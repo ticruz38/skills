@@ -2038,3 +2038,48 @@
   - Theme objects consolidate colors for backgrounds, text, grid, and titles
 ---
 
+## 2026-02-10 19:20 CET - US-046
+- Created reservation-manager skill - Restaurant table reservation system with calendar integration
+- Implemented comprehensive reservation management features:
+  - **Table Management**: Add, update, delete tables with capacity, section, and status tracking
+  - **Availability Checking**: Find available tables for date/time/party size with conflict detection
+  - **Reservation CRUD**: Create, get, list, update, cancel, delete reservations with full lifecycle
+  - **Status Workflow**: confirmed → seated → completed (or cancelled/no_show)
+  - **Calendar Integration**: Sync reservations to Google Calendar with auto event creation
+  - **SMS Notifications**: Confirmation, reminder, and cancellation message templates with variable substitution
+  - **Party Size Handling**: Auto-assign best-fitting table or check availability for specific tables
+  - **Configuration**: Restaurant name, hours, time slots, default duration, buffer times, SMS enable
+  - **Statistics**: Reservation counts by status/source, total guests, average party size
+- Database schema:
+  - `tables` - Table configuration (number, name, capacity, section, is_active)
+  - `reservations` - Full reservation records with calendar_event_id for sync
+  - `config` - Restaurant settings key-value store
+  - `sms_templates` - Message templates with {{variable}} substitution
+- Full CLI with commands:
+  - status, health - System monitoring
+  - tables, table-add, table-get, table-update, table-delete - Table management
+  - reservations, book, get, update, cancel, delete - Reservation CRUD
+  - seat, complete, no-show - Status transitions
+  - available, slots - Availability checking
+  - config, config-set - Configuration management
+  - reminders - Send SMS reminders for today's reservations
+  - stats - Usage statistics
+- Typecheck passes
+- Files changed:
+  - skills/reservation-manager/package.json (new)
+  - skills/reservation-manager/tsconfig.json (new)
+  - skills/reservation-manager/.gitignore (new)
+  - skills/reservation-manager/SKILL.md (new)
+  - skills/reservation-manager/src/index.ts (new - main library)
+  - skills/reservation-manager/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-046 passes: true)
+- **Learnings for future iterations:**
+  - Table conflict detection compares reservation time ranges for overlap
+  - Calendar integration creates events that can be tracked via calendar_event_id
+  - SMS template system uses {{variableName}} syntax for personalization
+  - Status workflow allows restaurants to track guest journey: confirmed → seated → completed
+  - Auto-table assignment picks the smallest table that fits the party size (best fit)
+  - Buffer times between reservations can be configured to allow table turnover
+  - Multi-table reservations supported via tableIds array for large parties
+---
+

@@ -1,0 +1,27 @@
+{
+  "name": "@openclaw/reservation-manager",
+  "version": "1.0.0",
+  "description": "Restaurant table reservation system with calendar integration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "ts-node src/cli.ts"
+  },
+  "dependencies": {
+    "@openclaw/calendar": "file:../calendar",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "reservations",
+    "restaurant",
+    "tables",
+    "bookings"
+  ]
+}
