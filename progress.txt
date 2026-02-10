@@ -1904,3 +1904,51 @@
   - Database schema should store property_id as unique key for tracking across searches
 ---
 
+## 2026-02-10 19:00 CET - US-043
+- Created client-crm skill - Real estate client relationship management with contact profiles, property preferences, communication history, and pipeline tracking
+- Implemented comprehensive CRM features:
+  - Contact profiles with name, email, phone, address, type (buyer/seller/renter/investor/vendor/other)
+  - Pipeline tracking with 7 stages: lead → qualified → viewing → offer → under_contract → closed → archived
+  - Property preferences with price range, bedrooms, bathrooms, sqft, locations, types, must-have/nice-to-have features
+  - Communication history with types: call, email, meeting, showing, text, note, other
+  - Urgency levels: low, medium, high, urgent
+  - Client status: active, inactive, on_hold, closed
+  - Lead source tracking
+  - Follow-up date management with upcoming follow-ups view
+  - Search by name/email/phone/notes
+  - Find clients by location preference or feature requirement
+  - Pipeline statistics and overall CRM statistics
+  - CSV import/export functionality
+- Full CLI with commands:
+  - add, list, get, update, delete - Client management
+  - search - Text search
+  - pipeline, pipeline-list - Pipeline management
+  - preferences, preferences-get - Property preferences
+  - log, communications - Communication tracking
+  - follow-ups, set-follow-up - Follow-up management
+  - by-location, by-feature - Search by preferences
+  - export, import - Data exchange
+  - stats, health - Reporting
+- SQLite storage with 3 tables:
+  - clients table with full contact info and pipeline status
+  - preferences table with JSON arrays for locations/types/features
+  - communications table for interaction history
+- Typecheck passes
+- Files changed:
+  - skills/client-crm/package.json (new)
+  - skills/client-crm/tsconfig.json (new)
+  - skills/client-crm/.gitignore (new)
+  - skills/client-crm/SKILL.md (new)
+  - skills/client-crm/src/index.ts (new - main library)
+  - skills/client-crm/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-043 passes: true)
+- **Learnings for future iterations:**
+  - CRM skills should track both status (active/inactive) and pipeline stage separately
+  - Property preferences with JSON arrays in SQLite enable flexible feature tracking
+  - Follow-up management is critical for real estate workflows
+  - Import/export functionality enables data portability
+  - Pipeline statistics help visualize the sales funnel
+  - Use CommonJS module format (not ES modules) for consistency with other skills
+  - SQLite database initialization with await new Promise wrapper for sqlite3
+---
+
