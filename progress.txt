@@ -2530,3 +2530,45 @@
   - Thread participants can be extracted from from/to/cc fields across all messages
 ---
 
+
+## 2026-02-10 20:36 CET - US-056
+- Created showing-scheduler skill - Real estate property showing scheduler with calendar coordination and client feedback
+- Built on top of calendar and client-crm skills for seamless integration
+- Implemented comprehensive showing management features:
+  - Property showing scheduling with client linking from CRM
+  - Calendar event creation and sync via calendar skill
+  - Lockbox code secure storage with access notes
+  - Client feedback collection with ratings, interest levels, and comments
+  - Route optimization using nearest neighbor algorithm with GPS coordinates
+  - Showing status workflow: scheduled → confirmed → completed/cancelled/no-show
+- Database schema:
+  - `showings` table with property details, client linking, lockbox codes, calendar event IDs
+  - `feedback` table with ratings, interest levels, pros/cons, follow-up tracking
+- Full CLI with commands:
+  - schedule, list, get, update, cancel, complete, confirm, no-show - CRUD operations
+  - lockbox, set-lockbox - Secure lockbox code management
+  - feedback, feedback-get - Client feedback collection
+  - route, optimize - Route optimization for multiple showings
+  - today, upcoming - Quick viewing commands
+  - stats, health - Monitoring and reporting
+- Route optimization uses simplified haversine distance calculation
+- Typecheck passes
+- Files changed:
+  - skills/showing-scheduler/package.json (new)
+  - skills/showing-scheduler/tsconfig.json (new)
+  - skills/showing-scheduler/.gitignore (new)
+  - skills/showing-scheduler/SKILL.md (new)
+  - skills/showing-scheduler/src/index.ts (new)
+  - skills/showing-scheduler/src/cli.ts (new)
+  - prd.json (updated US-056 passes: true)
+- **Learnings for future iterations:**
+  - ClientCRMConfig does NOT have a `profile` option - use CalendarSkill for profile separation
+  - When mapping object keys to database fields, use explicit field mapping object instead of keyof type mapping
+  - For route optimization, nearest neighbor algorithm works well for small sets (under 20 stops)
+  - Haversine formula for distance: R * 2 * atan2(sqrt(a), sqrt(1-a)) where R is Earth's radius in miles
+  - Estimate travel time at 30 mph average for urban real estate showings
+  - GPS coordinates enable proper route optimization; without them, fall back to time-based sorting
+  - Lockbox codes stored in same table as showing for easy retrieval during showing
+  - Feedback can trigger pipeline stage updates (high interest → offer stage)
+---
+

@@ -1,0 +1,30 @@
+{
+  "name": "@openclaw/showing-scheduler",
+  "version": "1.0.0",
+  "description": "Real estate property showing scheduler with calendar coordination, lockbox management, and client feedback",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "keywords": [
+    "real-estate",
+    "showings",
+    "scheduler",
+    "calendar",
+    "crm"
+  ],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "dependencies": {
+    "@openclaw/calendar": "file:../calendar",
+    "@openclaw/client-crm": "file:../client-crm",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
