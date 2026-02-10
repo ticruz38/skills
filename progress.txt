@@ -460,3 +460,120 @@
 - **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
 - **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
 
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **SQLite run result**: To get `lastID` after INSERT, use a custom promisified wrapper that captures `this.lastID` from the callback:
+  ```typescript
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err: Error | null) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+  ```
+- **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
+
+---
+
+## 2026-02-10 16:01 CET - US-013
+- Created portfolio skill - Track crypto portfolio positions with P&L and allocation
+- Built on top of binance skill for price data and balance syncing
+- Implemented comprehensive portfolio tracking features:
+  - Position tracking with average cost basis calculation
+  - Real-time P&L calculation using current prices from Binance
+  - Allocation breakdown with percentage calculations
+  - Historical performance tracking via snapshots
+  - Trade recording for accurate cost basis (BUY/SELL with fees)
+  - CSV export for portfolio data
+  - ASCII allocation and performance charts
+  - Binance sync to import current holdings
+- Database schema:
+  - positions table: tracks quantity, average_cost, total_cost, realized_pnl
+  - trades table: records all BUY/SELL transactions
+  - portfolio_snapshots table: historical portfolio values
+- Cost basis calculation uses average cost method:
+  - Buys add to quantity and recalculate average cost
+  - Sells realize P&L based on average cost, reduce quantity
+- Typecheck passes
+- Files changed:
+  - skills/portfolio/package.json (new)
+  - skills/portfolio/tsconfig.json (new)
+  - skills/portfolio/.gitignore (new)
+  - skills/portfolio/SKILL.md (new)
+  - skills/portfolio/src/index.ts (new)
+  - skills/portfolio/src/cli.ts (new)
+  - .gitignore (updated to exclude logs/)
+- **Learnings for future iterations:**
+  - Cost basis tracking requires storing both average_cost AND total_cost for accuracy
+  - Realized P&L must be tracked separately from unrealized P&L
+  - When syncing from exchange, use current price as cost basis if position is new
+  - For price lookups, try USDT pair first, then BTC pair as fallback
+  - CSV export should include both detailed positions and summary data
+  - ASCII charts use Unicode block characters for visualization
+  - Portfolio snapshots enable historical performance tracking over time
+---
+
+
+## 2026-02-10 16:05 CET - US-014
+- Created charts skill - Generate price charts and technical overlays for crypto trading
+- Built on top of binance skill for price data (klines/candlestick data)
+- Implemented comprehensive chart generation features:
+  - Line charts with gradient fills and current price indicator
+  - Candlestick charts with OHLC data and volume overlay
+  - Multiple timeframe support: 1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M
+  - Moving averages (SMA) with configurable periods and multiple MA support
+  - Volume bars on candlestick charts with up/down coloring
+  - Light and dark themes with customizable colors
+  - SVG export (pure JavaScript, no native dependencies)
+- ChartsSkill class provides:
+  - generateLineChart() - Simple price line with optional MAs
+  - generateCandlestickChart() - Full OHLC candlesticks with volume
+  - calculateSMA() - Technical indicator calculation
+  - saveChart() - Save to file
+  - healthCheck() and connection status
+- CLI commands:
+  - status, health - Connection monitoring
+  - line <symbol> - Generate line charts with --interval, --limit, --ma options
+  - candle <symbol> - Generate candlestick charts with --volume option
+  - Theme, width, height, output path customization
+- Chart features:
+  - Responsive SVG generation with configurable dimensions
+  - Price formatting (adapts to value magnitude)
+  - Date formatting (time for intraday, date for daily+)
+  - Legend for moving averages
+  - Grid lines with price labels
+  - Current price highlight
+- Typecheck passes
+- Files changed:
+  - skills/charts/package.json (new)
+  - skills/charts/tsconfig.json (new)
+  - skills/charts/.gitignore (new)
+  - skills/charts/SKILL.md (new)
+  - skills/charts/src/index.ts (new - main library with SVG generation)
+  - skills/charts/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - SVG chart generation is a great choice for pure JavaScript with no native dependencies
+  - Using viewBox allows SVGs to scale to any size while maintaining aspect ratio
+  - Coordinate mapping functions (getX, getY) make it easy to position elements
+  - Linear gradients can add depth to charts (priceGradient for area fill)
+  - Candlestick charts need separate handling for body (rect) and wick (line)
+  - Volume bars should have lower opacity to not overpower price action
+  - Theme objects make it easy to support multiple color schemes
+  - Date formatting should adapt to timeframe (show time for intraday, dates for daily+)
+---
+
