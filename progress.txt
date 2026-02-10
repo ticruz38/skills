@@ -364,3 +364,45 @@
   - Slack API uses `thread_ts` for thread replies (not `threadTs` in API calls)
 ---
 
+
+## 2026-02-10 15:50 CET - US-011
+- Created binance skill - Trade and monitor crypto via Binance API
+- Built on top of binance-auth skill for secure authentication
+- Implemented comprehensive trading features:
+  - Real-time price fetching (single symbol, multiple symbols, all prices)
+  - 24hr ticker statistics with price changes, volume, high/low
+  - Account balance viewing (all assets or specific asset)
+  - Order management: market orders, limit orders, order status, cancel orders
+  - Order history and trade history retrieval
+  - Candlestick/Kline data for technical analysis
+  - Exchange information and symbol details
+- Implemented local SQLite storage for:
+  - Trade records with order details, status, commission
+  - Price history tracking
+  - Notes support for trades
+- Implemented comprehensive CLI with commands:
+  - status, health, env - Connection monitoring
+  - price, prices, ticker, symbols, info, klines - Market data
+  - balance - Account balances
+  - buy, sell, limit-buy, limit-sell - Trading
+  - order, cancel, open, history - Order management
+  - trades, note - Local trade history
+- TypeScript implementation following all codebase patterns
+- Typecheck passes
+- Files changed:
+  - skills/binance/package.json (new)
+  - skills/binance/tsconfig.json (new)
+  - skills/binance/.gitignore (new)
+  - skills/binance/SKILL.md (new)
+  - skills/binance/src/index.ts (new)
+  - skills/binance/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - When building skills on top of auth-provider adapters, check what methods are available
+  - The BinanceProviderAdapter has `request()` method for GET/POST but only supports those methods
+  - For DELETE requests (like cancel order), implement a custom `signedRequest()` method
+  - Binance API uses HMAC-SHA256 signature with timestamp and query parameters
+  - Use `crypto.createHmac('sha256', secret).update(query).digest('hex')` for signatures
+  - For SQLite column names with camelCase in TypeScript, use snake_case in the database
+  - Store price history automatically when fetching prices for trend analysis
+---
+
