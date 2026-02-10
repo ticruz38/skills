@@ -59,6 +59,32 @@
 
 ---
 
+## 2026-02-10 14:56 CET - US-005
+- Created slack-auth skill - Slack OAuth and bot token management for team communication
+- Built on top of auth-provider skill for secure token management
+- Implemented multi-profile support for multiple Slack workspaces
+- Created SlackAuthClient class with initiateAuth, completeAuth, isConnected, getAccessToken, healthCheck, sendMessage, listChannels methods
+- Implemented CLI with status, connect, complete, disconnect, health, profiles, test commands
+- Added workspace info retrieval (team, user, URL) via auth.test API
+- Added permission validation and token health checking
+- Typecheck passes
+- Files changed:
+  - skills/slack-auth/package.json
+  - skills/slack-auth/tsconfig.json
+  - skills/slack-auth/.gitignore
+  - skills/slack-auth/SKILL.md
+  - skills/slack-auth/src/index.ts
+  - skills/slack-auth/src/cli.ts
+- **Learnings for future iterations:**
+  - Slack OAuth uses comma-separated scopes (not space-separated like Google)
+  - Slack tokens don't expire (no refresh needed), but we still validate via auth.test
+  - Slack API returns `{ ok: boolean, error?: string }` format for all responses
+  - AuthUrlResult type from auth-provider doesn't include scopes - must track separately if needed
+  - Use `isConnected()` with await since it's async (checks credentials from storage)
+  - Slack OAuth v2 returns both bot token and user token - we use the bot token
+
+---
+
 ## 2026-02-10 14:35 CET - US-002
 - Created google-oauth skill - Google OAuth adapter for Gmail, Calendar, Drive, Sheets, Docs
 - Built on top of auth-provider skill for secure token management
