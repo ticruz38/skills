@@ -1,0 +1,24 @@
+{
+  "name": "@openclaw/draft-responses",
+  "version": "1.0.0",
+  "description": "Generate email reply suggestions with multiple tone options and context-aware drafting",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "draft-responses": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@openclaw/email": "file:../email",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
