@@ -1,0 +1,21 @@
+{
+  "name": "@openclaw/saved-searches",
+  "version": "1.0.0",
+  "description": "Save and rerun searches automatically with result comparison and new item detection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@openclaw/web-search": "file:../web-search",
+    "@openclaw/news-aggregator": "file:../news-aggregator",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.0"
+  }
+}
