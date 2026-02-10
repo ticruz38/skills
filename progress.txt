@@ -210,3 +210,117 @@
   - Email threads use the same threadId across all messages in the conversation
   - Gmail API uses `users/me/messages` endpoint with OAuth authentication
   - The `run()` promisified helper must check if db is null before calling db.run()
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **SQLite run result**: To get `lastID` after INSERT, use a custom promisified wrapper that captures `this.lastID` from the callback:
+  ```typescript
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err: Error | null) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+  ```
+
+## 2026-02-10 15:34 CET - US-008
+- Created reminders skill - Local reminder system with scheduling and notifications
+- Implemented full TypeScript replacement of the old Python implementation:
+  - One-time reminders with flexible datetime parsing
+  - Recurring reminders (daily, weekly, monthly)
+  - Natural language parsing for dates: "in 2 hours", "tomorrow", "14:30", "in 30 minutes"
+  - Snooze functionality for temporarily dismissing reminders
+  - Complete/delete reminders with history tracking
+  - Daemon mode for cron/systemd integration to check for due reminders
+  - SQLite storage with separate tables for active reminders and completed history
+- Created RemindersSkill class with full API:
+  - addReminder(), addRecurringReminder() for creating reminders
+  - listReminders(), getDueReminders(), getReminder() for querying
+  - completeReminder(), snoozeReminder(), deleteReminder() for actions
+  - parseNaturalDateTime() for natural language datetime parsing
+  - healthCheck(), getStats(), daemonCheck() for monitoring
+- Implemented comprehensive CLI with all commands:
+  - add, recurring, list, due, get, complete, snooze, delete
+  - history, stats, daemon, health, parse (test parsing)
+- Typecheck passes
+- No external dependencies - works entirely offline with local SQLite
+- Files changed:
+  - skills/reminders/package.json (new)
+  - skills/reminders/tsconfig.json (new)
+  - skills/reminders/.gitignore (new)
+  - skills/reminders/SKILL.md (updated - converted to TypeScript)
+  - skills/reminders/src/index.ts (new - main library)
+  - skills/reminders/src/cli.ts (new - CLI interface)
+  - skills/reminders/reminders.py (deleted - old Python implementation)
+- **Learnings for future iterations:**
+  - SQLite3's `run()` method returns the Database instance, not the RunResult
+  - To get `lastID` after INSERT, must use the callback's `this` context
+  - Create a `runWithResult()` helper that captures `this.lastID` and `this.changes`
+  - Natural language parsing can be done locally with regex patterns - no external API needed
+  - Daemon mode should output JSON for easy integration with notification systems
+  - For recurring reminders, completing them should calculate and set the next occurrence
+  - Use ISO strings for datetime storage in SQLite for consistency
+---
+
+## 2026-02-10 15:40 CET - US-009
+- Created meetings skill - Coordinate meetings using calendar and email
+- Built on top of calendar and email skills for seamless integration
+- Implemented meeting coordination features:
+  - Find mutual availability using calendar's free/busy API
+  - Schedule meetings with automatic calendar event creation
+  - Send meeting invite emails to all attendees
+  - Send prep emails with agenda and materials
+- Implemented meeting management:
+  - Create, update, cancel, and delete meetings
+  - List meetings with filtering by status and date range
+  - Get detailed meeting information
+  - SQLite storage for meeting records and templates
+- Implemented meeting templates system:
+  - 5 default templates: Standup, Sprint Planning, 1-on-1, Retrospective, Review
+  - Template database with agenda items and prep documents
+  - Schedule meetings from templates with one command
+- Implemented agenda management:
+  - Structured agenda items with time allocations
+  - Automatic agenda text generation for calendar events
+  - Prep documents tracking
+- Created comprehensive CLI with commands:
+  - schedule, quick, template - Meeting creation options
+  - list, get, cancel, delete - Meeting management
+  - templates - List available templates
+  - free - Find available time slots
+  - invite, prep - Send emails
+  - status, health - Connection checks
+- TypeScript implementation following all codebase patterns
+- Typecheck passes
+- Files changed:
+  - skills/meetings/package.json (new)
+  - skills/meetings/tsconfig.json (new)
+  - skills/meetings/.gitignore (new)
+  - skills/meetings/SKILL.md (new)
+  - skills/meetings/src/index.ts (new)
+  - skills/meetings/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Skills can depend on multiple other skills (calendar + email)
+  - Use file: dependencies in package.json for local skill dependencies
+  - Template system allows users to quickly schedule common meeting types
+  - Prep emails are separate from invites - allows sending materials in advance
+  - SQLite storage pattern is consistent across all skills
+  - When using multiple skills, remember to close all connections in cleanup
+  - Meeting status tracks lifecycle: draft → scheduled → cancelled/completed
+  - Calendar event IDs are stored for bidirectional sync
+---
+

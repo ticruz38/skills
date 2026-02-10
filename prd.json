@@ -130,7 +130,7 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "No external deps. Used by: meetings, occasion-reminders, maintenance-scheduler"
     },
     {
@@ -146,7 +146,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: email, calendar"
     },
     {

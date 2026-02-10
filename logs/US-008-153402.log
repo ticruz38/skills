@@ -1,0 +1,462 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and progress log to understand what needs
+  to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me understand the current state:
+
+  1. I've completed US-001 through US-007 (auth-provider, google-oauth, binance-
+     h, quickbooks-auth, slack-auth, email, calendar)
+  2. The next story with passes: false is US-008: Create reminders skill for tas
+     anagement
+
+  Let me check the current branch and see if I need to switch to the branch spec
+  ified in the PRD (ralph/all-skills).
+• Let me check the current branch and look at the existing skills structure:
+• Used Shell (git branch --show-current && cat .last-branch)
+• Used Glob (skills/*)
+• I'm on the correct branch ralph/all-skills. I see that US-008 (reminders skill
+  ) has a directory already. Let me check if the skill is actually implemented a
+  nd if it passes typecheck. According to the PRD, US-008 has passes: false.
+
+  Let me look at the reminders skill to see what's there.
+• Let me check the current state of the reminders skill:
+• Used Glob (skills/reminders/**/*)
+• Used ReadFile (skills/reminders/SKILL.md)
+• I see the reminders skill exists but it's a Python implementation. According t
+  o the codebase patterns in progress.txt, all skills should be TypeScript-based
+  . Let me check the Python file and then create a proper TypeScript implementat
+  ion.
+
+  Looking at the acceptance criteria for US-008:
+
+  • One-time reminders with datetime
+  • Recurring reminders (daily, weekly, monthly)
+  • Natural language parsing ('in 2 hours')
+  • Snooze functionality
+  • Mark complete/delete
+  • Daemon mode for checking due reminders
+  • SQLite storage
+  • Typecheck passes
+
+  I need to:
+
+  1. Create a TypeScript implementation
+  2. Add package.json, tsconfig.json
+  3. Implement the CLI and library interface
+  4. Make sure typecheck passes
+• Let me check the existing Python implementation and then create a proper TypeS
+  cript version:
+• Used ReadFile (skills/reminders/reminders.py)
+• Used ReadFile (skills/email/package.json)
+• Used ReadFile (skills/email/tsconfig.json)
+• Now I understand. The reminders skill is currently a Python implementation, bu
+  t based on the patterns, I need to convert it to TypeScript. Let me create a p
+  roper TypeScript implementation that follows the patterns from the other skill
+  s like email and calendar.
+
+  I need to:
+
+  1. Create package.json
+  2. Create tsconfig.json
+  3. Create src/index.ts - the main library
+  4. Create src/cli.ts - the CLI interface
+  5. Update SKILL.md to reflect the TypeScript implementation
+  6. Delete the old reminders.py
+
+  Let me also look at the calendar skill for patterns on date handling and the e
+  mail skill for general patterns.
+• Let me check the calendar skill structure as a reference for date handling and
+  patterns:
+• Used ReadFile (skills/calendar/src/index.ts)
+• Used ReadFile (skills/calendar/src/cli.ts)
+• Hmm, the Python script for reminders is operational, but shifting to TypeScrip
+  t provides better type safety and aligns with the project structure. I need to
+  design a robust system that handles both one-off and recurring reminders. But
+  wait, before I dive into the source code, I must set up the environment. I nee
+  d a package.json for dependencies and a tsconfig.json for the build setup. Act
+  ually, I should generate the .gitignore now too to avoid tracking build artifa
+  cts later. Unless I establish this structure first, the implementation will be
+  disorganized. I'll start by creating these three configuration files to define
+  the skill's foundation and ensure the TypeScript project is valid.
+• Now I have a good understanding of the patterns. Let me create the TypeScript
+  implementation of the reminders skill. I'll need to:
+
+  1. Create package.json
+  2. Create tsconfig.json
+  3. Create .gitignore
+  4. Create src/index.ts (the main library)
+  5. Create src/cli.ts (CLI interface)
+  6. Update SKILL.md
+  7. Delete the old Python files
+• Used WriteFile (skills/reminders/package.json)
+• Used WriteFile (skills/reminders/tsconfig.json)
+• Used WriteFile (skills/reminders/.gitignore)
+• Now let me create the main source files. I'll create the src/index.ts with the
+  RemindersSkill class and src/cli.ts with the CLI.
+• Now let me create the main TypeScript source files:
+• Used WriteFile (skills/reminders/src/index.ts)
+  Parent directory not found
+• I need to create the src directory first.
+• Used Shell (mkdir -p skills/reminders/src)
+• Now let me create the source files.
+• Used WriteFile (skills/reminders/src/index.ts)
+• Now I need to create the CLI file. Let me create a comprehensive CLI that foll
+  ows the patterns from the calendar skill.
+• Used WriteFile (skills/reminders/src/cli.ts)
+• Now I need to update the SKILL.md file to reflect the TypeScript implementatio
+  n. Let me also delete the old Python file.
+• Now let me update the SKILL.md and remove the old Python file:
+• Used Shell (rm skills/reminders/reminders.py)
+• Used WriteFile (skills/reminders/SKILL.md)
+• Now I need to install dependencies and run typecheck to make sure everything p
+  asses.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd skills/reminders && npm install 2>&1)
+• The dependencies are installed (the warnings about deprecation and vulnerabili
+  ties are from the sqlite3 dependency chain, not from our code). Now let me run
+  typecheck.
+• Used Shell (cd skills/reminders && npm run typecheck 2>&1)
+  Failed with exit code: 2
+• I need to fix a few TypeScript errors:
+
+  1. In src/cli.ts, line 110, I need to fix the type check for ReminderType
+  2. In src/index.ts, I need to properly type the lastID and changes properties
+     ch come from the RunResult, not Database
+
+  Let me fix these issues.
+• Let me fix the TypeScript errors:
+• Used StrReplaceFile (skills/reminders/src/cli.ts)
+• Used StrReplaceFile (skills/reminders/src/index.ts)
+• Now let me run typecheck again.
+• Used Shell (cd skills/reminders && npm run typecheck 2>&1)
+• Typecheck passes. Now let me build the project to make sure it compiles correc
+  tly.
+• Typecheck passes. Let me build and test the CLI:
+• Used Shell (cd skills/reminders && npm run build 2>&1)
+• The build succeeded. Now let me test the CLI to make sure it works.
+• Used Shell (cd skills/reminders && no...e dist/cli.js health 2>&1)
+• Used Shell (cd skills/reminders && no...s parse "in 2 hours" 2>&1)
+• Used Shell (cd skills/reminders && no...t reminder from CLI" 2>&1)
+• The basic health check and date parsing work as expected. Hmm, the creation ou
+  tput shows ID: undefined. This is a clear indication that the return value of
+  the database insertion isn't being captured correctly in the skill logic. Wait
+  , I shouldn't just focus on the bug. I also need to verify the data persistenc
+  e and other core functionalities like listing and recurring tasks. Actually, i
+  nstead of just inspecting the source code again, I should test the CLI's workf
+  low directly. If I list the reminders right now, I can confirm if the 'undefin
+  ed' item was actually saved. Then, I'll try adding a recurring task and runnin
+  g the stats command to ensure the database connection is stable across differe
+  nt operations. Let me run a sequence of commands to verify the current state a
+  nd the daemon's ability to retrieve tasks.
+• The CLI works. The ID: undefined is just a display issue - let me test more co
+  mmands and then fix that:
+• Used Shell (cd skills/reminders && node dist/cli.js list 2>&1)
+• Used Shell (cd skills/reminders && no...Test daily reminder" 2>&1)
+• Used Shell (cd skills/reminders && node dist/cli.js stats 2>&1)
+• Used Shell (cd skills/reminders && no...e dist/cli.js daemon 2>&1)
+• Everything works! The ID is being stored correctly (we can see #1 in the list)
+  , but there's a display issue in the CLI where result.lastID is not being retu
+  rned properly. This is a known issue with sqlite3's TypeScript typings. The ac
+  tual functionality works - the IDs are assigned. The issue is just in how we'r
+  e extracting the lastID.
+
+  Let me check the actual index.ts code and see if there's a way to fix this pro
+  perly.
+
+  Actually, the issue is that the run callback has this context for lastID, but
+  we're not accessing it correctly. Let me trace through and see how the calenda
+  r and email skills handle this pattern...
+
+  Looking at those skills, they don't do INSERTs directly - they use the run() h
+  elper we defined. But when you need the lastID, you need to use the callback p
+  arameter or a different approach.
+
+  Actually, I think the issue is that sqlite3's run() method is a bit tricky. Le
+  t me look at a better way to handle this. One approach is to use the callback
+  to capture this.lastID.
+
+  Let me fix this properly:
+• The functionality works (IDs are assigned correctly as shown by #1), but there
+  's a display issue with extracting lastID. Let me fix this properly:
+• Used ReadFile (skills/reminders/src/index.ts)
+• Let me check the actual insert code and fix the lastID extraction. The issue i
+  s that sqlite3 uses a callback with this context for lastID. I need to modify
+  the approach.
+• Used ReadFile (skills/reminders/src/index.ts)
+• I see the issue. The sqlite3 module's run method returns the database instance
+  , not the RunResult. The lastID is only available in the callback function's t
+  his context. I need to use a different approach - I'll need to create a helper
+  function that wraps the run and returns lastID from the callback.
+
+  Let me fix this properly by modifying the approach to capture lastID.
+• I need to fix the lastID extraction. The sqlite3 run() returns the database, n
+  ot the RunResult. Let me fix this:
+• Used StrReplaceFile (skills/reminders/src/index.ts)
+• Now let me update the addReminder and addRecurringReminder methods to use runW
+  ithResult.
+• Used StrReplaceFile (skills/reminders/src/index.ts)
+• Now let me rebuild and test again.
+• Now let me rebuild and test:
+• Used Shell (cd skills/reminders && np...other test reminder" 2>&1)
+• Now the ID is showing correctly. Let me run all the quality checks and then co
+  mmit the changes.
+• Excellent! Now let me run full tests and typecheck:
+• Used Shell (cd skills/reminders && npm run typecheck 2>&1)
+• Used Shell (cd skills/reminders && node dist/cli.js list 2>&1)
+• Used Shell (cd skills/reminders && no...st/cli.js complete 1 2>&1)
+• Used Shell (cd skills/reminders && node dist/cli.js stats 2>&1)
+• All the functionality works correctly. Let me now:1. Check if there are any gl
+  obal quality checks to run2. Commit the changes3. Update the PRD4. Update prog
+  ress.txtLet me first check if there's a root-level typecheck or test script.
+• All functionality works. Let me check if there are any root-level quality chec
+  ks:
+• Used Shell (cat package.json 2>/dev/n...ho "No root package.json")
+• Used Glob (*.json)
+• There's no root package.json, so I'll just commit the changes. Let me:
+
+  1. Add all the changes
+  2. Commit with the message "feat: US-008 - Create reminders skill for task man
+     ment"
+  3. Update the PRD to set passes: true for US-008
+  4. Append to progress.txt
+• Now let me commit the changes:
+• Used Shell (git status 2>&1)
+• I see there are logs directory changes as well. Let me check what's in the log
+  s to make sure I don't need to worry about them. Actually, I should only commi
+  t the skill-related changes. Let me add the relevant files.
+• Used Shell (git add skills/reminders/ && git status 2>&1)
+• The skills/reminders changes are staged. Now let me commit and then update the
+  PRD and progress.txt.
+• Used Shell (git commit -m "feat: US-0...for task management" 2>&1)
+• Now I need to update the PRD to set passes: true for US-008 and append the pro
+  gress to progress.txt.
+• Now let me update the PRD and progress.txt:
+• Used StrReplaceFile (prd.json)
+• Now let me append the progress to progress.txt.
+• Used WriteFile (progress.txt)
+• Now let me check if there are any AGENTS.md files that should be updated. Let
+  me check if there's one in the skills/reminders directory or the root.
+• Let me check if there are any AGENTS.md files to update:
+• Used Glob (**/AGENTS.md)
+  Unsafe pattern
+• There's no AGENTS.md file in the root or skills directory. The progress.txt al
+  ready has the Codebase Patterns section at the top. I've completed the story.
+  Let me verify everything is committed and updated.
+• Let me verify the changes and check the next story:
+• Used Shell (cd skills/reminders && np..."✓ Typecheck passed" 2>&1)
+• Used Grep ("passes": false)
+• US-008 is complete. The next story with passes: false is US-009 (Create meetin
+  gs skill for scheduling coordination), which depends on email and calendar ski
+  lls.
+
+  Let me summarize what was accomplished.
+• I have successfully completed US-008 - Create reminders skill for task managem
+  ent. Here's a summary:
+
+  Completed Work
+
+  Story US-008: Reminders Skill
+
+  • TypeScript implementation replacing the old Python version
+  • Features implemented:
+    • ✅ One-time reminders with datetime
+    • ✅ Recurring reminders (daily, weekly, monthly)
+    • ✅ Natural language parsing ('in 2 hours', 'tomorrow', '14:30')
+    • ✅ Snooze functionality
+    • ✅ Mark complete/delete
+    • ✅ Daemon mode for checking due reminders
+    • ✅ SQLite storage
+    • ✅ Typecheck passes
+
+  Files Created/Modified:
+
+  • skills/reminders/package.json - Dependencies and scripts
+  • skills/reminders/tsconfig.json - TypeScript configuration
+  • skills/reminders/.gitignore - Git ignore rules
+  • skills/reminders/SKILL.md - Updated documentation
+  • skills/reminders/src/index.ts - Main library with RemindersSkill class
+  • skills/reminders/src/cli.ts - CLI interface
+  • Deleted old skills/reminders/reminders.py
+
+  Key Pattern Discovered:
+
+  For SQLite3 in TypeScript, the run() method returns the Database instance, not
+  the RunResult. To get lastID after INSERT, you need a custom helper that captu
+  res this.lastID from the callback:
+
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[]): Prom
+  ise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+
+  ──────────────────────────────────────────────────────────────────────────────
+  The next story to implement is US-009 - Create meetings skill for scheduling c
+  oordination (depends on email and calendar).
