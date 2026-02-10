@@ -1583,3 +1583,40 @@
   - When using await in template literals or callbacks, extract the value first to avoid async issues
 ---
 
+## 2026-02-10 18:13 CET - US-036
+- Created occasion-reminders skill - Track birthdays and anniversaries with gift planning timeline
+- Built on top of reminders skill for advance notice notifications
+- Implemented comprehensive features:
+  - Contact management with import support (CSV, JSON)
+  - Occasion tracking (birthdays, anniversaries, holidays, custom)
+  - Advance notice configuration (weeks + days)
+  - Gift planning timeline with suggested actions
+  - Budget tracking and gift ideas storage
+  - Age calculation for birthdays
+  - Years together calculation for anniversaries
+- Database schema:
+  - contacts table with name, email, phone, relationship, notes
+  - occasions table with type, date, advance notice settings, gift info
+  - Foreign key relationship with cascade delete
+- Full CLI with commands:
+  - Contact management: add-contact, list-contacts, get-contact, update-contact, delete-contact, import
+  - Occasion management: add-occasion, list-occasions, get-occasion, update-occasion, delete-occasion
+  - Queries: upcoming, birthdays, anniversaries, timeline, search, stats
+- Typecheck passes
+- Files changed:
+  - skills/occasion-reminders/package.json (new)
+  - skills/occasion-reminders/tsconfig.json (new)
+  - skills/occasion-reminders/.gitignore (new)
+  - skills/occasion-reminders/SKILL.md (new)
+  - skills/occasion-reminders/src/index.ts (new - main library)
+  - skills/occasion-reminders/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-036 passes: true)
+- **Learnings for future iterations:**
+  - When depending on other skills (like reminders), create them in constructor and close them in close()
+  - Use calculateNextOccurrence() to handle year-rolling for annual events
+  - Gift planning timeline should only show items where isAdvanceNotice is true
+  - Snake_case column names in SQLite map to camelCase in TypeScript interfaces
+  - Import functionality supports JSON arrays and simple CSV formats
+  - Timeline calculations adapt based on days until occasion (14 days to shop, 7 days to order, 1 day to wrap)
+---
+
