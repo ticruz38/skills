@@ -915,3 +915,89 @@
   - SQLite storage enables content history and template management
 ---
 
+
+## 2026-02-10 17:00 CET - US-022
+- Created social-scheduler skill - Schedule posts to social platforms with queue management
+- Implemented comprehensive scheduling features:
+  - Queue management with SQLite storage for posts
+  - Multi-platform support: Twitter/X, LinkedIn, Facebook, Instagram, YouTube, Generic
+  - Optimal timing suggestions based on industry best practices per platform
+  - Draft approval workflow with pending_approval → scheduled → published states
+  - Natural language datetime parsing ("tomorrow", "in 2 hours", "tuesday at 9", etc.)
+- Database schema:
+  - posts table with status tracking, approval workflow, metadata
+  - approval_log table for audit trail
+  - publish_log table for tracking publish attempts
+- Post status workflow: draft → pending_approval → scheduled → published/failed/cancelled
+- CLI commands:
+  - queue/add - Create new posts with --platform, --when, --approval options
+  - list - List posts with filtering by status, platform, upcoming
+  - get - Show detailed post info with approval and publish history
+  - approve/reject - Approval workflow with notes
+  - update - Modify post content or scheduled time
+  - cancel/delete - Post management
+  - due - List posts ready to publish
+  - optimal-times - Show best posting times for platform
+  - suggest-time - Get next optimal time for platform
+  - stats - Queue statistics
+  - health - System health check
+- Typecheck passes
+- Files changed:
+  - skills/social-scheduler/package.json (new)
+  - skills/social-scheduler/tsconfig.json (new)
+  - skills/social-scheduler/.gitignore (new)
+  - skills/social-scheduler/SKILL.md (new)
+  - skills/social-scheduler/src/index.ts (new)
+  - skills/social-scheduler/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Status workflow pattern: draft → pending_approval → scheduled → published/failed/cancelled
+  - Natural language datetime parsing provides great UX for scheduling
+  - Separate tables for approval_log and publish_log provide complete audit trails
+  - Optimal posting times can be stored as constants based on industry research
+  - The getNextOptimalTime() function finds the next available slot from current time
+  - Post metadata field allows flexible additional data per platform
+---
+
+## 2026-02-10 17:01 CET - US-023
+- Created engagement-replies skill - Draft replies to comments and messages with tone matching and sentiment awareness
+- Implemented comprehensive features:
+  - Generate multiple reply suggestions (configurable count) for any message
+  - Sentiment analysis using keyword-based scoring with caching in SQLite
+  - Automatic tone detection based on sentiment and message characteristics
+  - 8 tone options: professional, casual, friendly, formal, enthusiastic, empathetic, authoritative, witty
+  - 6 platform optimizations: twitter, linkedin, instagram, facebook, email, generic
+  - 8 built-in quick response templates with variable substitution
+  - Template categories: appreciation, engagement, support
+  - Reply history tracking with full metadata
+  - Statistics by platform, tone, and sentiment
+- Sentiment detection features:
+  - Positive/negative keyword matching
+  - Emotion detection (joy, gratitude, excitement, anger, disappointment, confusion, curiosity)
+  - Punctuation analysis (exclamations for enthusiasm, questions for curiosity)
+  - Confidence scoring based on keyword density
+  - SQLite caching for performance
+- Three reply generation strategies:
+  - Direct response: Straightforward acknowledgment and answer
+  - Engaging reply: Follow-up questions to continue conversation
+  - Appreciation reply: Gratitude-focused with community building
+- Tone automatically adapts to sentiment:
+  - Positive messages → friendly/enthusiastic tone
+  - Negative messages → empathetic tone
+  - Questions → professional tone
+- Typecheck passes
+- Files changed:
+  - skills/engagement-replies/package.json (new)
+  - skills/engagement-replies/tsconfig.json (new)
+  - skills/engagement-replies/.gitignore (new)
+  - skills/engagement-replies/SKILL.md (new)
+  - skills/engagement-replies/src/index.ts (new)
+  - skills/engagement-replies/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Sentiment analysis can be done locally with keyword lists - no API needed
+  - Tone detection should consider both sentiment AND message characteristics (questions, exclamations)
+  - Multiple reply variants provide users with different engagement strategies
+  - Template variable substitution uses regex: `new RegExp('{{\\s*key\\s*}}', 'g')`
+  - Sentiment caching using simple hash (message hash as key) improves performance
+  - Platform constraints (max length) should be applied after reply generation
+  - Emotion detection helps create more nuanced responses
+---

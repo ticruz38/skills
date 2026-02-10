@@ -359,7 +359,7 @@
         "Typecheck passes"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: google-oauth (YouTube). Uses model for content"
     },
     {
@@ -374,7 +374,7 @@
         "Typecheck passes"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": "Uses main model. No external deps"
     },
     {
