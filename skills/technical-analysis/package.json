@@ -1,0 +1,25 @@
+{
+  "name": "@openclaw/technical-analysis",
+  "version": "1.0.0",
+  "description": "Calculate technical indicators and signals for crypto trading",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch",
+    "cli": "node dist/cli.js",
+    "status": "node dist/cli.js status"
+  },
+  "keywords": ["technical-analysis", "indicators", "crypto", "trading", "rsi", "macd", "bollinger", "openclaw", "skill"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "dependencies": {
+    "@openclaw/auth-provider": "file:../auth-provider",
+    "@openclaw/binance": "file:../binance"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
