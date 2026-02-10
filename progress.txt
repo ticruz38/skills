@@ -2083,3 +2083,50 @@
   - Multi-table reservations supported via tableIds array for large parties
 ---
 
+
+## 2026-02-10 19:29 CET - US-047
+- Created ticket-triage skill - AI-powered support ticket classification and triage system
+- Implemented comprehensive ticket classification features:
+  - 8 ticket categories: bug, feature_request, question, complaint, billing, technical, account, other
+  - 4 priority levels: critical, high, medium, low with intelligent scoring
+  - Auto-assignment based on category with configurable assignment rules
+  - Spam filtering with confidence scoring and pattern detection
+  - SQLite storage for classification history and rules
+- Classification algorithm uses pattern matching:
+  - Keyword-based category detection with match counting
+  - Multi-factor priority scoring (urgency indicators, exclamation marks, follow-up status)
+  - Spam detection with 20+ spam patterns
+  - Confidence scoring based on match strength
+- Database schema includes:
+  - classifications table with full metadata and spam tracking
+  - classification_rules table for custom rules (keyword/regex)
+  - assignment_rules table for team routing
+  - classification_history table for audit trail
+- Full CLI with commands:
+  - classify - Classify tickets with --subject, --body, --from options
+  - category/priority/assignee - List tickets by filter
+  - spam - List spam tickets
+  - unreviewed - List unreviewed tickets
+  - review - Update classification with manual overrides
+  - add-rule/list-rules/delete-rule - Classification rule management
+  - assignment-rules/update-assignment - Assignment configuration
+  - stats - Comprehensive statistics
+  - health - System health check
+- Typecheck passes
+- Files changed:
+  - skills/ticket-triage/package.json (new)
+  - skills/ticket-triage/tsconfig.json (new)
+  - skills/ticket-triage/.gitignore (new)
+  - skills/ticket-triage/SKILL.md (new)
+  - skills/ticket-triage/src/index.ts (new - main library)
+  - skills/ticket-triage/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-047 passes: true)
+- **Learnings for future iterations:**
+  - Classification skills benefit from keyword pattern matching with match counting for confidence
+  - Spam detection should use multiple indicators with scoring rather than binary detection
+  - Auto-assignment rules enable flexible team routing without hardcoding
+  - Classification rules with regex support allow advanced pattern matching
+  - Review workflow (reviewed flag) enables human-in-the-loop quality control
+  - Snake_case database columns with Record interfaces pattern continues to work well
+---
+
