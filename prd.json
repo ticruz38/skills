@@ -162,7 +162,7 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: slack-auth. Used by: alerts, notifications"
     },
     {

@@ -324,3 +324,43 @@
   - Calendar event IDs are stored for bidirectional sync
 ---
 
+
+## 2026-02-10 15:50 CET - US-010
+- Created slack skill - Send messages and notifications to Slack channels
+- Built on top of slack-auth skill for authentication
+- Implemented comprehensive messaging features:
+  - Send messages to channels with rich formatting (blocks, attachments)
+  - Send direct messages to users
+  - Reply in threads
+  - Upload files to channels
+  - Create and manage channels (public/private)
+  - Join and leave channels
+  - List channels and users
+  - Get user info by ID or email
+- Implemented notification template system:
+  - Create reusable templates with variable substitution
+  - Templates stored in SQLite with blocks/attachments support
+  - Variable syntax: {{variableName}}
+  - Template CRUD operations
+- SQLite storage for:
+  - Notification templates with metadata
+  - Sent message history for auditing
+- TypeScript implementation following all codebase patterns
+- Typecheck passes
+- Files changed:
+  - skills/slack/package.json (new)
+  - skills/slack/tsconfig.json (new)
+  - skills/slack/.gitignore (new)
+  - skills/slack/SKILL.md (new)
+  - skills/slack/src/index.ts (new)
+  - skills/slack/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Use `new (sqlite3 as any).Database(path)` pattern for sqlite3 in ES modules
+  - For FormData file uploads in Node.js, need to use Blob with fetch
+  - Slack conversations API uses `conversations.list` for channels (not channels.list)
+  - Private channels use `conversations.create` with `is_private: true`
+  - Template variables use regex replacement: `new RegExp('{{\\s*key\\s*}}', 'g')`
+  - When serializing blocks for variable substitution, stringify → replace → parse
+  - Slack API uses `thread_ts` for thread replies (not `threadTs` in API calls)
+---
+
