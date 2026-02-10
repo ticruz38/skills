@@ -260,23 +260,6 @@
       "priority": 16,
       "passes": false,
       "notes": "RSS parsing, no API keys needed"
-    },
-    {
-      "id": "US-017",
-      "title": "Create documentation site with skill catalog",
-      "description": "As a user, I want to browse skills and read documentation online.",
-      "acceptanceCriteria": [
-        "Generate docs from skill registry",
-        "Searchable skill catalog",
-        "Profile-based skill bundles view",
-        "Installation instructions per skill",
-        "Auto-update on skill registry changes",
-        "Typecheck passes",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 17,
-      "passes": false,
-      "notes": "Documentation website"
     }
   ]
 }

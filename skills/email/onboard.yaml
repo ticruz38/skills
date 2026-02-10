@@ -1,0 +1,24 @@
+questions:
+  - key: google_auth
+    question: "Set up Google OAuth for Gmail access:"
+    type: info
+    help: |
+      1. Go to https://console.cloud.google.com/
+      2. Create a new project
+      3. Enable Gmail API
+      4. Create OAuth 2.0 credentials (Desktop app)
+      5. Download client_secret.json
+      
+      Then run: ./email.py auth
+      
+  - key: client_id
+    question: "Enter your Google Client ID:"
+    type: secret
+    env_var: GOOGLE_CLIENT_ID
+    required: true
+    
+  - key: client_secret
+    question: "Enter your Google Client Secret:"
+    type: secret
+    env_var: GOOGLE_CLIENT_SECRET
+    required: true
