@@ -921,7 +921,7 @@
         "Typecheck passes"
       ],
       "priority": 59,
-      "passes": false,
+      "passes": true,
       "notes": "Optional: Yelp API. Uses model for responses"
     },
     {
