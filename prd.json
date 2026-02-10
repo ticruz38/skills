@@ -514,7 +514,7 @@
         "Typecheck passes"
       ],
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "notes": "Uses main model. No API key needed"
     },
     {
@@ -529,7 +529,7 @@
         "Typecheck passes"
       ],
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: email. Uses model for classification"
     },
     {

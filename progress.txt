@@ -1413,3 +1413,86 @@
   - Feed error tracking helps identify problematic sources
 ---
 
+## 2026-02-10 17:54 CET - US-032
+- Created summarizer skill - Text summarization with key point extraction
+- Implemented extractive summarization algorithm using local text processing (no external API)
+- Features implemented:
+  - Article and document summarization with adjustable length (short/medium/long)
+  - Key points extraction with configurable count
+  - Multiple output formats: paragraph, bullet points, numbered list
+  - Document type optimization: article, document, email, meeting, research
+  - Focus keywords support to emphasize specific topics
+  - File summarization support
+- Scoring algorithm considers:
+  - Document-type specific keywords (higher weight)
+  - Focus keywords (highest weight)
+  - Statistical indicators (percentages, currency amounts)
+  - Structural cues (transition words, position)
+  - Optimal sentence length
+- SQLite storage for summary history with compression stats
+- Full CLI with commands: summarize, file, history, get, stats, clear, delete, health
+- Typecheck passes
+- Files changed:
+  - skills/summarizer/package.json (new)
+  - skills/summarizer/tsconfig.json (new)
+  - skills/summarizer/.gitignore (new)
+  - skills/summarizer/SKILL.md (new)
+  - skills/summarizer/src/index.ts (new)
+  - skills/summarizer/src/cli.ts (new)
+  - prd.json (updated US-032 passes: true)
+- **Learnings for future iterations:**
+  - Extractive summarization works well without external APIs - score sentences based on keywords and structure
+  - Document-type specific keyword boosts improve relevance for different content types
+  - Focus keywords allow users to customize summaries for their needs
+  - Compression ratio tracking helps users understand summary efficiency
+  - SQLite storage enables summary history and statistics tracking
+---
+
+
+## 2026-02-10 17:58 CET - US-033
+- Created inbox-triage skill - AI-powered email prioritization and sorting system
+- Implemented comprehensive email classification features:
+  - 9 email categories: urgent, important, newsletter, promotional, social, updates, forums, spam, unknown
+  - 5 priority levels: critical, high, medium, low, none with 0-100 scoring
+  - AI classification algorithm analyzing sender patterns, subject keywords, content indicators
+  - Confidence scoring based on pattern matching strength
+- Implemented bulk actions with undo support:
+  - Bulk archive, mark as read, and trash operations
+  - 24-hour undo window for all bulk actions
+  - Previous state tracking for restoration
+- Implemented sender rules system:
+  - Custom rules for specific email addresses
+  - Auto-categorization and priority assignment
+  - Rule management (add, list, delete)
+- SQLite storage for:
+  - classifications table with full metadata
+  - sender_rules table for custom rules
+  - undo_actions table with 24hr expiration
+  - action_history table for audit trail
+- Full CLI with commands:
+  - status/health - System health check
+  - classify/triage/inbox - Email classification
+  - category/priority - Query by classification
+  - unreviewed/review - Review workflow
+  - archive/mark-read/trash/undo - Bulk actions
+  - add-rule/rules/delete-rule - Sender rule management
+  - stats - Classification statistics
+- TypeScript implementation following all codebase patterns
+- Typecheck passes
+- Files changed:
+  - skills/inbox-triage/package.json (new)
+  - skills/inbox-triage/tsconfig.json (new)
+  - skills/inbox-triage/.gitignore (new)
+  - skills/inbox-triage/SKILL.md (new)
+  - skills/inbox-triage/src/index.ts (new - main library)
+  - skills/inbox-triage/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-033 passes: true)
+- **Learnings for future iterations:**
+  - Classification algorithm uses multi-factor scoring (sender patterns, keywords, labels, thread status)
+  - Confidence calculation: base 0.5 + (reasons * 0.15), capped at 0.95
+  - Undo system stores previous states as JSON and expires after 24 hours
+  - Sender rules override AI classification for known senders
+  - SQLite ON CONFLICT clause useful for upsert when re-classifying
+  - Classification Record interfaces needed for snake_case column mapping
+---
+
