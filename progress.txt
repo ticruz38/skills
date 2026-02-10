@@ -1989,3 +1989,52 @@
   - CSV escape: wrap in quotes and double internal quotes
 ---
 
+
+## 2026-02-10 19:18 CET - US-045
+- Created chart-generator skill - Generate charts and visualizations from data sources
+- Built on top of data-connector skill for data integration
+- Implemented comprehensive chart generation features:
+  - 5 chart types: Bar, Line, Pie, Doughnut, and Area charts
+  - 3 color themes: Light, Dark, and Colorful with curated palettes
+  - Customizable dimensions, titles, axis labels, legends, and grid display
+  - Pure SVG generation with no native dependencies
+  - Multi-series support for bar, line, and area charts
+  - Template system for saving and reusing chart configurations
+  - Data source integration for generating charts from data-connector cached data
+- Features implemented:
+  - Bar charts with single/multi-series support, value labels on bars
+  - Line charts with points, connecting lines, and smooth curves
+  - Area charts with filled regions under lines
+  - Pie charts with percentage labels and color-coded slices
+  - Doughnut charts with center total display
+  - Embeddable HTML code generation for web integration
+  - Template CRUD operations (save, list, get, delete, generate)
+  - Statistics tracking (templates count, chart generation history)
+- SQLite storage for:
+  - templates table with chart configuration and optional data source
+  - chart_history table for tracking generation history
+- Full CLI with commands:
+  - generate <type> - Generate chart from JSON data file
+  - from-connection - Generate chart from data-connector cached data
+  - template save/list/get/delete/generate - Template management
+  - stats - Show statistics
+  - health - Health check
+- Typecheck passes
+- Files changed:
+  - skills/chart-generator/package.json (new)
+  - skills/chart-generator/tsconfig.json (new)
+  - skills/chart-generator/.gitignore (new)
+  - skills/chart-generator/SKILL.md (new)
+  - skills/chart-generator/src/index.ts (new - main library with SVG generation)
+  - skills/chart-generator/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-045 passes: true)
+- **Learnings for future iterations:**
+  - SVG chart generation is fully self-contained with no external dependencies
+  - Multi-series data normalization allows consistent handling of single and multi-series inputs
+  - Template system with optional data source enables reusable report configurations
+  - Use hexToRgba() helper for area chart fills with transparency
+  - Pie/doughnut charts calculate angles using (value / total) * 2 * Math.PI
+  - Grid line count (5) provides good balance between detail and readability
+  - Theme objects consolidate colors for backgrounds, text, grid, and titles
+---
+
