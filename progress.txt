@@ -2317,3 +2317,42 @@
   - SQLite config table with `id INTEGER PRIMARY KEY CHECK (id = 1)` ensures single-row config
   - When seeding with `INSERT OR IGNORE`, UNIQUE constraints are essential for idempotency
 ---
+
+## 2026-02-10 19:57 CET - US-051
+- Created focus-time-blocks skill - Protect focus time on calendar for deep work
+- Built on top of calendar skill for Google Calendar integration
+- Implemented comprehensive features:
+  - Recurring focus blocks with customizable schedules (days of week, start/end times)
+  - Auto-decline meeting rules with pattern matching and custom messages
+  - DND integration via calendar visibility settings (private events)
+  - Productivity analytics with completion rates, weekly trends, daily distribution
+- Database schema:
+  - `focus_blocks` - Block configuration with auto_decline, dnd_enabled flags
+  - `productivity_sessions` - Session tracking with status, interruptions, notes
+  - `auto_decline_rules` - Rules for automatic meeting decline
+- 4 default templates: Morning Deep Work, Afternoon Focus, Creative Session, Weekend Learning
+- Session lifecycle: scheduled → completed/interrupted/cancelled
+- Analytics includes: total sessions, completion rate, focus hours, interruptions, weekly trends
+- Full CLI with commands:
+  - block-create, block-list, block-get, block-update, block-delete, block-enable, block-disable
+  - templates, template-apply
+  - schedule, sessions, session-start, session-complete, session-interrupt, session-cancel
+  - decline-add, decline-list, decline-delete
+  - analytics, suggest
+- Typecheck passes
+- Files changed:
+  - skills/focus-time-blocks/package.json (new)
+  - skills/focus-time-blocks/tsconfig.json (new)
+  - skills/focus-time-blocks/.gitignore (new)
+  - skills/focus-time-blocks/SKILL.md (new)
+  - skills/focus-time-blocks/src/index.ts (new - main library)
+  - skills/focus-time-blocks/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-051 passes: true)
+- **Learnings for future iterations:**
+  - Calendar integration for focus time uses visibility='private' for DND effect
+  - Analytics with SQLite use julianday() for time calculations
+  - Multiple status values (scheduled, completed, interrupted, cancelled) enable rich tracking
+  - Weekly trend query uses strftime('%Y-W%W', date) for ISO week grouping
+  - Day of week distribution uses CASE CAST(strftime('%w', date) AS INTEGER) for readable day names
+---
+
