@@ -1541,3 +1541,45 @@
   - SQLite storage for drafts enables history tracking and statistics
 ---
 
+
+## 2026-02-10 18:08 CET - US-035
+- Created gift-suggestions skill - Suggest personalized gift ideas based on recipient profiles
+- Implemented comprehensive features:
+  - Recipient profile management with SQLite storage (name, relationship, age, gender, interests, notes)
+  - Smart gift suggestion algorithm with interest matching, budget filtering, occasion matching
+  - 64 curated gift ideas across 8 categories (Tech, Experiences, Home, Fashion, Books, Wellness, Food, Entertainment)
+  - Trending gift tracking with popularity scores
+  - Gift history tracking with recipient reactions (loved, liked, neutral, disliked)
+  - Occasion-appropriate suggestions (birthday, christmas, anniversary, etc.)
+  - Age and gender considerations for appropriate suggestions
+  - Exclude previously gifted items option
+- Suggestion algorithm scoring factors:
+  - Interest matches (25 points per match)
+  - Budget fit (15 points if fully within budget, 5 if partially)
+  - Occasion match (20 points)
+  - Age appropriateness (10 points)
+  - Gender match (5 points)
+  - Trending bonus (10 points)
+- Full CLI with commands:
+  - Recipient management: add-recipient, list-recipients, get-recipient, update-recipient, delete-recipient
+  - Suggestions: suggest, suggest-interests
+  - Discovery: trending, categories, budget
+  - History: add-history, history
+  - Reporting: stats, health
+- Typecheck passes
+- Files changed:
+  - skills/gift-suggestions/package.json (new)
+  - skills/gift-suggestions/tsconfig.json (new)
+  - skills/gift-suggestions/.gitignore (new)
+  - skills/gift-suggestions/SKILL.md (new)
+  - skills/gift-suggestions/src/index.ts (new - main library)
+  - skills/gift-suggestions/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - Gift suggestion skills can use local curated databases rather than external APIs
+  - Multi-factor scoring algorithms work well for recommendation systems
+  - Interest matching is the most important factor (highest weight)
+  - Gift history tracking helps avoid duplicate gifts and improve future suggestions
+  - Reaction tracking (loved/liked/neutral/disliked) can train better recommendations
+  - When using await in template literals or callbacks, extract the value first to avoid async issues
+---
+
