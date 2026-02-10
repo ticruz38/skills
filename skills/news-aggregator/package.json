@@ -1,0 +1,20 @@
+{
+  "name": "@openclaw/news-aggregator",
+  "version": "1.0.0",
+  "description": "RSS/Atom feed aggregator with keyword filtering and source management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6",
+    "fast-xml-parser": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

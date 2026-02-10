@@ -1336,3 +1336,80 @@
   - PDF reports can be generated as HTML first, which is ready for PDF conversion tools
   - Receipt bundles store metadata as JSON with image paths for audit trails
 ---
+
+## 2026-02-10 17:47 CET - US-030
+- Created web-search skill - Search the web for information with structured results
+- Implemented comprehensive search features:
+  - Query search with configurable number of results
+  - Structured results with title, URL, snippet, source, and rank
+  - Source ranking by relevance
+  - Result caching in SQLite with 7-day TTL
+  - Safe search filtering option
+- Dual-mode operation:
+  - Serper API mode: When SERPER_API_KEY is set, uses Serper.dev API for automated results
+  - Fallback mode: Returns links to Google, Bing, DuckDuckGo search pages when no API key
+- SQLite storage for:
+  - search_cache table with query, results, total_results, created_at
+  - Automatic cache expiration based on creation date
+  - Cache stats tracking
+- Full CLI with commands:
+  - search/s <query> - Search with --num, --safe, --no-safe options
+  - cache - View cache statistics
+  - clear-cache --days N - Clear old entries
+  - health/h - Check system health and API availability
+- Typecheck passes
+- No external API dependencies by default - works without any API key
+- Files changed:
+  - skills/web-search/package.json (new)
+  - skills/web-search/tsconfig.json (new)
+  - skills/web-search/.gitignore (new)
+  - skills/web-search/SKILL.md (new)
+  - skills/web-search/src/index.ts (new - main library)
+  - skills/web-search/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-030 passes: true)
+- **Learnings for future iterations:**
+  - When implementing optional external API integration, provide a fallback mode that still works
+  - HTTPS requests in Node.js use the `https` module with options for hostname, path, method, headers
+  - For POST requests, calculate Content-Length with Buffer.byteLength()
+  - Cache TTL can be implemented at query time with `created_at > datetime("now", "-7 days")`
+  - When no API key is available, returning search engine links is a useful fallback
+---
+
+
+## 2026-02-10 17:50 CET - US-031
+- Created news-aggregator skill - RSS/Atom feed aggregator with keyword filtering and source management
+- Implemented comprehensive features:
+  - RSS 2.0 and Atom feed parsing using fast-xml-parser
+  - Source management with name, URL, category, and active/inactive status
+  - Keyword filtering system with include/exclude filters and priority scoring
+  - Deduplication by GUID with find and remove functions
+  - Full feed item lifecycle: fetch, read/unread, save/unsave
+  - Fetch error tracking per source with automatic retry counting
+  - Comprehensive CLI with all commands for management
+- Database schema:
+  - feed_sources table with error tracking and last fetch timestamp
+  - feed_items table with read/saved status and full text indexing
+  - keyword_filters table with include/exclude and priority
+- CLI commands:
+  - sources, add, remove, enable, disable - Source management
+  - fetch, list, read, mark-read, save, unsave - Feed operations
+  - filters, filter-add, filter-remove, filtered - Keyword filtering
+  - duplicates, dedupe - Deduplication
+  - stats, health - Monitoring
+- Typecheck passes
+- Files changed:
+  - skills/news-aggregator/package.json (new)
+  - skills/news-aggregator/tsconfig.json (new)
+  - skills/news-aggregator/.gitignore (new)
+  - skills/news-aggregator/SKILL.md (new)
+  - skills/news-aggregator/src/index.ts (new - main library)
+  - skills/news-aggregator/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - fast-xml-parser is a good choice for RSS/Atom parsing - no native dependencies
+  - RSS and Atom have different structures: RSS uses channel.item[], Atom uses feed.entry[]
+  - Atom links are complex - may be an array with @rel attributes or single object
+  - GUID deduplication is essential for RSS feeds (same story can appear in multiple sources)
+  - Use both http and https modules for fetching - not all feeds use HTTPS
+  - Feed error tracking helps identify problematic sources
+---
+
