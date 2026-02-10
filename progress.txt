@@ -577,3 +577,128 @@
   - Date formatting should adapt to timeframe (show time for intraday, dates for daily+)
 ---
 
+
+## 2026-02-10 16:08 CET - US-015
+- Created technical-analysis skill - Calculate technical indicators and signals for crypto trading
+- Built on top of binance skill for price data (klines)
+- Implemented comprehensive technical indicators:
+  - RSI (Relative Strength Index) with configurable period and overbought/oversold thresholds
+  - MACD with fast/slow/signal periods and crossover detection
+  - Bollinger Bands with %B and bandwidth calculations
+  - SMA (Simple Moving Average)
+  - EMA (Exponential Moving Average)
+  - WMA (Weighted Moving Average)
+- Implemented signal generation system:
+  - RSI overbought/oversold signals
+  - MACD bullish/bearish crossover detection
+  - Bollinger Bands %B position signals
+  - Moving average crossover signals (golden/death cross)
+  - Overall signal aggregation with confidence scoring
+- Full CLI with commands:
+  - rsi, macd, bb - Individual indicator commands
+  - sma, ema, wma - Moving average commands
+  - analyze - Complete technical analysis with all indicators
+  - signals - Trading signals summary
+  - status, health - Connection monitoring
+- Typecheck passes
+- Files changed:
+  - skills/technical-analysis/package.json (new)
+  - skills/technical-analysis/tsconfig.json (new)
+  - skills/technical-analysis/.gitignore (new)
+  - skills/technical-analysis/SKILL.md (new)
+  - skills/technical-analysis/src/index.ts (new)
+  - skills/technical-analysis/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - RSI calculation tracks gains/losses separately, then averages over the period
+  - MACD requires calculating EMAs of the price, then EMA of the MACD line for signal
+  - Bollinger Bands %B = (Price - Lower) / (Upper - Lower), useful for position within bands
+  - EMA uses a smoothing multiplier of 2/(period+1)
+  - Signal generation compares current vs previous values to detect crossovers
+  - Overall signal confidence is weighted by individual indicator confidences
+---
+
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **SQLite run result**: To get `lastID` after INSERT, use a custom promisified wrapper that captures `this.lastID` from the callback:
+  ```typescript
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err: Error | null) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+  ```
+- **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
+- **Database column naming**: SQLite returns snake_case column names. Create separate Record interfaces (snake_case) and convert to main interfaces (camelCase):
+  ```typescript
+  interface InvoiceRecord {
+    id?: number;
+    invoice_number: string;
+    // ... snake_case columns
+  }
+  // Convert when fetching:
+  return {
+    id: record.id,
+    invoiceNumber: record.invoice_number,
+    // ...
+  };
+  ```
+
+---
+
+## 2026-02-10 16:25 CET - US-016
+- Created invoices skill - Create, manage, and track professional invoices
+- Complete TypeScript implementation with:
+  - Invoice creation with line items and automatic total calculation
+  - Professional PDF generation (HTML templates ready for PDF conversion)
+  - Payment tracking with partial payment support
+  - Client database management
+  - Business configuration (tax rate, terms, invoice numbering)
+  - Invoice status workflow: draft → sent → paid/overdue/cancelled
+  - Automatic overdue detection for past-due invoices
+  - Summary reports with revenue, outstanding, paid amounts
+  - CSV export for accounting integration
+- Database schema:
+  - `config` - Business settings (name, tax rate, terms, invoice prefix)
+  - `clients` - Client information
+  - `invoices` - Invoice records with totals and status
+  - `line_items` - Individual line items per invoice
+  - `payments` - Payment records per invoice
+- Key implementation details:
+  - Invoice numbers auto-generated with configurable prefix (e.g., INV-0001)
+  - Snake_case database columns mapped to camelCase TypeScript interfaces
+  - Tax calculation: subtotal * (taxRate / 100)
+  - Balance due = total - amount_paid
+  - Status auto-updates to 'paid' when fully paid
+  - Status auto-updates to 'overdue' when past due date and status is 'sent'
+- Files changed:
+  - skills/invoices/package.json (new)
+  - skills/invoices/tsconfig.json (new)
+  - skills/invoices/.gitignore (new)
+  - skills/invoices/SKILL.md (updated to TypeScript)
+  - skills/invoices/src/index.ts (new - main library)
+  - skills/invoices/src/cli.ts (new - CLI interface)
+  - Deleted old Python implementation
+- **Learnings for future iterations:**
+  - When using SQLite with TypeScript, create separate Record interfaces for snake_case column names
+  - Map database records to camelCase interfaces when returning from methods
+  - The invoice template uses CSS for professional appearance with status badges
+  - CSV export format: headers with invoice details for accounting software import
+  - Payment tracking allows partial payments - update balance and status accordingly
+---
+
