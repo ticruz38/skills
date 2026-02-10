@@ -1,0 +1,282 @@
+{
+  "project": "OpenClaw Skills Platform",
+  "branchName": "ralph/skills-platform",
+  "description": "Unified platform for 60+ AI skills across 17 professional profiles with shared auth, runtime, and SDK",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create auth-provider skill with OAuth and API key support",
+      "description": "As a skill developer, I want a centralized auth system so I don't implement OAuth separately for each skill.",
+      "acceptanceCriteria": [
+        "Implement OAuth 2.0 flow with PKCE support",
+        "Implement API key storage and retrieval",
+        "Encrypt credentials with AES-256-GCM using master key",
+        "Auto-refresh OAuth tokens before expiration",
+        "Support multi-profile (named accounts per provider)",
+        "Health check command shows all providers status",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "BLOCKER: Required by 40+ skills. Implement first."
+    },
+    {
+      "id": "US-002",
+      "title": "Create skill runtime with SKILL.md parser",
+      "description": "As an agent user, I want skills to work consistently regardless of which profile I activate.",
+      "acceptanceCriteria": [
+        "Parse SKILL.md frontmatter (name, description, entry, type)",
+        "Extract capabilities from markdown documentation",
+        "Standardize JSON output format across all skills",
+        "Implement unified error handling with error codes",
+        "Health check endpoint for all skill types",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Depends on US-001 for auth integration"
+    },
+    {
+      "id": "US-003",
+      "title": "Create skills-cli tool with install and list commands",
+      "description": "As a user, I want to browse and install skills easily from a central registry.",
+      "acceptanceCriteria": [
+        "Implement `skills list` to show available skills",
+        "Implement `skills install [skill-name]` from GitHub repo",
+        "Resolve and install dependencies automatically",
+        "Parse skill.yaml and validate structure",
+        "Show auth requirements before installation",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "CLI interface for skill management"
+    },
+    {
+      "id": "US-004",
+      "title": "Create shared database schema for cross-skill entities",
+      "description": "As a user, I want my skills to share relevant data (e.g., receipts → expenses → reports).",
+      "acceptanceCriteria": [
+        "Create contacts table (shared across all skills)",
+        "Create transactions table (receipts, invoices, expenses)",
+        "Create events table (calendar, meetings, trips)",
+        "Create documents table (files, attachments)",
+        "Implement data lineage tracking",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "SQLite for local, PostgreSQL for scale"
+    },
+    {
+      "id": "US-005",
+      "title": "Create profile manifest system for skill bundles",
+      "description": "As a user, I want to activate a complete profile (e.g., 'Accountant') with one command.",
+      "acceptanceCriteria": [
+        "Define profile manifest YAML format",
+        "Implement `skills install-profile accountant` command",
+        "Bulk collect auth credentials during onboarding",
+        "Validate all skills install successfully",
+        "Create profile switch command",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Depends on US-003"
+    },
+    {
+      "id": "US-006",
+      "title": "Create skills SDK with init and test commands",
+      "description": "As a developer, I want templates and tools to create new skills quickly.",
+      "acceptanceCriteria": [
+        "Implement `skills init [skill-name]` with templates",
+        "Create templates: api-integration, oauth, local-only",
+        "Implement `skills test` for local validation",
+        "Create skill.yaml validator",
+        "Generate README from skill.yaml",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Developer experience tooling"
+    },
+    {
+      "id": "US-007",
+      "title": "Create monitoring dashboard for skill health",
+      "description": "As an operator, I want visibility into skill health and usage.",
+      "acceptanceCriteria": [
+        "Implement structured JSON logging",
+        "Collect metrics: latency, errors, usage counts",
+        "Create `skills status` health dashboard",
+        "Alert on skill health check failures",
+        "Show usage analytics per skill",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Observability infrastructure"
+    },
+    {
+      "id": "US-008",
+      "title": "Implement email skill with Gmail/Outlook OAuth",
+      "description": "As a Secretary profile user, I want to read and send emails via my agent.",
+      "acceptanceCriteria": [
+        "Integrate with auth-provider for Gmail OAuth",
+        "Implement email list with search and filters",
+        "Implement email send with attachments",
+        "Support email templates and signatures",
+        "Thread view and reply functionality",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "First real skill using auth-provider"
+    },
+    {
+      "id": "US-009",
+      "title": "Implement calendar skill with Google/Outlook",
+      "description": "As a Secretary profile user, I want to schedule and manage meetings.",
+      "acceptanceCriteria": [
+        "Integrate with auth-provider for calendar OAuth",
+        "List events with time range filters",
+        "Create events with attendees and locations",
+        "Find free time slots across calendars",
+        "Send meeting invites",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Similar to existing calendar example but with auth-provider"
+    },
+    {
+      "id": "US-010",
+      "title": "Implement reminders skill with cron scheduling",
+      "description": "As a Secretary profile user, I want automated reminders for tasks and follow-ups.",
+      "acceptanceCriteria": [
+        "Create reminder with datetime and message",
+        "Support recurring reminders (daily, weekly, monthly)",
+        "Deliver via Telegram/Slack/email",
+        "Snooze and dismiss functionality",
+        "Context-aware reminders (location, activity)",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "No external auth needed - local scheduling"
+    },
+    {
+      "id": "US-011",
+      "title": "Implement binance skill with portfolio tracking",
+      "description": "As a Trader profile user, I want to track crypto prices and my portfolio.",
+      "acceptanceCriteria": [
+        "Integrate with auth-provider for API key storage",
+        "Get real-time price data",
+        "Track portfolio value across positions",
+        "Calculate P&L with cost basis",
+        "Support testnet for paper trading",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Similar to existing binance example"
+    },
+    {
+      "id": "US-012",
+      "title": "Implement price alerts skill with notifications",
+      "description": "As a Trader profile user, I want alerts when prices hit target levels.",
+      "acceptanceCriteria": [
+        "Set price alerts with conditions (above/below)",
+        "Support percentage change alerts",
+        "Send alerts via Telegram/Slack/email",
+        "Alert history and management",
+        "Batch alerts to avoid spam",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Uses binance skill data or standalone"
+    },
+    {
+      "id": "US-013",
+      "title": "Implement receipt-ocr skill with expense categorization",
+      "description": "As an Accountant/Receipt Tracker user, I want to extract data from receipt photos.",
+      "acceptanceCriteria": [
+        "Upload receipt image (camera or file)",
+        "OCR extract merchant, amount, date, items",
+        "Auto-categorize expense (ML/rule-based)",
+        "Confidence scoring with manual review",
+        "Export to expenses database",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "May use Google Vision API or Tesseract"
+    },
+    {
+      "id": "US-014",
+      "title": "Implement invoice-generator skill with PDF export",
+      "description": "As an Invoice Chaser user, I want to create professional invoices.",
+      "acceptanceCriteria": [
+        "Create invoice with line items and tax",
+        "Generate PDF with professional template",
+        "Add company branding and logo",
+        "Calculate totals and payment terms",
+        "Store in shared database",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Local PDF generation (no auth needed)"
+    },
+    {
+      "id": "US-015",
+      "title": "Implement web-search skill with structured results",
+      "description": "As a Researcher user, I want to search the web for information.",
+      "acceptanceCriteria": [
+        "Search with query and get structured results",
+        "Rank results by relevance",
+        "Cache results for 24 hours",
+        "Extract key snippets from pages",
+        "Support advanced search operators",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Uses Serper/Google Custom Search API"
+    },
+    {
+      "id": "US-016",
+      "title": "Implement news-aggregator skill with RSS parsing",
+      "description": "As a Researcher user, I want to monitor news from multiple sources.",
+      "acceptanceCriteria": [
+        "Parse RSS/Atom feeds",
+        "Filter by keywords (include/exclude)",
+        "Deduplicate articles across sources",
+        "Unified feed view with categories",
+        "Full-text search across articles",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "RSS parsing, no API keys needed"
+    },
+    {
+      "id": "US-017",
+      "title": "Create documentation site with skill catalog",
+      "description": "As a user, I want to browse skills and read documentation online.",
+      "acceptanceCriteria": [
+        "Generate docs from skill registry",
+        "Searchable skill catalog",
+        "Profile-based skill bundles view",
+        "Installation instructions per skill",
+        "Auto-update on skill registry changes",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Documentation website"
+    }
+  ]
+}
