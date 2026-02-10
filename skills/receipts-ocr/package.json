@@ -1,0 +1,26 @@
+{
+  "name": "@openclaw/receipts-ocr",
+  "version": "1.0.0",
+  "description": "Extract data from receipt photos using Google Vision API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch",
+    "cli": "node dist/cli.js",
+    "status": "node dist/cli.js status"
+  },
+  "keywords": ["receipts", "ocr", "expenses", "vision", "google", "openclaw", "skill"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "dependencies": {
+    "@openclaw/google-oauth": "file:../google-oauth",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/sqlite3": "^3.1.11",
+    "typescript": "^5.3.3"
+  }
+}
