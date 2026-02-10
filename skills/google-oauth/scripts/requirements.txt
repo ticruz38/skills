@@ -1,0 +1,13 @@
+# Google OAuth2 Skill Requirements
+
+# Core Google libraries
+google-auth>=2.22.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.1
+google-api-python-client>=2.95.0
+
+# For minion.do integration (async HTTP)
+aiohttp>=3.8.0
+
+# Optional: For better CLI experience
+# rich>=13.0.0
