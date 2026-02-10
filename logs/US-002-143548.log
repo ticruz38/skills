@@ -420,3 +420,69 @@
 • Now let me update the Codebase Patterns section to consolidate the most import
   ant patterns. Then I need to commit this change and we're done for this iterat
   ion.
+• Used Shell (cd /root/code/skills && g...it --amend --no-edit 2>&1)
+• Let me verify the PRD status and confirm the next story that needs to be worke
+  d on:
+• Let me verify the current PRD status:
+• Used Shell (cd /root/code/skills && c...-A2 '"passes"' | head -40)
+• I've successfully verified that US-001 and US-002 are marked as passing. The n
+  ext priorities in the queue are the remaining authentication skills: binance-a
+  uth, quickbooks-auth, and slack-auth.
+
+  Wait, before I conclude, I need to ensure the implementation of US-002 is robu
+  st and follows all project standards. Let's look back at the requirements. The
+  core task was to create a Google OAuth skill. I started by building upon the e
+  xisting auth-provider framework to ensure consistency. Actually, by migrating
+  from the legacy Python codebase to a unified TypeScript environment, I've impr
+  oved maintainability. I've also ensured that multi-profile support is function
+  al, allowing users to manage several Google accounts simultaneously.
+
+  The service-specific scopes for Gmail, Calendar, Drive, Sheets, and Docs are n
+  ow correctly integrated, allowing for granular permission handling. I've teste
+  d the CLI commands—status, connect, complete, disconnect, health, profiles, an
+  d scopes—and they are all operational. Finally, the code passed the typecheck
+  and linting, and I've committed everything with the standard message format. S
+  ince all acceptance criteria are satisfied and the foundation is set, the logi
+  cal next step is to signal completion and move toward the next authentication
+  sprint.
+• Story US-002 is complete. Here's a summary of what was implemented:
+
+  Summary - US-002: Google OAuth Skill
+
+  What Was Implemented
+
+  • google-oauth skill - A TypeScript-based Google OAuth adapter built on top of
+    he auth-provider skill
+  • Replaced the existing Python implementation with a proper TypeScript skill
+  • Provides simplified OAuth flow for Gmail, Calendar, Drive, Sheets, and Docs
+
+  Key Features
+
+  1. Multi-profile support - Manage multiple Google accounts (work, personal, et
+  2. Service-specific scopes - Request only needed permissions (gmail, calendar,
+     ive, sheets, docs)
+  3. Auto-refresh - Tokens automatically refresh via auth-provider
+  4. Health checks - Monitor token validity and expiration
+  5. CLI commands - status, connect, complete, disconnect, health, profiles, sco
+
+  Files Created/Modified
+
+  • skills/google-oauth/package.json, tsconfig.json, .gitignore
+  • skills/google-oauth/src/index.ts - Main API
+  • skills/google-oauth/src/cli.ts - Command-line interface
+  • skills/google-oauth/SKILL.md - Documentation
+  • skills/auth-provider/src/types.ts - Added UserProfile interface
+  • skills/auth-provider/src/index.ts - Added deleteCredentials, listProfiles, g
+    UserProfile
+
+  Quality Checks Passed
+
+  • ✅ Typecheck passes
+  • ✅ Build succeeds
+  • ✅ CLI works correctly
+  • ✅ Committed with message: feat: US-002 - Create google-oauth skill for Goog
+    services
+
+  ──────────────────────────────────────────────────────────────────────────────
+  Next Story: US-003 (binance-auth), US-004 (quickbooks-auth), and US-005 (slack
+  -auth) are the remaining auth-related stories with passes: false.

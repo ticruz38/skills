@@ -1,0 +1,389 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD and progress files to understand what needs to
+  be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• I've examined the PRD and the progress log. US-001 and US-002 are marked compl
+  ete, so I'll skip those. US-003, "Create binance-auth skill for trading API,"
+  is the highest-priority item where passes is false.
+
+  The requirements for this skill are specific: I need to implement a secure API
+  key storage mechanism, toggle between testnet and production environments, val
+  idate API permissions, and set up a health check that queries account balances
+  . This will likely involve extending the auth-provider's architecture to handl
+  e HMAC-SHA256 signatures rather than standard OAuth flows.
+
+  However, before I can define the structure or start coding, I need to see wher
+  e this skill fits within the existing codebase. The PRD suggests a modular ski
+  ll system. I need to verify the directory naming conventions and see if there
+  are any existing "binance" related stubs I should be aware of.
+
+  Wait, I should also check the general skills/ directory to see the list of cur
+  rently implemented or planned modules. This will ensure that binance-auth is p
+  laced correctly and follows the established organizational pattern. I'll start
+  by exploring the skills directory to get a clear view of the workspace.
+• Let me check the current branch and explore the existing skill structure to un
+  derstand the patterns better.
+• Used Shell (cd /root/code/skills && g...current && ls -la skills/)
+• Good, I'm on the correct branch ralph/all-skills. Now let me look at the exist
+  ing auth-provider and google-oauth skills to understand the patterns I should
+  follow for binance-auth.
+• Used ReadFile (skills/auth-provider/src/types.ts)
+• Used ReadFile (skills/auth-provider/src/providers/binance.ts)
+• Used ReadFile (skills/auth-provider/SKILL.md)
+• I have a solid grasp of the auth-provider structure now. To build the binance-
+  auth skill, I need to follow the established architectural patterns. Wait, I s
+  hould verify how these skills are actually being linked—is it through local fi
+  le references, workspaces, or a specific import alias? I need to see the depen
+  dency structure in package.json and how the main entry point exports its funct
+  ionality.
+
+  Actually, google-oauth is the best reference for this since it likely handles
+  similar provider-specific logic and relies on the core auth service. By examin
+  ing its package manifest and source index, I can ensure the new Binance skill
+  integrates correctly without any circular dependencies. I'll start by checking
+  these files in the google-oauth directory to establish a baseline for my imple
+  mentation.
+• Let me also look at the google-oauth skill structure to understand the pattern
+  for dependent skills:
+• Used ReadFile (skills/google-oauth/package.json)
+• Used ReadFile (skills/google-oauth/src/index.ts)
+• I've analyzed the existing auth-provider and its google-oauth implementation.
+  The architecture for a new skill is clear: a package.json for dependencies, a
+  tsconfig.json for build settings, a SKILL.md for documentation, and a src fold
+  er containing the core logic.
+
+  However, binance-auth has a unique requirement: it handles API Key/Secret pair
+  s rather than standard OAuth 2.0 flows. This means the src/index.ts will focus
+  on credential management and HMAC-SHA256 signature generation for Binance's se
+  curity model. I also need a CLI utility in src/cli.ts for manual configuration
+  and health checks.
+
+  Wait, I should map out the implementation sequence to ensure I don't miss the
+  SKILL.md or the specific tsconfig settings used in this repo. The most logical
+  approach is to build the foundation first and then layer the specific Binance
+  logic on top.
+
+  I'll start by defining the project structure and dependencies in package.json,
+  then move to the TypeScript configuration and source files. I'll formalize thi
+  s roadmap now to guide the development process.
+• Now I understand the patterns. Let me create the binance-auth skill. This will
+  be a skill built on top of auth-provider for managing Binance API credentials.
+• Used SetTodoList
+  • Create binance-auth skill structure ←
+  • Create package.json with auth-provider dependency
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Create src/index.ts with BinanceAuthClient
+  • Create src/cli.ts for CLI commands
+  • Build and typecheck
+  • Update PRD and progress.txt
+• Let me create the binance-auth skill directory and all its files.
+• Used Shell (mkdir -p /root/code/skills/skills/binance-auth/src)
+• Now let me create all the necessary files for the binance-auth skill.
+• Used WriteFile (skills/binance-auth/package.json)
+• Used WriteFile (skills/binance-auth/tsconfig.json)
+• Used WriteFile (skills/binance-auth/SKILL.md)
+• Now let me create the main index.ts file with the BinanceAuthClient class.
+• Used WriteFile (skills/binance-auth/src/index.ts)
+• Now let me create the CLI file for the binance-auth skill.
+• Used WriteFile (skills/binance-auth/src/cli.ts)
+• Now I need to update the todo list and build/typecheck the project.
+• Used SetTodoList
+  • Create binance-auth skill structure
+  • Create package.json with auth-provider dependency
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Create src/index.ts with BinanceAuthClient
+  • Create src/cli.ts for CLI commands
+  • Build and typecheck ←
+  • Update PRD and progress.txt
+• Let me build and typecheck the binance-auth skill.
+• Used Shell (cd /root/code/skills/skil...tall && npm run typecheck)
+  Failed with exit code: 2
+• Hmm, the compiler is flagging a type mismatch in the binance-auth skill. It se
+  ems auth.getBinanceClient and auth.getApiKey are being treated as if they retu
+  rn a Promise, but the code is using them as if they are synchronous.
+
+  Wait, let me check the implementation. If these methods were recently updated
+  to be async, then src/index.ts is missing several await keywords. This would e
+  xplain why the subsequent property access is failing.
+
+  I need to verify the method signatures in the auth-provider source code to be
+  sure. I'll read the main index.ts for the auth-provider skill to see how these
+  functions are defined.
+• Used ReadFile (skills/auth-provider/src/index.ts)
+• I see the issue. The getBinanceClient and getApiKey methods in auth-provider a
+  re async, but I was using them synchronously. Let me fix the binance-auth/src/
+  index.ts file.
+• Used WriteFile (skills/binance-auth/src/index.ts)
+• Now I need to update the CLI file to properly handle the async methods. The is
+  Connected() method is now async, so I need to update all usages.
+• Now let me update the CLI file to handle async methods properly:
+• Used WriteFile (skills/binance-auth/src/cli.ts)
+• Now let me run typecheck again to see if there are any more errors.
+• Used Shell (cd /root/code/skills/skil...auth && npm run typecheck)
+• Typecheck passes. Now let me build the project.
+• Typecheck passes. Let me build the project:
+• Used Shell (cd /root/code/skills/skil...nce-auth && npm run build)
+• Build succeeded. Let me verify the build output and then update the PRD and pr
+  ogress.txt.
+• Used Shell (cd /root/code/skills/skil...ance-auth && ls -la dist/)
+• The build is complete. Now I need to:
+
+  1. Update the PRD to set passes: true for US-003
+  2. Append progress to progress.txt
+  3. Commit the changesLet me do that now.
+• Build is successful. Now let me update the PRD and progress file:
+• Used SetTodoList
+  • Create binance-auth skill structure
+  • Create package.json with auth-provider dependency
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Create src/index.ts with BinanceAuthClient
+  • Create src/cli.ts for CLI commands
+  • Build and typecheck
+  • Update PRD and progress.txt ←
+• Now let me update the PRD to set US-003 to passes: true and append the progres
+  s.
+• Used StrReplaceFile (prd.json)
+• Used StrReplaceFile (progress.txt)
+• Now let me commit the changes.
+• Used Shell (cd /root/code/skills && git add -A && git status)
+• The git status shows that node_modules are being added. I should not commit no
+  de_modules. Let me check if there's a .gitignore in the auth-provider and goog
+  le-oauth skills to follow the same pattern.
+• I see node_modules is being included. Let me add a .gitignore for the binance-
+  auth skill following the pattern of other skills:
+• Used Shell (cat /root/code/skills/ski...e_modules/\ndist/\n*.log")
+• Let me create a .gitignore for binance-auth and remove node_modules and dist f
+  rom staging, then commit only the source files.
+• Used WriteFile (skills/binance-auth/.gitignore)
+• Used Shell (cd /root/code/skills && g...rogress.txt && git status)
+• Now let me commit the changes with the proper commit message format.
+• Used Shell (cd /root/code/skills && g...th skill for trading API")
+• The commit is done. Now let me update the todo list and verify the completed s
+  tatus.
+• Used SetTodoList
+  • Create binance-auth skill structure
+  • Create package.json with auth-provider dependency
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Create src/index.ts with BinanceAuthClient
+  • Create src/cli.ts for CLI commands
+  • Build and typecheck
+  • Update PRD and progress.txt
+• Let me verify the PRD is correctly updated and check how many stories remain t
+  o be done.
+• Let me verify the PRD update and check remaining stories:
+• Used Shell (cd /root/code/skills && g..."passes": false' prd.json)
+• 3 stories are now complete (US-001, US-002, US-003), and 57 remain. Let me ver
+  ify the PRD is properly updated by checking the US-003 section.
+• Used Shell (cd /root/code/skills && g...'"id": "US-003"' prd.json)
+• US-003 is now marked as passing. Let me verify the progress.txt file was updat
+  ed properly.
+• Used Shell (cd /root/code/skills && head -30 progress.txt)
+• The progress.txt file has been correctly updated with the US-003 entry. Let me
+  provide a summary of what was completed.
+• I have successfully completed US-003 - Create binance-auth skill for trading A
+  PI.
+
+  Summary
+
+  Created the binance-auth skill that provides Binance API authentication and ke
+  y management for trading skills. The skill is built on top of the auth-provide
+  r skill for secure credential storage.
+
+  Files Created:
+
+  • skills/binance-auth/package.json - Package configuration with auth-provider
+    pendency
+  • skills/binance-auth/tsconfig.json - TypeScript configuration
+  • skills/binance-auth/SKILL.md - Documentation with usage examples
+  • skills/binance-auth/src/index.ts - Main library with BinanceAuthClient class
+  • skills/binance-auth/src/cli.ts - CLI for managing credentials
+  • skills/binance-auth/.gitignore - Git ignore file
+
+  Features Implemented:
+
+  • ✅ Secure API key and secret storage (encrypted via auth-provider)
+  • ✅ Support for testnet vs production environments
+  • ✅ API permission validation (SPOT, MARGIN, FUTURES, etc.)
+  • ✅ Health check with balance query
+  • ✅ Multi-profile support for multiple Binance accounts
+  • ✅ CLI commands: status, connect, health, list, validate, balance, disconnec
+
+  Quality Checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build succeeds
+  • ✅ Committed with message: feat: US-003 - Create binance-auth skill for trad
+    g API
+
+  The PRD has been updated with passes: true for US-003, and progress has been l
+  ogged to progress.txt.
+
+  ──────────────────────────────────────────────────────────────────────────────
+  3 of 60 stories complete. 57 remaining.
