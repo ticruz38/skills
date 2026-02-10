@@ -1,0 +1,22 @@
+{
+  "name": "@openclaw/tax-export",
+  "version": "1.0.0",
+  "description": "Export expenses for tax filing with multiple formats",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "cli": "npm run build && node dist/cli.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openclaw/expense-categorizer": "file:../expense-categorizer",
+    "@openclaw/receipts-ocr": "file:../receipts-ocr",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
