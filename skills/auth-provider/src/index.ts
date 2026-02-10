@@ -13,6 +13,7 @@ import {
   HealthCheckResult,
   AuthProviderOptions,
   ProviderAdapter,
+  UserProfile,
 } from './types';
 import { EncryptedStorage } from './storage';
 import {
@@ -269,6 +270,53 @@ export class AuthProvider {
   }
 
   /**
+   * Delete credentials (token or API key) for provider/profile
+   */
+  async deleteCredentials(provider: ProviderType, profile: string = 'default'): Promise<boolean> {
+    try {
+      // Try to delete token first
+      const token = await this.storage.getToken(provider, profile);
+      if (token) {
+        await this.storage.deleteToken(provider, profile);
+        return true;
+      }
+      
+      // Try API key for binance
+      if (provider === 'binance') {
+        const apiKey = await this.storage.getApiKey(provider, profile);
+        if (apiKey) {
+          await this.storage.deleteApiKey(provider, profile);
+          return true;
+        }
+      }
+      
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * List all profiles for a provider
+   */
+  async listProfiles(provider: ProviderType): Promise<string[]> {
+    const tokens = await this.storage.listTokens(provider);
+    const profiles = tokens.map(t => t.profile);
+    
+    // Also check API keys for binance
+    if (provider === 'binance') {
+      const apiKeys = await this.storage.listApiKeys(provider);
+      for (const key of apiKeys) {
+        if (!profiles.includes(key.profile)) {
+          profiles.push(key.profile);
+        }
+      }
+    }
+    
+    return profiles;
+  }
+
+  /**
    * List all stored tokens
    */
   async listTokens(provider?: ProviderType): Promise<TokenData[]> {
@@ -456,6 +504,34 @@ export class AuthProvider {
     }
 
     return undefined;
+  }
+
+  /**
+   * Get user profile for a connected account
+   */
+  async getUserProfile(
+    provider: ProviderType,
+    profile: string = 'default'
+  ): Promise<UserProfile | null> {
+    const token = await this.getValidAccessToken(provider, profile);
+    if (!token) return null;
+
+    const adapter = this.adapters.get(provider);
+    if (adapter?.getUserProfile) {
+      return adapter.getUserProfile(token);
+    }
+
+    // Fallback: try to get from stored metadata
+    const tokenData = await this.storage.getToken(provider, profile);
+    if (tokenData?.metadata?.email) {
+      return {
+        email: tokenData.metadata.email,
+        name: tokenData.metadata.name,
+        picture: tokenData.metadata.picture,
+      };
+    }
+
+    return null;
   }
 }
 

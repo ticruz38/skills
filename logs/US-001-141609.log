@@ -1,0 +1,522 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and progress log to understand what needs
+  to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• The PRD is quite extensive, but the logic is sound: start with the foundationa
+  l auth-provider skill (US-001) before anything else. However, I need to unders
+  tand the existing skill architecture before I can implement it correctly. Is t
+  here a standardized template for SKILL.md or shared utilities I should leverag
+  e?
+
+  Wait, I also need to verify the branch. The PRD specifies branchName: ralph/al
+  l-skills. If I'm not on that branch, I'll need to create or switch to it.
+
+  Actually, before I dive into code, I should get a high-level view of the proje
+  ct. I'll check the root directory for any documentation, examine an existing s
+  kill for reference, and verify my current git status to ensure I'm starting fr
+  om the right place. This will ensure the new authentication provider aligns wi
+  th the existing ecosystem.
+• Let me understand the current project structure and check the branch status.
+• Used Shell (git branch --show-current && git status --short)
+• Used Glob (skills/*)
+• Used ReadFile (SKILL.md)
+• I need to switch to the ralph/all-skills branch as defined in the PRD. Let me
+  also look at an existing skill to understand the structure better.
+• Let me check out the correct branch and examine an existing skill structure:
+• Used Shell (git checkout -b ralph/all...checkout ralph/all-skills)
+• Used Glob (skills/google-oauth/*)
+• Used Glob (skills/email/*)
+• Let me look at an existing skill to understand the structure better. The googl
+  e-oauth skill seems most relevant to US-001.
+• Used ReadFile (skills/google-oauth/SKILL.md)
+• Used ReadFile (skills/email/SKILL.md)
+• Used Shell (cat skills/email/email.py)
+• Now I have a good understanding of the project structure. Let me look at the g
+  oogle-oauth/scripts directory to understand better:
+• Used Glob (skills/google-oauth/scripts/*)
+• Used Shell (find . -name "*.py" -path "./skills/*" | head -20)
+• I've analyzed the existing google-oauth skill, and it's clear that while it ha
+  ndles Google's specific implementation well, the system needs a more universal
+  foundation. The PRD for US-001 outlines a foundational auth-provider skill tha
+  t acts as a centralized broker for all authentication flows. This isn't just a
+  simple wrapper; it needs to support multiple distinct providers—specifically G
+  oogle, Binance, QuickBooks, and Slack. Each of these providers has different s
+  ecurity requirements; for instance, Google and QuickBooks rely on OAuth 2.0 wi
+  th PKCE for enhanced security, while Binance uses a more traditional API key a
+  nd secret pair.
+
+  Wait, I need to consider the persistence layer. The PRD specifies that credent
+  ials must be stored encrypted in SQLite. This is a critical detail—if I'm buil
+  ding a centralized provider, it can't just store tokens in plain text or scatt
+  ered across different files. I should probably use a strong encryption standar
+  d like AES-256. The schema needs to account for provider, profile, access_toke
+  n, refresh_token, and expires_at.
+
+  But what about the implementation language? Looking at the other skills in the
+  repository, there's a clear split. Some use Python for heavy backend lifting,
+  while others use TypeScript, especially when interacting with the project's in
+  ternal types. Since this auth-provider is a 'foundation' skill, it needs to be
+  accessible to both ecosystems. If I only provide a Python SDK, the TypeScript
+  skills will struggle to validate tokens or initiate flows.
+
+  Actually, the PRD mentions a 'health check endpoint'. This suggests the skill
+  should have a runnable server or a CLI that can be queried to ensure the provi
+  der is functioning and that the stored credentials for a specific user are sti
+  ll valid. If a token is nearing expiration for the 'quickbooks' provider, this
+  skill should ideally handle the refresh automatically before another skill eve
+  n requests it.
+
+  Let's break down the acceptance criteria again:
+
+  1. OAuth 2.0 flow with PKCE.
+  2. Encrypted SQLite storage.
+  3. Support for Google, Binance, QuickBooks, and Slack.
+  4. Auto-refresh logic.
+  5. Multi-profile support.
+  6. Health check endpoint.
+  7. Type-checking compatibility.
+
+  The scope is quite large. I can't just start writing code without a plan. I ne
+  ed to define the directory structure first—should the providers be plugins? Ho
+  w will the encryption keys be managed securely?
+
+  Unless I have a clear roadmap, I'll likely miss one of the provider-specific n
+  uances. For example, Binance doesn't use OAuth, so the 'Provider' interface ne
+  eds to be flexible enough to handle both OAuth and HMAC-based authentication.
+
+  Therefore, I need to establish a formal todo list to track these moving parts.
+  I'll start by setting up the core infrastructure in TypeScript to ensure type
+  safety across the board, then implement the Python backend for the actual toke
+  n management and encryption. This structured approach will ensure that the fou
+  ndational 'auth-provider' skill is robust enough to support the 60 other skill
+  s mentioned in the project overview. I'll use the SetTodoList tool to formaliz
+  e this plan now.
+• Now I understand the structure. Let me create the auth-provider skill - the fo
+  undation skill that manages OAuth tokens and API keys. I'll follow the existin
+  g patterns but make it provider-agnostic.
+• Used SetTodoList
+  • Create auth-provider skill structure ←
+  • Implement core auth provider module
+  • Implement OAuth 2.0 with PKCE flow
+  • Implement encrypted SQLite storage
+  • Implement provider adapters (Google, Binance, QuickBooks, Slack)
+  • Implement health check endpoint
+  • Create SKILL.md documentation
+  • Run typecheck and quality checks
+  • Commit changes
+• Let me create the auth-provider skill. I'll create a TypeScript-based skill as
+  it appears the ecosystem supports both Python and TypeScript skills.
+• Used Shell (mkdir -p skills/auth-provider)
+• I've analyzed the requirements for the auth-provider skill. It needs to act as
+  the central hub for all authentication flows within the system. While I have e
+  xperience with OAuth, the 'Multi-profile support' requirement means I need to
+  be careful about how I structure the storage. If I just store a single token p
+  er provider, I'll lose the ability to switch between different user contexts o
+  r 'profiles' as requested.
+
+  Wait, how should I handle the encryption? Storing credentials in SQLite is str
+  aightforward, but I need to ensure that the encryption key isn't hardcoded. Pe
+  rhaps I'll use a master key derived from the environment. But then again, the
+  immediate priority is the schema design. Actually, looking at the PRD again, t
+  he health check is just as vital. If a token expires, the skill needs to ident
+  ify that and handle the refresh automatically.
+
+  Unless I define the core architecture first, I might lose track of the specifi
+  c requirements like PKCE or provider-specific nuances. I should probably start
+  by outlining the project structure. I need a package.json for the TypeScript e
+  nvironment, a detailed SKILL.md to document the API for other skills, and the
+  main logic files.
+
+  Before I dive into the code, I need to organize these thoughts into a concrete
+  plan. I'll set up a todo list to track the initial setup, the storage logic, t
+  he provider implementations, and finally the health check. This will keep the
+  implementation focused and ensure I don't miss the encrypted SQLite requiremen
+  t.
+• Used WriteFile (skills/auth-provider/package.json)
+• Used WriteFile (skills/auth-provider/tsconfig.json)
+• Now let me create the main source files. I'll start with the types, then the s
+  torage layer, then the providers, and finally the main auth provider class.
+• Used Shell (mkdir -p skills/auth-provider/src/providers)
+• Now let me create the TypeScript source files. I'll create them one by one wit
+  h proper typing.
+• Used WriteFile (skills/auth-provider/src/types.ts)
+• Now let me create the storage layer with encryption:
+• Used WriteFile (skills/auth-provider/src/storage.ts)
+• Now let me create the provider adapters for each supported provider:
+• Used WriteFile (skills/auth-provider/src/providers/base.ts)
+• Now let me create individual provider adapters:
+• Used WriteFile (skills/auth-provider/src/providers/google.ts)
+• Now let me create the Binance provider adapter (API key based):
+• Used WriteFile (skills/auth-provider/src/providers/binance.ts)
+• Now let me create the QuickBooks provider adapter:
+• Used WriteFile (skills/auth-provider/src/providers/quickbooks.ts)
+• Now let me create the Slack provider adapter:
+• Used WriteFile (skills/auth-provider/src/providers/slack.ts)
+• Now let me create the providers index file:
+• Used WriteFile (skills/auth-provider/src/providers/index.ts)
+• Now let me create the main auth provider class that ties everything together:
+• Used WriteFile (skills/auth-provider/src/index.ts)
+• Now let me create the CLI script:
+• Used WriteFile (skills/auth-provider/src/cli.ts)
+• Now let me create the SKILL.md documentation file:
+• Used WriteFile (skills/auth-provider/SKILL.md)
+• Now let me update the todo list and run the build to verify everything compile
+  s correctly:
+• Used SetTodoList
+  • Create auth-provider skill structure
+  • Implement core auth provider module
+  • Implement OAuth 2.0 with PKCE flow
+  • Implement encrypted SQLite storage
+  • Implement provider adapters (Google, Binance, QuickBooks, Slack)
+  • Implement health check endpoint
+  • Create SKILL.md documentation
+  • Run typecheck and quality checks ←
+  • Commit changes
+• Let me install dependencies and run the build:
+• Used Shell (cd skills/auth-provider && npm install 2>&1)
+  Failed with exit code: 1
+• The better-sqlite3 package is having compilation issues with Node.js 24. Let m
+  e switch to a more compatible approach using the built-in sqlite3 module or a
+  pure-JS alternative. Since this is a skill that should work across different e
+  nvironments, I'll use a simpler approach with the sqlite3 package or implement
+  a pure TypeScript storage solution.
+• The better-sqlite3 package has compatibility issues with this Node version. Le
+  t me switch to using the standard sqlite3 package which is more compatible:
+• Used WriteFile (skills/auth-provider/package.json)
+• Now let me update the storage.ts to use sqlite3 instead of better-sqlite3:
+• Used WriteFile (skills/auth-provider/src/storage.ts)
+• Now I need to update the types.ts to use async methods for the CredentialStora
+  ge interface:
+• Used StrReplaceFile (skills/auth-provider/src/types.ts)
+• Now I need to update the main index.ts to use async storage methods. Let me re
+  write it:
+• Used WriteFile (skills/auth-provider/src/index.ts)
+• Now I need to update the CLI to use async methods:
+• Used WriteFile (skills/auth-provider/src/cli.ts)
+• Now let's try to install dependencies and build again:
+• Used Shell (cd skills/auth-provider && npm install 2>&1)
+• Good, the dependencies installed. Now let's run the build:
+• Used Shell (cd skills/auth-provider && npm run build 2>&1)
+  Failed with exit code: 2
+• There are some TypeScript errors. Let me fix them - mostly around JSON parsing
+  and type issues with fetch responses:
+• Used WriteFile (skills/auth-provider/src/providers/google.ts)
+• Now let me fix the other provider files:
+• Used WriteFile (skills/auth-provider/src/providers/binance.ts)
+• Now let me fix the QuickBooks provider:
+• Used WriteFile (skills/auth-provider/src/providers/quickbooks.ts)
+• Now let me fix the Slack provider:
+• Used WriteFile (skills/auth-provider/src/providers/slack.ts)
+• Now let me also update the base provider to make validateToken optional and co
+  nsistent:
+• Used StrReplaceFile (skills/auth-provider/src/providers/base.ts)
+  No replacements made
+• Let me check the base provider file:
+• Used ReadFile (skills/auth-provider/src/providers/base.ts)
+• The base provider looks good. Now let me try to build again:
+• Used Shell (cd skills/auth-provider && npm run build 2>&1)
+  Failed with exit code: 2
+• I need to fix the ProviderAdapter interface to make validateToken more flexibl
+  e:
+• Used StrReplaceFile (skills/auth-provider/src/types.ts)
+• Now let me build again:
+• Used Shell (cd skills/auth-provider && npm run build 2>&1)
+• The build succeeded. Now let's run typecheck to make sure everything is good:
+• Used Shell (cd skills/auth-provider && npm run typecheck 2>&1)
+• Typecheck passes. Now let's test the CLI to make sure it works:
+• Used Shell (cd skills/auth-provider &...ist/cli.js env-check 2>&1)
+  Failed with exit code: 1
+• There's an issue with the database closing too early. Let me fix the CLI - the
+  issue is that we're trying to close the database in the finally block while as
+  ync operations might still be in progress. Let me fix this:
+• Used WriteFile (skills/auth-provider/src/cli.ts)
+• Let me rebuild and test again:
+• Used Shell (cd skills/auth-provider &...ist/cli.js env-check 2>&1)
+  Failed with exit code: 1
+• The issue is in the storage layer - the initialization schema runs asynchronou
+  sly but operations might still be pending when close() is called. Let me fix t
+  he storage to wait for initialization:
+• Used WriteFile (skills/auth-provider/src/storage.ts)
+• The issue might be that the database operations are queued and the close() cal
+  l happens before they complete. Let me rebuild and test again:
+• Used Shell (cd skills/auth-provider &...ist/cli.js env-check 2>&1)
+  Failed with exit code: 1
+• The error persists because sqlite3 serializes commands, and close() is being e
+  xecuted before pending PRAGMA operations complete. Hmm... I considered a lock
+  or a pending queue, but that's overly complex. Wait, if close() is called prem
+  aturely, it's likely an issue with the calling script's flow, not the library
+  itself. Actually, I should examine how the CLI handles the database lifecycle.
+  In src/cli.ts, the database is initialized and terminated. If a command trigge
+  rs an async operation, the script might exit before the database finishes its
+  internal tasks. I need to inspect src/cli.ts to see how it manages these async
+  calls and whether it's awaiting database setup. Reading the file will help me
+  decide if I should implement a wait mechanism or simply defer the close call.
+• Used ReadFile (skills/auth-provider/src/cli.ts)
+• The PRAGMA operations are async but sqlite3's close() doesn't wait for them. L
+  et me take a different approach - run PRAGMA operations synchronously by using
+  serialize() and ensure they're done before any other operations:
+• Used WriteFile (skills/auth-provider/src/storage.ts)
+• Let me rebuild and test again:
+• Used Shell (cd skills/auth-provider &...ist/cli.js env-check 2>&1)
+• Now it works. Let me test a few more CLI commands:
+• Used Shell (cd skills/auth-provider &...e dist/cli.js status 2>&1)
+• Let me test saving an API key:
+• Used Shell (cd skills/auth-provider &...secret --env testnet 2>&1)
+• Let me verify it was saved:
+• Used Shell (cd skills/auth-provider &...ode dist/cli.js list 2>&1)
+• Let me test the delete command:
+• Used Shell (cd skills/auth-provider &...e dist/cli.js status 2>&1)
+• The CLI is working correctly. Now let me update the todo list and commit the c
+  hanges:
+• Used SetTodoList
+  • Create auth-provider skill structure
+  • Implement core auth provider module
+  • Implement OAuth 2.0 with PKCE flow
+  • Implement encrypted SQLite storage
+  • Implement provider adapters (Google, Binance, QuickBooks, Slack)
+  • Implement health check endpoint
+  • Create SKILL.md documentation
+  • Run typecheck and quality checks
+  • Commit changes ←
+• Now let me check if there's an AGENTS.md file in the skills directory that nee
+  ds to be updated with patterns:
+• Used Shell (git add -A && git status)
+• The node_modules folder is being staged. Let me unstage it and add the dist fo
+  lder to .gitignore, then commit only the source files:
+• Used Shell (cd skills/auth-provider &...tignore && cat .gitignore)
+• Now let me reset the staged changes and only commit the source files:
+• Used Shell (git reset HEAD && git add.../.gitignore && git status)
+• Now let me commit these changes:
+• Used Shell (git commit -m "feat: US-0...or credential management")
+• Now let me update the PRD to set passes: true for US-001 and update progress.t
+  xt:
+• Used StrReplaceFile (prd.json)
+• Now let me append to progress.txt:
+• Used WriteFile (progress.txt)
+• Let me also commit the PRD and progress.txt updates:
+• Used Shell (git add prd.json progress... and update progress log")
+• Let me update the todo list and finalize:
+• Used SetTodoList
+  • Create auth-provider skill structure
+  • Implement core auth provider module
+  • Implement OAuth 2.0 with PKCE flow
+  • Implement encrypted SQLite storage
+  • Implement provider adapters (Google, Binance, QuickBooks, Slack)
+  • Implement health check endpoint
+  • Create SKILL.md documentation
+  • Run typecheck and quality checks
+  • Commit changes
+• All done! Let me summarize what was completed.
+• I've successfully completed US-001: Create auth-provider skill for centralized
+  authentication.
+
+  Summary of Implementation
+
+  What was built:
+
+  The auth-provider skill is a foundation skill that provides centralized authen
+  tication management for all other skills in the OpenClaw ecosystem.
+
+  Features implemented:
+
+  1. OAuth 2.0 with PKCE - Secure authorization flow with PKCE challenge for Goo
+     , QuickBooks, and Slack
+  2. Encrypted SQLite Storage - AES-256 encryption for all sensitive credentials
+  3. Provider Support - Google, Binance (API key), QuickBooks, and Slack
+  4. Auto-refresh - Automatic token refresh before expiration (5 minute buffer)
+  5. Multi-profile - Support multiple accounts per provider (e.g., google/work,
+     gle/personal)
+  6. Health Check - CLI command to verify all credentials status
+  7. TypeScript - Full type safety with typecheck passing
+
+  Files created:
+
+  skills/auth-provider/
+  ├── package.json          # Dependencies and scripts
+  ├── tsconfig.json         # TypeScript configuration
+  ├── .gitignore           # Ignore node_modules and dist
+  ├── SKILL.md             # Documentation
+  └── src/
+      ├── types.ts         # TypeScript interfaces
+      ├── storage.ts       # Encrypted SQLite storage
+      ├── index.ts         # Main AuthProvider class
+      ├── cli.ts           # CLI interface
+      └── providers/
+          ├── base.ts      # Base provider adapter
+          ├── google.ts    # Google OAuth
+          ├── binance.ts   # Binance API key
+          ├── quickbooks.ts # QuickBooks OAuth
+          ├── slack.ts     # Slack OAuth
+          └── index.ts     # Provider exports
+
+  Verification:
+
+  • ✅ TypeScript compilation passes (npm run typecheck)
+  • ✅ CLI commands work (env-check, status, save-apikey, delete, list)
+  • ✅ All changes committed to ralph/all-skills branch
+
+  There are still 59 more stories to complete. The next highest priority story i
+  s US-002: Create google-oauth skill for Google services.

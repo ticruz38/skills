@@ -8,7 +8,31 @@
 - Provider adapters implement base interface for OAuth flows
 - PKCE is used for all OAuth flows for security
 - Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
 
+---
+
+## 2026-02-10 14:35 CET - US-002
+- Created google-oauth skill - Google OAuth adapter for Gmail, Calendar, Drive, Sheets, Docs
+- Built on top of auth-provider skill for secure token management
+- Replaced existing Python implementation with TypeScript
+- Implemented multi-profile support for multiple Google accounts
+- Added service-specific scope selection (gmail, calendar, drive, sheets, docs)
+- Created CLI with status, connect, complete, disconnect, health, profiles, scopes commands
+- Files changed:
+  - skills/google-oauth/package.json
+  - skills/google-oauth/tsconfig.json
+  - skills/google-oauth/SKILL.md
+  - skills/google-oauth/src/index.ts
+  - skills/google-oauth/src/cli.ts
+  - skills/auth-provider/src/types.ts (added UserProfile interface)
+  - skills/auth-provider/src/index.ts (added deleteCredentials, listProfiles, getUserProfile)
+- **Learnings for future iterations:**
+  - Provider adapters can have optional methods like `getUserProfile?` for provider-specific features
+  - Use `return token || null` to convert undefined to null for consistent return types
+  - CLI commands that call async methods need to be async and use await
 ---
 
 ## 2026-02-10 14:16 CET - US-001

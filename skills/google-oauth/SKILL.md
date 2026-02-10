@@ -1,364 +1,418 @@
 ---
 name: google-oauth
-description: Authenticate with Google OAuth2 to access Gmail, Calendar, Drive, Sheets, and other Google services. Use when the user needs to connect their Google account for email management, calendar events, file storage, or any Google Workspace integration. Supports seamless chat-based OAuth via minion.do.
+description: "Google OAuth adapter for Gmail, Calendar, Drive, Sheets, and other Google services. Built on top of auth-provider for secure token management with automatic refresh, multi-profile support, and health checks."
+version: 1.0.0
+author: OpenClaw
+entry: ./dist/cli.js
+type: script
 ---
 
-# Google OAuth2 Skill
+# Google OAuth Skill
 
-Universal Google OAuth2 integration for Gmail, Calendar, Drive, Sheets, and more.
+Google OAuth 2.0 integration for accessing Google services. This skill provides a simplified interface built on top of the auth-provider skill, handling authentication, token storage, automatic refresh, and health monitoring.
 
----
+## Features
 
-## Supported Google Services
+- **Multi-Service Support**: Gmail, Calendar, Drive, Sheets, Docs, and People
+- **Multi-Profile**: Manage multiple Google accounts
+- **Auto-Refresh**: Tokens automatically refresh before expiration
+- **Health Checks**: Monitor token validity and expiration
+- **Service Scopes**: Request only the permissions you need
 
-| Service | Scopes | Use Cases |
-|---------|--------|-----------|
-| **Gmail** | `gmail.modify`, `gmail.labels` | Read, send, manage emails |
-| **Calendar** | `calendar`, `calendar.events` | Create events, check availability |
-| **Drive** | `drive`, `drive.file` | Upload, download, manage files |
-| **Sheets** | `spreadsheets` | Read/write spreadsheets |
-| **Docs** | `documents` | Create and edit documents |
-| **People** | `userinfo.profile`, `userinfo.email` | Get user profile info |
-
----
-
-## Quick Start
-
-### 1. Configure Environment
-
-Add to your `~/.openclaw/.env`:
+## Installation
 
 ```bash
-# Minion.do configuration (recommended)
-MINION_BASE_URL=https://minion.do
-MINION_API_KEY=your-api-key-if-required
-OPENCLAW_INSTANCE_ID=openclaw-prod-001
-
-# Optional: Custom redirect host for branded OAuth pages
-# MINION_REDIRECT_HOST=https://your-domain.com/auth/callback
+npm install
+npm run build
 ```
 
-### 2. Connect via Chat
+## Environment Configuration
 
-Simply ask in Telegram/WhatsApp:
+The Google OAuth skill uses the auth-provider skill's configuration. Ensure you have set up the auth-provider environment:
 
-> **You:** Connect my Google account
->
-> **OpenClaw:** 🔗 **Connect your Google Account**
->
-> Click this link to authorize access to Gmail, Calendar, and Drive:
-> https://minion.do/auth/callback?state=abc123
->
-> ⏳ Link expires in 5 minutes.
-> I'll let you know once you're connected!
->
-> *[User clicks and authorizes]*
->
-> **OpenClaw:** ✅ **Google Account Connected!**
->
-> 📧 **john@example.com**
-> 
-> Authorized services:
-> • Gmail - Read and send emails
-> • Calendar - Manage events
-> • Drive - Access files
->
-> You can now use Google commands like:
-> • 'Show my unread emails'
-> • 'What's on my calendar today?'
-> • 'List files in my Drive'
+```bash
+# ~/.openclaw/.env
 
----
+# Google OAuth credentials
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:8080/auth/callback
 
-## Service-Specific Connections
-
-### Connect Only Gmail
-
-> **You:** Connect Gmail only
-
-### Connect Only Calendar
-
-> **You:** Connect Google Calendar
-
-### Connect Only Drive
-
-> **You:** Connect Google Drive
-
-### Connect Everything
-
-> **You:** Connect all Google services
-
----
-
-## Usage Examples
-
-### Check Connection Status
-
-> **You:** Google status
-
-**OpenClaw:**
+# Optional: Custom encryption key
+AUTH_PROVIDER_KEY=your-encryption-key-min-32-chars
 ```
-✅ Google Account Connected
-📧 john@example.com
-
-Connected services:
-  ✓ Gmail
-  ✓ Calendar  
-  ✓ Drive
-
-Available commands:
-  • Gmail: 'Show unread emails', 'Send email...'
-  • Calendar: 'What's on my calendar?', 'Create event...'
-  • Drive: 'List my files', 'Upload to Drive...'
-```
-
-### Disconnect
-
-> **You:** Disconnect Google
-
----
-
-## Python API Usage
-
-### Initialize Client
-
-```python
-from scripts.google_auth_client import GoogleAuthClient
-
-# Check if connected
-client = GoogleAuthClient.for_chat(chat_id="123456789")
-
-if not client.is_connected():
-    # Start OAuth flow
-    auth_info = client.request_auth_url(
-        services=["gmail", "calendar", "drive"]
-    )
-    print(f"Send this to user: {auth_info['authUrl']}")
-    
-    # Poll for completion
-    client.complete_auth(auth_info['state'])
-```
-
-### Use Google Services
-
-```python
-# Gmail
-from scripts.google_services import GmailService
-
-gmail = GmailService.for_chat(chat_id="123456789")
-messages = gmail.list_messages(query="is:unread", max_results=10)
-
-# Calendar
-from scripts.google_services import CalendarService
-
-calendar = CalendarService.for_chat(chat_id="123456789")
-events = calendar.list_events(time_min="2026-02-05T00:00:00Z")
-
-# Drive
-from scripts.google_services import DriveService
-
-drive = DriveService.for_chat(chat_id="123456789")
-files = drive.list_files(page_size=10)
-```
-
----
-
-## Scopes Reference
-
-### Predefined Scope Sets
-
-```python
-from scripts.google_scopes import Scopes
-
-# Gmail only
-Scopes.GMAIL
-# ['https://www.googleapis.com/auth/gmail.modify',
-#  'https://www.googleapis.com/auth/gmail.labels']
-
-# Calendar only
-Scopes.CALENDAR
-# ['https://www.googleapis.com/auth/calendar',
-#  'https://www.googleapis.com/auth/calendar.events']
-
-# Drive only
-Scopes.DRIVE
-# ['https://www.googleapis.com/auth/drive',
-#  'https://www.googleapis.com/auth/drive.file']
-
-# All services
-Scopes.ALL
-# Combines Gmail + Calendar + Drive + Sheets + Docs
-
-# Read-only access
-Scopes.GMAIL_READONLY
-Scopes.CALENDAR_READONLY
-Scopes.DRIVE_READONLY
-```
-
-### Custom Scopes
-
-```python
-from scripts.google_auth_client import GoogleAuthClient
-
-client = GoogleAuthClient.for_chat(chat_id="123456789")
-
-# Request specific scopes
-auth_info = client.request_auth_url(
-    scopes=[
-        "https://www.googleapis.com/auth/gmail.readonly",
-        "https://www.googleapis.com/auth/calendar.events.readonly"
-    ]
-)
-```
-
----
 
 ## CLI Usage
 
 ### Check Status
 
 ```bash
-python3 ~/.openclaw/skills/google-oauth/scripts/google_auth.py \
-    --chat-id 123456789 \
-    --status
+# Check default profile
+node dist/cli.js status
+
+# Check specific profile
+node dist/cli.js status work
 ```
 
-### Connect Services
+### Connect Account
 
 ```bash
-# Connect all services
-python3 ~/.openclaw/skills/google-oauth/scripts/google_auth.py \
-    --chat-id 123456789 \
-    --platform telegram \
-    --services gmail,calendar,drive
+# Connect with all services
+node dist/cli.js connect default all
 
-# Connect Gmail only
-python3 ~/.openclaw/skills/google-oauth/scripts/google_auth.py \
-    --chat-id 123456789 \
-    --services gmail
+# Connect with specific services
+node dist/cli.js connect default gmail
+node dist/cli.js connect default gmail,calendar
+node dist/cli.js connect default calendar,drive
+```
+
+### Complete OAuth Flow
+
+After opening the authorization URL and granting permission:
+
+```bash
+node dist/cli.js complete default "AUTH_CODE" "STATE"
+```
+
+### List Profiles
+
+```bash
+node dist/cli.js profiles
+```
+
+### Health Check
+
+```bash
+# Check specific profile
+node dist/cli.js health default
+
+# Check all profiles
+node dist/cli.js health
 ```
 
 ### Disconnect
 
 ```bash
-python3 ~/.openclaw/skills/google-oauth/scripts/google_auth.py \
-    --chat-id 123456789 \
-    --disconnect
+# Disconnect specific profile
+node dist/cli.js disconnect default
+
+# Disconnect all profiles
+node dist/cli.js disconnect
 ```
 
-### With Custom Redirect Host
+### View Available Scopes
 
 ```bash
-python3 ~/.openclaw/skills/google-oauth/scripts/google_auth.py \
-    --chat-id 123456789 \
-    --services all \
-    --redirect-host https://your-domain.com/auth/callback
+node dist/cli.js scopes
 ```
 
----
+## JavaScript/TypeScript API
 
-## Token Storage
+### Initialize Client
 
-Tokens are stored securely per chat:
+```typescript
+import { GoogleOAuthClient, GoogleScopes } from './index';
 
-```
-~/.openclaw/
-└── google-tokens/
-    ├── gmail-{chat_hash}.json
-    ├── calendar-{chat_hash}.json
-    ├── drive-{chat_hash}.json
-    └── combined-{chat_hash}.json   # All services in one token
-```
+// Create client for default profile
+const client = new GoogleOAuthClient();
 
-Each file has 0600 permissions (user read/write only).
-
----
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MINION_BASE_URL` | Minion.do platform URL | `https://minion.do` |
-| `MINION_API_KEY` | API key for minion.do | (optional) |
-| `MINION_REDIRECT_HOST` | Custom OAuth redirect host | (minion.do default) |
-| `OPENCLAW_INSTANCE_ID` | Unique instance identifier | `openclaw-local` |
-| `GOOGLE_TOKEN_DIR` | Custom token storage path | `~/.openclaw/google-tokens` |
-
----
-
-## Integration for OpenClaw Developers
-
-```python
-from scripts.google_auth_manager import GoogleAuthManager
-
-# Initialize manager
-auth = GoogleAuthManager(platform="telegram")
-
-# Handle user requests
-response = auth.handle_request(
-    chat_id="123456789",
-    message_text="Connect my Google account"
-)
-
-if response:
-    send_message(chat_id, response["text"])
-    
-    # Handle background actions
-    for action in response.get("actions", []):
-        if action["type"] == "poll_oauth":
-            # Start background polling
-            start_background_task(
-                auth.poll_and_complete,
-                state=action["state"],
-                chat_id=action["chat_id"],
-                send_callback=send_message
-            )
+// Or for specific profile
+const workClient = GoogleOAuthClient.forProfile('work');
+const personalClient = GoogleOAuthClient.forProfile('personal');
 ```
 
----
+### OAuth Flow
 
-## Security Notes
+```typescript
+// Step 1: Initiate authorization
+const auth = client.initiateAuth(['gmail', 'calendar', 'drive']);
 
-- **Token Encryption:** Tokens are stored with restricted file permissions (0600)
-- **No Token Logging:** Tokens never appear in logs or chat messages
-- **Session Timeout:** OAuth sessions expire after 5 minutes
-- **Scope Limiting:** Only request scopes you actually need
-- **Automatic Refresh:** Tokens auto-refresh when expired
+console.log('Open this URL:', auth.url);
+console.log('State:', auth.state); // Save for step 2
 
----
+// Step 2: Complete with authorization code
+const result = await client.completeAuth(code, state);
+
+if (result.success) {
+  console.log('Connected as:', result.email);
+  console.log('Scopes:', result.scopes);
+} else {
+  console.error('Failed:', result.error);
+}
+```
+
+### Check Connection Status
+
+```typescript
+if (client.isConnected()) {
+  console.log('Connected!');
+  
+  // Get user info
+  const email = await client.getUserEmail();
+  const profile = await client.getUserProfile();
+  console.log('Email:', email);
+  console.log('Name:', profile?.name);
+  console.log('Picture:', profile?.picture);
+} else {
+  console.log('Not connected');
+}
+```
+
+### Get Access Token
+
+```typescript
+// Gets valid token (auto-refreshes if needed)
+const token = await client.getAccessToken();
+
+// Use with Google APIs
+const response = await fetch('https://www.googleapis.com/gmail/v1/users/me/profile', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+```
+
+### Check Authorized Services
+
+```typescript
+// Check if specific service is authorized
+if (client.hasService('gmail')) {
+  console.log('Gmail access granted');
+}
+
+if (client.hasService('calendar')) {
+  console.log('Calendar access granted');
+}
+
+// Get all connected scopes
+const scopes = client.getConnectedScopes();
+```
+
+### Health Check
+
+```typescript
+const health = await client.healthCheck();
+
+if (health.status === 'healthy') {
+  console.log('Token is valid');
+  console.log('Expires at:', new Date(health.expiresAt! * 1000));
+} else {
+  console.warn('Token issue:', health.message);
+}
+```
+
+### Disconnect
+
+```typescript
+// Disconnect specific profile
+client.disconnect();
+
+// Or disconnect all profiles
+import { disconnectAll } from './index';
+disconnectAll();
+```
+
+### Make Authenticated Requests
+
+```typescript
+// Convenient method for authenticated requests
+const response = await client.fetch('https://www.googleapis.com/gmail/v1/users/me/messages');
+const data = await response.json();
+```
+
+## Scope Reference
+
+### Available Services
+
+| Service | Scopes | Description |
+|---------|--------|-------------|
+| `gmail` | `gmail.modify`, `gmail.labels` | Read, send, manage emails |
+| `calendar` | `calendar`, `calendar.events` | Create events, check availability |
+| `drive` | `drive`, `drive.file` | Upload, download, manage files |
+| `sheets` | `spreadsheets` | Read/write spreadsheets |
+| `docs` | `documents` | Create and edit documents |
+| `people` | `userinfo.profile`, `userinfo.email` | Get user profile info |
+| `all` | All above | Full access to all services |
+
+### Using Scopes in Code
+
+```typescript
+import { GoogleScopes, getScopesForServices } from './index';
+
+// Predefined scope sets
+console.log(GoogleScopes.GMAIL);
+console.log(GoogleScopes.CALENDAR);
+console.log(GoogleScopes.DRIVE);
+console.log(GoogleScopes.ALL);
+
+// Get scopes for services
+const scopes = getScopesForServices(['gmail', 'calendar']);
+```
+
+## Multi-Profile Support
+
+Manage multiple Google accounts:
+
+```typescript
+import { GoogleOAuthClient, getConnectedProfiles } from './index';
+
+// Different profiles for different accounts
+const work = GoogleOAuthClient.forProfile('work');
+const personal = GoogleOAuthClient.forProfile('personal');
+
+// Connect both
+work.initiateAuth(['gmail', 'calendar']);
+personal.initiateAuth(['drive']);
+
+// List all connected profiles
+const profiles = getConnectedProfiles();
+console.log('Connected profiles:', profiles);
+
+// Check each profile's health
+for (const profileName of profiles) {
+  const client = GoogleOAuthClient.forProfile(profileName);
+  const health = await client.healthCheck();
+  console.log(`${profileName}: ${health.status}`);
+}
+```
+
+## Using with Google APIs
+
+### Gmail API
+
+```typescript
+const client = GoogleOAuthClient.forProfile('default');
+const token = await client.getAccessToken();
+
+// List labels
+const response = await client.fetch(
+  'https://www.googleapis.com/gmail/v1/users/me/labels'
+);
+const labels = await response.json();
+
+// List messages
+const messagesResponse = await client.fetch(
+  'https://www.googleapis.com/gmail/v1/users/me/messages?maxResults=10'
+);
+const messages = await messagesResponse.json();
+```
+
+### Calendar API
+
+```typescript
+// List calendars
+const response = await client.fetch(
+  'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+);
+const calendars = await response.json();
+
+// List events
+const now = new Date().toISOString();
+const eventsResponse = await client.fetch(
+  `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${now}&maxResults=10`
+);
+const events = await eventsResponse.json();
+```
+
+### Drive API
+
+```typescript
+// List files
+const response = await client.fetch(
+  'https://www.googleapis.com/drive/v3/files?pageSize=10'
+);
+const files = await response.json();
+```
+
+## Error Handling
+
+```typescript
+try {
+  const token = await client.getAccessToken();
+  if (!token) {
+    console.log('Not authenticated');
+    return;
+  }
+  
+  // Make API request
+  const response = await client.fetch('https://www.googleapis.com/...');
+  
+  if (!response.ok) {
+    if (response.status === 403) {
+      console.error('Permission denied - check scopes');
+    } else if (response.status === 401) {
+      console.error('Token expired - will auto-refresh on next call');
+    }
+  }
+} catch (error) {
+  console.error('Request failed:', error.message);
+}
+```
+
+## Storage
+
+Tokens are securely stored by the auth-provider skill in:
+```
+~/.openclaw/skills/auth-provider/credentials.db
+```
+
+All sensitive data is AES-256 encrypted.
+
+## Testing
+
+```bash
+# Type checking
+npm run typecheck
+
+# Build
+npm run build
+
+# Run CLI commands
+npm run cli -- status
+npm run cli -- connect default gmail
+npm run status  # shortcut
+```
 
 ## Troubleshooting
 
-### "Not connected" error
+### "Not authenticated" error
 
+The user needs to connect their Google account:
 ```bash
-# Check status
-python3 scripts/google_auth.py --chat-id 123456789 --status
-
-# Reconnect
-python3 scripts/google_auth.py --chat-id 123456789 --services all
+node dist/cli.js connect default all
 ```
 
 ### "Insufficient permissions" error
 
-The user needs to grant all requested scopes. Have them:
-1. Disconnect: `Disconnect Google`
-2. Reconnect: `Connect all Google services`
+The connected account doesn't have the required scopes. Reconnect with the needed services:
+```bash
+node dist/cli.js disconnect default
+node dist/cli.js connect default gmail,calendar,drive
+```
 
 ### Token expired
 
-Tokens auto-refresh. If issues persist:
+Tokens auto-refresh when calling `getAccessToken()` or `fetch()`. If issues persist, check health:
 ```bash
-rm ~/.openclaw/google-tokens/*-{chat_hash}.json
-# Then reconnect via chat
+node dist/cli.js health
 ```
 
----
+### Connection issues
 
-## References
+Check your Google OAuth credentials in `~/.openclaw/.env`:
+```bash
+# Verify auth-provider environment
+node ../auth-provider/dist/cli.js env-check
+```
 
-- [Gmail API](https://developers.google.com/gmail/api/reference/rest)
-- [Calendar API](https://developers.google.com/calendar/api/v3/reference)
-- [Drive API](https://developers.google.com/drive/api/v3/reference)
-- [Sheets API](https://developers.google.com/sheets/api/reference/rest)
-- [Google OAuth Scopes](https://developers.google.com/identity/protocols/oauth2/scopes)
+## Dependencies
+
+- `@openclaw/auth-provider`: For OAuth flow and token storage
+- `sqlite3`: Database access (via auth-provider)
+
+## Security Notes
+
+- Tokens are stored encrypted by auth-provider
+- OAuth uses PKCE flow for security
+- Tokens auto-refresh 5 minutes before expiration
+- Database file has 0600 permissions (user read/write only)

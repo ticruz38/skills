@@ -96,6 +96,13 @@ export interface TokenResponse {
   scope?: string;
 }
 
+/** User profile from OAuth provider */
+export interface UserProfile {
+  email: string;
+  name?: string;
+  picture?: string;
+}
+
 /** Provider adapter interface */
 export interface ProviderAdapter {
   readonly type: ProviderType;
@@ -103,6 +110,7 @@ export interface ProviderAdapter {
   exchangeCode(code: string, state: OAuthState): Promise<TokenResponse>;
   refreshToken(refreshToken: string): Promise<TokenResponse>;
   validateToken?(token: string, ...args: any[]): Promise<boolean>;
+  getUserProfile?(token: string): Promise<UserProfile | null>;
   healthCheck(tokenData: TokenData): Promise<HealthCheckResult>;
 }
 
