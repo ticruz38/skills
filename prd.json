@@ -389,7 +389,7 @@
         "Typecheck passes"
       ],
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "notes": "Uses main model. No API key needed"
     },
     {
