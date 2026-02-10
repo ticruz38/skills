@@ -2405,3 +2405,49 @@
   - Report history provides audit trail for compliance
 ---
 
+
+## 2026-02-10 20:13 CET - US-053
+- Created monthly-reports skill - Monthly expense summaries with spending breakdown, trend analysis, and budget comparison
+- Built on top of expense-categorizer skill for categorized expense data
+- Implemented comprehensive reporting features:
+  - Monthly expense reports with total spending, transaction count, average transaction
+  - Spending breakdown by category with percentages
+  - Month-over-month trend analysis with direction indicators
+  - Year-over-year comparison (when data available)
+  - Daily average spending calculation
+  - Budget setting with total and category-specific budgets
+  - Budget comparison with variance calculation and status indicators
+  - Automated insights generation based on spending patterns
+- Visual features:
+  - ASCII bar charts for spending by category (top 10)
+  - ASCII trend charts for multi-month comparison
+  - HTML export with professional styling and print-friendly formatting
+- SQLite storage for:
+  - budgets table with total and category-specific budgets
+  - report_history table with full report data and trend metrics
+- Added getCategoryStats() method to expense-categorizer skill for date-range based category statistics
+- Full CLI with commands:
+  - generate/current/last - Generate reports
+  - list/get - Report history management
+  - budget/budget-view - Budget management
+  - stats/health - System monitoring
+  - export - HTML export
+  - chart/trend - Visual charts
+- Typecheck passes
+- Files changed:
+  - skills/monthly-reports/package.json (new)
+  - skills/monthly-reports/tsconfig.json (new)
+  - skills/monthly-reports/.gitignore (new)
+  - skills/monthly-reports/SKILL.md (new)
+  - skills/monthly-reports/src/index.ts (new)
+  - skills/monthly-reports/src/cli.ts (new)
+  - skills/expense-categorizer/src/index.ts (added getCategoryStats method)
+- **Learnings for future iterations:**
+  - When depending on skills that need new methods, add the method first, then build
+  - HTML export with inline CSS is a good pattern for PDF-ready reports
+  - ASCII charts using Unicode block characters work well in terminal
+  - Budget comparison status should use clear visual indicators (✓ under, ✗ over, ● on track)
+  - Insights generation should provide actionable observations, not just raw data
+  - Category stats with date range filtering enables historical analysis
+---
+

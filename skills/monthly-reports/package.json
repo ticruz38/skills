@@ -1,0 +1,29 @@
+{
+  "name": "@openclaw/monthly-reports",
+  "version": "1.0.0",
+  "description": "Monthly expense summaries with spending breakdown, trend analysis, and budget comparison",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "ts-node src/cli.ts"
+  },
+  "dependencies": {
+    "@openclaw/expense-categorizer": "file:../expense-categorizer",
+    "@openclaw/receipts-ocr": "file:../receipts-ocr",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "expenses",
+    "reports",
+    "monthly",
+    "budget",
+    "analytics"
+  ]
+}

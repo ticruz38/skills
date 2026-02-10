@@ -834,6 +834,44 @@ export class ExpenseCategorizerSkill {
       };
     }
   }
+
+  /**
+   * Get statistics for a specific category within a date range
+   */
+  async getCategoryStats(
+    category: string,
+    options: { startDate?: string; endDate?: string } = {}
+  ): Promise<CategoryStats | null> {
+    await this.ensureDatabase();
+
+    // Get receipts from receipts-ocr skill for this category and date range
+    const receipts = await this.receiptsSkill.listReceipts({
+      startDate: options.startDate,
+      endDate: options.endDate,
+    });
+
+    // Filter by category
+    const categoryReceipts = receipts.filter(r => r.category === category);
+
+    if (categoryReceipts.length === 0) {
+      return null;
+    }
+
+    const totalAmount = categoryReceipts.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+    
+    // Calculate average confidence
+    const confidences = categoryReceipts.map(r => 
+      ((r.totalConfidence || 0) + (r.merchantConfidence || 0) + (r.dateConfidence || 0)) / 3
+    );
+    const averageConfidence = confidences.reduce((a, b) => a + b, 0) / confidences.length;
+
+    return {
+      category,
+      receiptCount: categoryReceipts.length,
+      totalAmount,
+      averageConfidence,
+    };
+  }
 }
 
 export default ExpenseCategorizerSkill;
