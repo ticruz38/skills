@@ -1668,3 +1668,44 @@
   - CLI argument parsing for comma-separated lists: use `value.split(',').map(v => v.trim())`
 ---
 
+
+## 2026-02-10 18:26 CET - US-038
+- Created shopping-list-generator skill - Generate organized shopping lists from meal plans with pantry checking
+- Built on top of recipe-suggester skill for recipe data
+- Implemented comprehensive features:
+  - Generate shopping lists from recipe IDs with automatic ingredient extraction
+  - Smart categorization by store section (produce, meat, seafood, dairy, bakery, frozen, pantry, beverages, household, other)
+  - Pantry check to skip items already in inventory
+  - Duplicate merging when multiple recipes share ingredients
+  - Servings scaling to adjust quantities
+  - Full pantry management with expiration tracking
+- Database schema:
+  - shopping_lists table for list metadata
+  - shopping_items table with section and recipe references
+  - pantry_items table with expiration dates
+- Full CLI with commands:
+  - generate - Create lists from recipe IDs with --pantry-check, --merge-duplicates, --scale options
+  - create, list, get, delete - List management
+  - add, toggle, remove, clear-checked - Item management
+  - sections - View items grouped by store section
+  - export - Text format export
+  - pantry-add, pantry-remove, pantry-list, pantry-search, pantry-check - Pantry management
+  - stats, health - Monitoring
+- Typecheck passes
+- Files changed:
+  - skills/shopping-list-generator/package.json (new)
+  - skills/shopping-list-generator/tsconfig.json (new)
+  - skills/shopping-list-generator/.gitignore (new)
+  - skills/shopping-list-generator/SKILL.md (new)
+  - skills/shopping-list-generator/src/index.ts (new - main library)
+  - skills/shopping-list-generator/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-038 passes: true)
+- **Learnings for future iterations:**
+  - Recipe-suggester method is `getRecipeById()` not `getRecipe()`
+  - Store section categorization uses keyword matching against ingredient names
+  - Pantry check queries with LIKE for partial matching (e.g., "olive oil" matches "extra virgin olive oil")
+  - Section keywords should cover common variations (e.g., "scallion" and "green onion")
+  - When scaling amounts, handle fractions (1/2, 1/4) and mixed numbers
+  - Combining amounts requires checking for same units before adding
+---
+
