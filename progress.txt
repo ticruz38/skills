@@ -2616,3 +2616,41 @@
   - Categories help organize shopping lists by store section
 ---
 
+
+## 2026-02-10 20:52 CET - US-058
+- Created diy-guides skill - Step-by-step DIY repair guides for home maintenance
+- Implemented comprehensive features:
+  - 12 pre-loaded repair guides covering plumbing, electrical, appliances, furniture, outdoor, automotive, painting, flooring, HVAC, and general repairs
+  - Difficulty ratings (easy, medium, hard) with color-coded CLI output
+  - Complete tools and materials lists for each guide
+  - Step-by-step instructions with numbered steps and detailed descriptions
+  - Video link integration with platform and duration info
+  - Pro tips and safety warnings for each repair
+  - Cost estimates and time estimates
+  - Full search and filtering capabilities (by category, difficulty, keyword)
+- Database schema with SQLite storage:
+  - guides table with all fields (JSON arrays for tools, materials, steps, video_links, tips, warnings)
+  - Indexes on category, difficulty, and title for efficient queries
+- CLI commands:
+  - list, get - Browse and view guides
+  - search - Find guides by keyword
+  - category, difficulty - Filter guides
+  - categories, difficulties, stats - Reporting
+  - tools, materials, steps, tips, warnings, videos - View specific sections
+- Key implementation detail: Fixed deadlock during initialization by avoiding `initialize()` call inside `addGuide()` when seeding data
+- Typecheck passes
+- Files changed:
+  - skills/diy-guides/package.json (new)
+  - skills/diy-guides/tsconfig.json (new)
+  - skills/diy-guides/.gitignore (new)
+  - skills/diy-guides/SKILL.md (new)
+  - skills/diy-guides/src/index.ts (new)
+  - skills/diy-guides/src/cli.ts (new)
+  - prd.json (updated US-058 passes: true)
+- **Learnings for future iterations:**
+  - Avoid calling `initialize()` in methods that are used during the seeding process
+  - When seeding data during initialization, insert directly using SQL to avoid circular initialization dependencies
+  - Use `Promise.resolve().then()` chain instead of async/await inside the sqlite3 Database callback for proper async handling
+  - Snake_case column names in SQLite with Record interfaces pattern continues to work well
+  - Category icons and difficulty colors enhance CLI user experience
+---
