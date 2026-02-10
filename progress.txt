@@ -2451,3 +2451,47 @@
   - Category stats with date range filtering enables historical analysis
 ---
 
+
+## 2026-02-10 20:21 CET - US-054
+- Created competitor-monitor skill - Monitor competitor website changes with change detection and alert notifications
+- Built on top of web-search skill for data retrieval
+- Implemented comprehensive competitor monitoring features:
+  - Competitor management with name, URL, description, check frequency
+  - Website fetching with HTTP/HTTPS support, timeout handling, user-agent
+  - Content hash comparison using SHA256 for accurate change detection
+  - Snapshot history with content preview, HTTP status, content length
+  - Change detection with multiple types: content, status, keyword_match
+  - Severity classification: critical (4xx/5xx), major (>50% change), minor (20-50%), info (<20%)
+  - Keyword monitoring - alerts when specific keywords appear in content
+  - Alert management with read/unread status and severity-based filtering
+  - Analysis tools with trend detection and change statistics
+- Database schema:
+  - competitors table with check_frequency, keywords, alert settings
+  - snapshots table with content_hash, content_preview, metadata
+  - changes table with change_type, severity, read/unread status
+- Full CLI with commands:
+  - add, list, get, update, delete - Competitor management
+  - check - Check for changes (specific or all competitors)
+  - changes - View detected changes with filtering
+  - read - Mark changes as read
+  - snapshots - View competitor snapshot history
+  - stats, analyze - Reporting and analytics
+  - health - System health check
+- Typecheck passes
+- Files changed:
+  - skills/competitor-monitor/package.json (new)
+  - skills/competitor-monitor/tsconfig.json (new)
+  - skills/competitor-monitor/.gitignore (new)
+  - skills/competitor-monitor/SKILL.md (new)
+  - skills/competitor-monitor/src/index.ts (new)
+  - skills/competitor-monitor/src/cli.ts (new)
+  - prd.json (updated US-054 passes: true)
+- **Learnings for future iterations:**
+  - Content hashing with SHA256 is reliable for change detection
+  - Keyword monitoring adds valuable intelligence beyond basic change detection
+  - Severity classification helps users prioritize which changes to review
+  - Text preview extraction (removing HTML tags) provides human-readable context
+  - Change analysis with trend detection (increasing/decreasing/stable) provides insights
+  - The runWithResult helper pattern continues to work well for SQLite operations
+  - SQLite ON DELETE CASCADE maintains referential integrity for snapshots and changes
+---
