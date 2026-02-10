@@ -406,3 +406,57 @@
   - Store price history automatically when fetching prices for trend analysis
 ---
 
+## 2026-02-10 15:56 CET - US-012
+- Created alerts skill - Monitor prices and send notifications
+- Built on top of binance and slack skills for price data and notifications
+- Implemented two types of alerts:
+  - Threshold alerts: Trigger when price goes above or below a specific value
+  - Percentage change alerts: Trigger when price changes by a percentage within a timeframe
+- Features implemented:
+  - Price threshold alerts (above/below conditions)
+  - Percentage change alerts with configurable direction (up/down/both)
+  - Multi-channel notifications (console, Slack)
+  - Alert history stored in SQLite with full trigger details
+  - Batch checking of all alerts with detailed results
+  - Enable/disable/pause alerts
+  - Statistics tracking (trigger counts, active alerts)
+  - Full CLI with all commands
+- SQLite storage for:
+  - threshold_alerts table with trigger tracking
+  - percentage_alerts table with last price tracking for change calculation
+  - alert_history table for audit trail
+- Dynamic import for Slack skill to handle ES module compatibility
+- Typecheck passes
+- Files changed:
+  - skills/alerts/package.json (new)
+  - skills/alerts/tsconfig.json (new)
+  - skills/alerts/.gitignore (new)
+  - skills/alerts/SKILL.md (new)
+  - skills/alerts/src/index.ts (new)
+  - skills/alerts/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - When depending on ES module skills from CommonJS, use dynamic imports
+  - For percentage alerts, store last_price to calculate changes over time
+  - Alert history provides valuable audit trail for triggered notifications
+  - Use JSON.stringify/parse for storing arrays (channels) in SQLite
+  - Batch notifications by collecting all triggered alerts and sending together
+  - Skills can depend on multiple other skills (binance + slack)
+---
+
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
+
