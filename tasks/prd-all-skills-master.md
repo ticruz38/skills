@@ -72,7 +72,7 @@ Master reference document for implementing all 60+ skills across 17 professional
 | `google-oauth` | auth-provider | OAuth 2.0 | Google services auth |
 | `binance-auth` | auth-provider | API Key | Binance API auth |
 | `quickbooks-auth` | auth-provider | OAuth 2.0 | QuickBooks auth |
-| `openai-auth` | auth-provider | API Key | OpenAI API auth |
+| (none - uses main model) | - | - | AI text generation |
 | `slack-auth` | auth-provider | Bot Token | Slack auth |
 
 ### Layer 2: Core Skills (Build Third)
@@ -244,7 +244,7 @@ These skills combine multiple Layer 2 skills:
 ### Phase 2: Auth Adapters (Week 2)
 4. `google-oauth` - For all Google services
 5. `binance-auth` - For trading skills
-6. `openai-auth` - For AI-powered skills
+
 7. `slack-auth` - For Slack integration
 
 ### Phase 3: Core Skills (Weeks 3-4)
@@ -267,8 +267,8 @@ These skills combine multiple Layer 2 skills:
 18. `quickbooks` (depends: quickbooks-auth)
 
 **Content Creator:**
-19. `content-writer` (depends: openai-auth)
-20. `social-scheduler` (depends: google-oauth)
+19. `content-writer` (uses main model)
+20. `social-scheduler` (depends: google-oauth, uses model for content)
 
 ### Phase 4: Specialized Skills (Weeks 5-8)
 

@@ -1,0 +1,943 @@
+{
+  "project": "OpenClaw Skills Ecosystem",
+  "branchName": "ralph/all-skills",
+  "description": "Complete implementation of 60 skills across 17 professional profiles",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create auth-provider skill for centralized authentication",
+      "description": "Foundation skill that manages OAuth tokens and API keys for all other skills",
+      "acceptanceCriteria": [
+        "Implement OAuth 2.0 flow with PKCE",
+        "Store credentials encrypted in SQLite",
+        "Support Google, Binance, QuickBooks providers",
+        "Auto-refresh tokens before expiration",
+        "Multi-profile support (multiple accounts)",
+        "Health check endpoint",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "BLOCKER: All other skills depend on this"
+    },
+    {
+      "id": "US-002",
+      "title": "Create google-oauth skill for Google services",
+      "description": "Google OAuth adapter for Gmail, Calendar, Drive, Photos access",
+      "acceptanceCriteria": [
+        "Authenticate with Google OAuth 2.0",
+        "Store tokens via auth-provider",
+        "Provide token refresh",
+        "Support multiple Google accounts",
+        "Health check for token validity",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Required by: email, calendar, drive, photos, receipts-ocr"
+    },
+    {
+      "id": "US-003",
+      "title": "Create binance-auth skill for trading API",
+      "description": "Binance API key management for trading skills",
+      "acceptanceCriteria": [
+        "Store API key and secret securely",
+        "Support testnet vs production",
+        "Validate API permissions",
+        "Health check with balance query",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Required by: binance, alerts, portfolio, charts"
+    },
+    {
+      "id": "US-004",
+      "title": "Create quickbooks-auth skill for accounting",
+      "description": "QuickBooks OAuth for accounting integration",
+      "acceptanceCriteria": [
+        "QuickBooks OAuth flow",
+        "Store realm ID and tokens",
+        "Sandbox vs production toggle",
+        "Token refresh handling",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Required by: quickbooks, reports"
+    },
+    {
+      "id": "US-005",
+      "title": "Create slack-auth skill for notifications",
+      "description": "Slack bot token management",
+      "acceptanceCriteria": [
+        "Store bot token securely",
+        "Validate token permissions",
+        "Test connection on setup",
+        "Health check endpoint",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Required by: slack, alerts, notifications"
+    },
+    {
+      "id": "US-006",
+      "title": "Create email skill for Gmail integration",
+      "description": "Read, send, and manage Gmail messages",
+      "acceptanceCriteria": [
+        "List recent emails with pagination",
+        "Search with Gmail query syntax",
+        "Read full email content (text/HTML)",
+        "Send emails with attachments",
+        "Thread view and reply",
+        "Cache metadata in SQLite",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Depends: google-oauth. Used by: inbox-triage, meetings, reminders"
+    },
+    {
+      "id": "US-007",
+      "title": "Create calendar skill for scheduling",
+      "description": "Google Calendar integration for events and availability",
+      "acceptanceCriteria": [
+        "List events with time filters",
+        "Create events with attendees",
+        "Find free time slots",
+        "Update and delete events",
+        "Handle recurring events",
+        "Sync to SQLite cache",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Depends: google-oauth. Used by: meetings, scheduler, showing-scheduler"
+    },
+    {
+      "id": "US-008",
+      "title": "Create reminders skill for task management",
+      "description": "Local reminder system with scheduling",
+      "acceptanceCriteria": [
+        "One-time reminders with datetime",
+        "Recurring reminders (daily, weekly, monthly)",
+        "Natural language parsing ('in 2 hours')",
+        "Snooze functionality",
+        "Mark complete/delete",
+        "Daemon mode for checking due reminders",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "No external deps. Used by: meetings, occasion-reminders, maintenance-scheduler"
+    },
+    {
+      "id": "US-009",
+      "title": "Create meetings skill for scheduling coordination",
+      "description": "Coordinate meetings using calendar and email",
+      "acceptanceCriteria": [
+        "Find mutual availability",
+        "Send meeting invites via email",
+        "Create calendar events",
+        "Meeting agenda templates",
+        "Prep documents gathering",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Depends: email, calendar"
+    },
+    {
+      "id": "US-010",
+      "title": "Create slack skill for team communication",
+      "description": "Send messages and notifications to Slack channels",
+      "acceptanceCriteria": [
+        "Send messages to channels",
+        "Send direct messages",
+        "Upload files",
+        "Create channel if not exists",
+        "Notification templates",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Depends: slack-auth. Used by: alerts, notifications"
+    },
+    {
+      "id": "US-011",
+      "title": "Create binance skill for crypto trading",
+      "description": "Trade and monitor crypto via Binance API",
+      "acceptanceCriteria": [
+        "Get real-time prices",
+        "Check account balances",
+        "Place market/limit orders",
+        "View order history",
+        "Support testnet mode",
+        "SQLite for trade history",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Depends: binance-auth. Used by: alerts, portfolio, charts"
+    },
+    {
+      "id": "US-012",
+      "title": "Create alerts skill for price notifications",
+      "description": "Monitor prices and send alerts",
+      "acceptanceCriteria": [
+        "Set price thresholds",
+        "Percentage change alerts",
+        "Multi-channel notifications (Telegram, Slack)",
+        "Alert history",
+        "Batch notifications",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Depends: binance. Uses model for notification text"
+    },
+    {
+      "id": "US-013",
+      "title": "Create portfolio skill for tracking positions",
+      "description": "Track crypto portfolio across positions",
+      "acceptanceCriteria": [
+        "Aggregate all positions",
+        "Calculate P&L with cost basis",
+        "Allocation charts",
+        "Historical performance",
+        "Export to CSV/PDF",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Depends: binance. Uses model for analysis text"
+    },
+    {
+      "id": "US-014",
+      "title": "Create charts skill for price visualization",
+      "description": "Generate price charts and technical overlays",
+      "acceptanceCriteria": [
+        "Line charts for price history",
+        "Multiple timeframes",
+        "Volume overlay",
+        "MA indicators",
+        "Export PNG/SVG",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Depends: binance. Local chart generation"
+    },
+    {
+      "id": "US-015",
+      "title": "Create technical-analysis skill for indicators",
+      "description": "Calculate technical indicators and signals",
+      "acceptanceCriteria": [
+        "RSI calculation",
+        "MACD indicator",
+        "Moving averages",
+        "Bollinger Bands",
+        "Signal generation",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Depends: binance. Local calculations"
+    },
+    {
+      "id": "US-016",
+      "title": "Create invoices skill for billing",
+      "description": "Create and manage professional invoices",
+      "acceptanceCriteria": [
+        "Create invoices with line items",
+        "Generate PDF with templates",
+        "Track payment status",
+        "Client database",
+        "Payment recording",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "No external deps. Local PDF generation"
+    },
+    {
+      "id": "US-017",
+      "title": "Create receipts-ocr skill for expense scanning",
+      "description": "Extract data from receipt photos using Google Vision",
+      "acceptanceCriteria": [
+        "Upload receipt images",
+        "OCR merchant, amount, date",
+        "Line item extraction",
+        "Confidence scoring",
+        "Manual correction UI",
+        "Store in SQLite",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Depends: google-oauth (Vision API)"
+    },
+    {
+      "id": "US-018",
+      "title": "Create quickbooks skill for accounting sync",
+      "description": "Sync with QuickBooks Online",
+      "acceptanceCriteria": [
+        "Sync customers",
+        "Sync invoices",
+        "Sync transactions",
+        "Two-way sync",
+        "Conflict resolution",
+        "SQLite cache",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Depends: quickbooks-auth"
+    },
+    {
+      "id": "US-019",
+      "title": "Create reports skill for financial reports",
+      "description": "Generate P&L, balance sheet, cash flow",
+      "acceptanceCriteria": [
+        "P&L statement",
+        "Balance sheet",
+        "Cash flow report",
+        "PDF export",
+        "Scheduled reports",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Depends: quickbooks, receipts-ocr. Uses model for summaries"
+    },
+    {
+      "id": "US-020",
+      "title": "Create tax-prep skill for tax documents",
+      "description": "Compile tax documents and summaries",
+      "acceptanceCriteria": [
+        "Categorize deductible expenses",
+        "Schedule C generation",
+        "1099 tracking",
+        "Export for TurboTax",
+        "Accountant package",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "Depends: receipts-ocr, invoices"
+    },
+    {
+      "id": "US-021",
+      "title": "Create content-writer skill for text generation",
+      "description": "Generate content using the main model",
+      "acceptanceCriteria": [
+        "Blog post generation",
+        "Social media captions",
+        "Email templates",
+        "Tone adjustment",
+        "Platform-specific formatting",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Uses main model. No API key needed"
+    },
+    {
+      "id": "US-022",
+      "title": "Create social-scheduler skill for posting",
+      "description": "Schedule posts to social platforms",
+      "acceptanceCriteria": [
+        "Queue management",
+        "Optimal timing suggestions",
+        "Multi-platform support",
+        "Draft approval workflow",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "Depends: google-oauth (YouTube). Uses model for content"
+    },
+    {
+      "id": "US-023",
+      "title": "Create engagement-replies skill for social responses",
+      "description": "Draft replies to comments and messages",
+      "acceptanceCriteria": [
+        "Generate reply suggestions",
+        "Tone matching",
+        "Quick response templates",
+        "Sentiment-aware replies",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Uses main model. No external deps"
+    },
+    {
+      "id": "US-024",
+      "title": "Create image-prompts skill for AI image generation",
+      "description": "Generate prompts for Midjourney, DALL-E",
+      "acceptanceCriteria": [
+        "Style-aware prompts",
+        "Subject descriptions",
+        "Parameter suggestions",
+        "Prompt variations",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "Uses main model. No API key needed"
+    },
+    {
+      "id": "US-025",
+      "title": "Create hashtag-research skill for trending tags",
+      "description": "Find relevant and trending hashtags",
+      "acceptanceCriteria": [
+        "Keyword-based suggestions",
+        "Trending analysis",
+        "Relevance scoring",
+        "Niche discovery",
+        "SQLite cache",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "Web scraping. No API key needed"
+    },
+    {
+      "id": "US-026",
+      "title": "Create payment-reminders skill for invoice chasing",
+      "description": "Automated payment reminder emails",
+      "acceptanceCriteria": [
+        "Escalating reminder schedule",
+        "Email template customization",
+        "Payment status tracking",
+        "Client-specific settings",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "Depends: invoices, email"
+    },
+    {
+      "id": "US-027",
+      "title": "Create client-tracker skill for payment history",
+      "description": "Track client payment behavior",
+      "acceptanceCriteria": [
+        "Client database",
+        "Payment history",
+        "Credit risk scoring",
+        "Outstanding balances",
+        "Communication log",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Depends: invoices. SQLite storage"
+    },
+    {
+      "id": "US-028",
+      "title": "Create expense-categorizer skill for receipts",
+      "description": "Auto-categorize expenses from receipts",
+      "acceptanceCriteria": [
+        "ML/rule-based categorization",
+        "Custom categories",
+        "Learning from corrections",
+        "Bulk categorization",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "Depends: receipts-ocr. Uses model for categorization"
+    },
+    {
+      "id": "US-029",
+      "title": "Create tax-export skill for expense export",
+      "description": "Export expenses for tax filing",
+      "acceptanceCriteria": [
+        "CSV export",
+        "PDF reports",
+        "Deductible filtering",
+        "IRS category mapping",
+        "Receipt attachment bundling",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "Depends: expense-categorizer"
+    },
+    {
+      "id": "US-030",
+      "title": "Create web-search skill for research",
+      "description": "Search the web for information",
+      "acceptanceCriteria": [
+        "Query search",
+        "Structured results",
+        "Source ranking",
+        "Result caching",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "Optional: Serper API key. Can use scraping"
+    },
+    {
+      "id": "US-031",
+      "title": "Create news-aggregator skill for RSS feeds",
+      "description": "Monitor news from RSS sources",
+      "acceptanceCriteria": [
+        "RSS/Atom parsing",
+        "Keyword filtering",
+        "Source management",
+        "Deduplication",
+        "SQLite storage",
+        "Typecheck passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": "No API key needed"
+    },
+    {
+      "id": "US-032",
+      "title": "Create summarizer skill for text summarization",
+      "description": "Summarize articles and documents",
+      "acceptanceCriteria": [
+        "Article summarization",
+        "Document summaries",
+        "Key points extraction",
+        "Adjustable length",
+        "Typecheck passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "Uses main model. No API key needed"
+    },
+    {
+      "id": "US-033",
+      "title": "Create inbox-triage skill for email sorting",
+      "description": "AI-powered email prioritization",
+      "acceptanceCriteria": [
+        "Priority scoring",
+        "Smart categorization",
+        "Bulk actions",
+        "Undo support",
+        "Typecheck passes"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": "Depends: email. Uses model for classification"
+    },
+    {
+      "id": "US-034",
+      "title": "Create draft-responses skill for email replies",
+      "description": "Generate email reply suggestions",
+      "acceptanceCriteria": [
+        "Multiple tone options",
+        "Context-aware drafting",
+        "One-click send",
+        "Template support",
+        "Typecheck passes"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": "Depends: email. Uses main model"
+    },
+    {
+      "id": "US-035",
+      "title": "Create gift-suggestions skill for present ideas",
+      "description": "Suggest personalized gift ideas",
+      "acceptanceCriteria": [
+        "Recipient-based suggestions",
+        "Interest matching",
+        "Budget filtering",
+        "Trend awareness",
+        "Typecheck passes"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": "Uses main model. SQLite for profiles"
+    },
+    {
+      "id": "US-036",
+      "title": "Create occasion-reminders skill for birthdays",
+      "description": "Track birthdays and anniversaries",
+      "acceptanceCriteria": [
+        "Contact import",
+        "Advance notice",
+        "Gift planning timeline",
+        "Recurring reminders",
+        "Typecheck passes"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": "Depends: reminders. SQLite storage"
+    },
+    {
+      "id": "US-037",
+      "title": "Create recipe-suggester skill for meal ideas",
+      "description": "Suggest recipes based on preferences",
+      "acceptanceCriteria": [
+        "Dietary filters",
+        "Ingredient matching",
+        "Cuisine preferences",
+        "Difficulty levels",
+        "Typecheck passes"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": "Uses main model. Optional: Spoonacular API"
+    },
+    {
+      "id": "US-038",
+      "title": "Create shopping-list-generator skill for groceries",
+      "description": "Generate organized shopping lists",
+      "acceptanceCriteria": [
+        "From meal plans",
+        "Categorize by store section",
+        "Pantry check",
+        "Merge duplicates",
+        "Typecheck passes"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": "Depends: recipe-suggester. SQLite storage"
+    },
+    {
+      "id": "US-039",
+      "title": "Create maintenance-scheduler skill for home tasks",
+      "description": "Schedule recurring home maintenance",
+      "acceptanceCriteria": [
+        "Seasonal templates",
+        "Custom schedules",
+        "Notification timing",
+        "Completion tracking",
+        "Typecheck passes"
+      ],
+      "priority": 39,
+      "passes": false,
+      "notes": "Depends: reminders. SQLite storage"
+    },
+    {
+      "id": "US-040",
+      "title": "Create flight-search skill for travel",
+      "description": "Search and compare flights",
+      "acceptanceCriteria": [
+        "Route search",
+        "Price comparison",
+        "Date flexibility",
+        "Filter by airline/stops",
+        "Typecheck passes"
+      ],
+      "priority": 40,
+      "passes": false,
+      "notes": "Optional: Amadeus API. Can use scraping"
+    },
+    {
+      "id": "US-041",
+      "title": "Create itinerary-builder skill for trip planning",
+      "description": "Build day-by-day travel itineraries",
+      "acceptanceCriteria": [
+        "Drag-drop scheduling",
+        "Time estimates",
+        "Travel time between locations",
+        "Export to PDF",
+        "Typecheck passes"
+      ],
+      "priority": 41,
+      "passes": false,
+      "notes": "SQLite storage. No external deps"
+    },
+    {
+      "id": "US-042",
+      "title": "Create property-alerts skill for real estate",
+      "description": "Monitor property listings",
+      "acceptanceCriteria": [
+        "Saved searches",
+        "Instant alerts",
+        "Filtering by criteria",
+        "Price change detection",
+        "Typecheck passes"
+      ],
+      "priority": 42,
+      "passes": false,
+      "notes": "Optional: Zillow API. Can use scraping"
+    },
+    {
+      "id": "US-043",
+      "title": "Create client-crm skill for realtor contacts",
+      "description": "Real estate client relationship management",
+      "acceptanceCriteria": [
+        "Contact profiles",
+        "Property preferences",
+        "Communication history",
+        "Pipeline tracking",
+        "Typecheck passes"
+      ],
+      "priority": 43,
+      "passes": false,
+      "notes": "SQLite storage. No external deps"
+    },
+    {
+      "id": "US-044",
+      "title": "Create data-connector skill for spreadsheets",
+      "description": "Connect to Google Sheets, Airtable",
+      "acceptanceCriteria": [
+        "Google Sheets read/write",
+        "Airtable integration",
+        "CSV import/export",
+        "Data caching",
+        "Typecheck passes"
+      ],
+      "priority": 44,
+      "passes": false,
+      "notes": "Depends: google-oauth. SQLite cache"
+    },
+    {
+      "id": "US-045",
+      "title": "Create chart-generator skill for data viz",
+      "description": "Generate charts and visualizations",
+      "acceptanceCriteria": [
+        "Bar, line, pie charts",
+        "Customization options",
+        "PNG/SVG export",
+        "Embeddable code",
+        "Typecheck passes"
+      ],
+      "priority": 45,
+      "passes": false,
+      "notes": "Depends: data-connector. Local generation"
+    },
+    {
+      "id": "US-046",
+      "title": "Create reservation-manager skill for restaurants",
+      "description": "Restaurant table reservation system",
+      "acceptanceCriteria": [
+        "Table management",
+        "Availability checking",
+        "Party size handling",
+        "SMS confirmations",
+        "Typecheck passes"
+      ],
+      "priority": 46,
+      "passes": false,
+      "notes": "Depends: calendar. SQLite storage"
+    },
+    {
+      "id": "US-047",
+      "title": "Create ticket-triage skill for support",
+      "description": "AI-powered ticket classification",
+      "acceptanceCriteria": [
+        "Priority classification",
+        "Category detection",
+        "Auto-assignment",
+        "Spam filtering",
+        "Typecheck passes"
+      ],
+      "priority": 47,
+      "passes": false,
+      "notes": "Uses main model. Optional: Zendesk API"
+    },
+    {
+      "id": "US-048",
+      "title": "Create response-drafts skill for support replies",
+      "description": "Draft support response suggestions",
+      "acceptanceCriteria": [
+        "Tone matching",
+        "KB integration",
+        "Solution suggestions",
+        "Multiple options",
+        "Typecheck passes"
+      ],
+      "priority": 48,
+      "passes": false,
+      "notes": "Uses main model. Optional: Zendesk API"
+    },
+    {
+      "id": "US-049",
+      "title": "Create scheduling-links skill for booking",
+      "description": "Generate Calendly-style booking links",
+      "acceptanceCriteria": [
+        "Availability windows",
+        "Multiple meeting types",
+        "Custom duration",
+        "Embeddable widget",
+        "Typecheck passes"
+      ],
+      "priority": 49,
+      "passes": false,
+      "notes": "Depends: calendar. SQLite storage"
+    },
+    {
+      "id": "US-050",
+      "title": "Create buffer-time skill for calendar gaps",
+      "description": "Auto-add buffers between meetings",
+      "acceptanceCriteria": [
+        "Configurable buffers",
+        "Travel time calculation",
+        "Prep time blocks",
+        "Auto-adjustment",
+        "Typecheck passes"
+      ],
+      "priority": 50,
+      "passes": false,
+      "notes": "Depends: calendar"
+    },
+    {
+      "id": "US-051",
+      "title": "Create focus-time-blocks skill for deep work",
+      "description": "Protect focus time on calendar",
+      "acceptanceCriteria": [
+        "Recurring focus blocks",
+        "Auto-decline meetings",
+        "DND integration",
+        "Productivity analytics",
+        "Typecheck passes"
+      ],
+      "priority": 51,
+      "passes": false,
+      "notes": "Depends: calendar. Uses model for suggestions"
+    },
+    {
+      "id": "US-052",
+      "title": "Create report-builder skill for automated reports",
+      "description": "Build automated data reports",
+      "acceptanceCriteria": [
+        "Scheduled reports",
+        "Template system",
+        "Data aggregation",
+        "PDF/Excel export",
+        "Email delivery",
+        "Typecheck passes"
+      ],
+      "priority": 52,
+      "passes": false,
+      "notes": "Depends: data-connector, chart-generator, email. Uses model for summaries"
+    },
+    {
+      "id": "US-053",
+      "title": "Create monthly-reports skill for expenses",
+      "description": "Monthly expense summaries",
+      "acceptanceCriteria": [
+        "Spending breakdown",
+        "Trend analysis",
+        "Budget comparison",
+        "Visual charts",
+        "PDF export",
+        "Typecheck passes"
+      ],
+      "priority": 53,
+      "passes": false,
+      "notes": "Depends: expense-categorizer. Uses model for insights"
+    },
+    {
+      "id": "US-054",
+      "title": "Create competitor-monitor skill for tracking",
+      "description": "Monitor competitor website changes",
+      "acceptanceCriteria": [
+        "Website monitoring",
+        "Change detection",
+        "Screenshot comparison",
+        "Alert notifications",
+        "Typecheck passes"
+      ],
+      "priority": 54,
+      "passes": false,
+      "notes": "Depends: web-search. Uses model for analysis"
+    },
+    {
+      "id": "US-055",
+      "title": "Create email-summarizer skill for thread summaries",
+      "description": "Summarize long email threads",
+      "acceptanceCriteria": [
+        "Thread summarization",
+        "Key points extraction",
+        "Action items",
+        "Adjustable length",
+        "Typecheck passes"
+      ],
+      "priority": 55,
+      "passes": false,
+      "notes": "Depends: email. Uses main model"
+    },
+    {
+      "id": "US-056",
+      "title": "Create showing-scheduler skill for real estate",
+      "description": "Schedule property showings",
+      "acceptanceCriteria": [
+        "Calendar coordination",
+        "Lockbox code storage",
+        "Client feedback collection",
+        "Route optimization",
+        "Typecheck passes"
+      ],
+      "priority": 56,
+      "passes": false,
+      "notes": "Depends: calendar, client-crm"
+    },
+    {
+      "id": "US-057",
+      "title": "Create pantry-tracker skill for inventory",
+      "description": "Track pantry inventory",
+      "acceptanceCriteria": [
+        "Barcode scanning",
+        "Low stock alerts",
+        "Expiration tracking",
+        "Shopping list integration",
+        "Typecheck passes"
+      ],
+      "priority": 57,
+      "passes": false,
+      "notes": "SQLite storage. No external deps"
+    },
+    {
+      "id": "US-058",
+      "title": "Create diy-guides skill for home repairs",
+      "description": "Step-by-step repair guides",
+      "acceptanceCriteria": [
+        "Common repairs database",
+        "Video link integration",
+        "Tools list",
+        "Difficulty ratings",
+        "Typecheck passes"
+      ],
+      "priority": 58,
+      "passes": false,
+      "notes": "SQLite storage. Uses model for guidance"
+    },
+    {
+      "id": "US-059",
+      "title": "Create review-monitor skill for reputation",
+      "description": "Monitor and respond to reviews",
+      "acceptanceCriteria": [
+        "Google/Yelp tracking",
+        "Sentiment analysis",
+        "Response templates",
+        "Alert notifications",
+        "Typecheck passes"
+      ],
+      "priority": 59,
+      "passes": false,
+      "notes": "Optional: Yelp API. Uses model for responses"
+    },
+    {
+      "id": "US-060",
+      "title": "Create saved-searches skill for research automation",
+      "description": "Save and rerun searches automatically",
+      "acceptanceCriteria": [
+        "Save search queries",
+        "Scheduled execution",
+        "Result comparison",
+        "New item detection",
+        "Typecheck passes"
+      ],
+      "priority": 60,
+      "passes": false,
+      "notes": "Depends: web-search, news-aggregator"
+    }
+  ]
+}
