@@ -694,7 +694,7 @@
         "Typecheck passes"
       ],
       "priority": 44,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: google-oauth. SQLite cache"
     },
     {

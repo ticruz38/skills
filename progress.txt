@@ -1952,3 +1952,40 @@
   - SQLite database initialization with await new Promise wrapper for sqlite3
 ---
 
+
+## 2026-02-10 19:08 CET - US-044
+- Created data-connector skill - Connect to Google Sheets, Airtable, and CSV for data management
+- Built on top of google-oauth skill for Google Sheets authentication
+- Implemented comprehensive data operations:
+  - Google Sheets: read, write, append with OAuth authentication
+  - Airtable: read (paginated), write (batch), update operations
+  - CSV: read/write with proper escaping, delimiter support, type conversion
+- SQLite storage for:
+  - connections table - store connection metadata and configs
+  - data_cache table - local cache of synced data
+- Features:
+  - Connection management (create, get, list, update, delete)
+  - Data caching with automatic timestamp tracking
+  - Sync operations to pull data from any source
+  - Health check with status of all dependencies
+  - CSV import/export to/from any data source
+- Full CLI with commands: status, list, add, get, delete, sync, read, write, cache, clear-cache, import, export, stats
+- Typecheck passes
+- Files changed:
+  - skills/data-connector/package.json (new)
+  - skills/data-connector/tsconfig.json (new)
+  - skills/data-connector/.gitignore (new)
+  - skills/data-connector/SKILL.md (new)
+  - skills/data-connector/src/index.ts (new - main library)
+  - skills/data-connector/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-044 passes: true)
+- **Learnings for future iterations:**
+  - Google Sheets API uses `spreadsheets/{id}/values/{range}` endpoint
+  - Airtable API paginates with `offset` parameter, max 100 records per request
+  - CSV parsing needs to handle quoted values with embedded delimiters
+  - Use `sqlite3.Database` generic type is `all<RowType>` not `all<RowType[]>`
+  - Dynamic import for ES modules: `await import('@openclaw/google-oauth')`
+  - Store connection configs as JSON strings in SQLite
+  - CSV escape: wrap in quotes and double internal quotes
+---
+
