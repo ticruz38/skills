@@ -1709,3 +1709,41 @@
   - Combining amounts requires checking for same units before adding
 ---
 
+
+
+## 2026-02-10 18:30 CET - US-039
+- Created maintenance-scheduler skill - Schedule recurring home maintenance tasks with seasonal templates
+- Built on top of reminders skill for notification scheduling
+- Implemented comprehensive features:
+  - Seasonal templates for 3 home types: House (16 tasks), Apartment (11 tasks), Condo (10 tasks)
+  - Task frequency support: Monthly (30 days), Quarterly (90 days), Bi-annual (180 days), Annual (365 days), Custom (any days)
+  - Custom task creation with name, description, frequency, advance notice, and category
+  - Completion tracking with history and notes
+  - Notification timing via reminders skill integration
+  - Categories: indoor, outdoor, hvac, plumbing, electrical, appliance, safety, cleaning, other
+- Database schema:
+  - tasks table with schedule configuration and next due date
+  - completion_history table with completion notes
+- Full CLI with commands:
+  - apply-template, preview-template, templates - Template management
+  - create, list, get, update, delete - Task management
+  - complete - Mark tasks done with auto-scheduling of next occurrence
+  - upcoming, due - Query upcoming and currently due tasks
+  - history - View completion history
+  - stats, health - Reporting
+- Typecheck passes
+- Files changed:
+  - skills/maintenance-scheduler/package.json (new)
+  - skills/maintenance-scheduler/tsconfig.json (new)
+  - skills/maintenance-scheduler/.gitignore (new)
+  - skills/maintenance-scheduler/SKILL.md (new)
+  - skills/maintenance-scheduler/src/index.ts (new - main library)
+  - skills/maintenance-scheduler/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - Seasonal templates provide a great onboarding experience - users can quickly get started
+  - When completing a task, delete the old reminder and create a new one for the next occurrence
+  - calculateNextDue() adds frequencyDays to the current date for the next occurrence
+  - Grouping output by category (in list command) improves readability
+  - Notice period calculation: daysUntil <= advanceNoticeDays means it's time to notify
+  - Template preview allows users to see what they'll get before applying
+---
