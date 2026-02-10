@@ -2356,3 +2356,52 @@
   - Day of week distribution uses CASE CAST(strftime('%w', date) AS INTEGER) for readable day names
 ---
 
+
+## 2026-02-10 20:04 CET - US-052
+- Created report-builder skill - Build automated data reports with scheduled delivery
+- Built on top of data-connector, chart-generator, and email skills
+- Implemented comprehensive report automation features:
+  - Report templates with configurable data sources, aggregation, and charting
+  - Scheduled reports (daily, weekly, monthly, quarterly, yearly)
+  - Data aggregation: sum, average, count, min, max
+  - Multi-format export: HTML (with charts), CSV, JSON, PDF-ready
+  - Email delivery with attachments
+  - Report history tracking
+  - Due report execution with dry-run support
+- Database schema:
+  - `report_templates` - Template definitions with aggregation and chart config
+  - `scheduled_reports` - Schedule configuration with next/last run tracking
+  - `report_history` - Generated report audit trail
+- Template system supports:
+  - Connection to any data-connector source
+  - SQL-like filtering
+  - Aggregation by column
+  - Chart generation integration (bar, line, pie, doughnut, area)
+  - Configurable sections: chart, table, summary
+- Schedule configuration:
+  - Flexible periods with day-of-week and day-of-month options
+  - Multiple output formats per schedule
+  - Email recipients with customizable subject/body
+  - Next run calculation based on period settings
+- Full CLI with commands:
+  - template-create, template-list, template-get, template-update, template-delete
+  - schedule-create, schedule-list, schedule-get, schedule-update, schedule-enable/disable, schedule-delete
+  - generate, preview, execute, due (check and run), history, stats
+- Typecheck passes
+- Files changed:
+  - skills/report-builder/package.json (new)
+  - skills/report-builder/tsconfig.json (new)
+  - skills/report-builder/.gitignore (new)
+  - skills/report-builder/SKILL.md (new)
+  - skills/report-builder/src/index.ts (new - main library)
+  - skills/report-builder/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-052 passes: true)
+- **Learnings for future iterations:**
+  - Report builder orchestrates multiple skills (data-connector + chart-generator + email)
+  - Aggregation can be done locally after fetching data - no need for SQL support
+  - Schedule calculation needs to handle different periods (daily/weekly/monthly/quarterly/yearly)
+  - Dry-run mode is useful for testing schedules without sending emails
+  - HTML reports with inline SVG charts are PDF-ready
+  - Report history provides audit trail for compliance
+---
+

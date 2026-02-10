@@ -815,7 +815,7 @@
         "Typecheck passes"
       ],
       "priority": 52,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: data-connector, chart-generator, email. Uses model for summaries"
     },
     {

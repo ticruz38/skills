@@ -1,0 +1,23 @@
+{
+  "name": "@openclaw/report-builder",
+  "version": "1.0.0",
+  "description": "Build automated data reports with scheduled delivery",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "cli": "npm run build && node dist/cli.js",
+    "status": "npm run cli -- status",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openclaw/data-connector": "file:../data-connector",
+    "@openclaw/chart-generator": "file:../chart-generator",
+    "@openclaw/email": "file:../email",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
