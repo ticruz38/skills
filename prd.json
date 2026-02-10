@@ -212,7 +212,7 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: binance. Uses model for analysis text"
     },
     {
