@@ -743,3 +743,92 @@
   - CSV export should escape quotes and wrap fields in quotes for proper parsing
 ---
 
+
+## 2026-02-10 16:30 CET - US-018
+- Created quickbooks skill - QuickBooks Online integration for accounting sync
+- Built on top of quickbooks-auth skill for secure authentication
+- Implemented comprehensive two-way sync features:
+  - Sync customers from QuickBooks with conflict detection
+  - Sync invoices with line items and status tracking
+  - Sync transactions (payments, deposits, etc.)
+  - SQLite cache for all synced data with local modification tracking
+  - Conflict resolution system with local vs remote choice
+  - Incremental sync support (since date parameter)
+- Database schema includes:
+  - customers table with full customer details
+  - invoices table with line items sub-table
+  - transactions table for financial transactions
+  - sync_state table for tracking last sync times
+  - conflicts table for unresolved sync conflicts
+- CLI commands:
+  - status, health - Connection monitoring
+  - customers, customer-get, customer-sync - Customer management
+  - invoices, invoice-get, invoice-sync - Invoice management  
+  - transactions, transaction-sync - Transaction sync
+  - sync - Full sync with entity type filtering
+  - conflicts, conflict-resolve - Conflict management
+  - sync-state - View sync timestamps
+- Two-way sync strategy:
+  - Pull changes from QuickBooks on sync
+  - Track local modifications with local_modified flag
+  - Detect conflicts when both local and remote changed
+  - Allow resolving conflicts by keeping local or remote version
+- Typecheck passes
+- Files changed:
+  - skills/quickbooks/package.json (new)
+  - skills/quickbooks/tsconfig.json (new)
+  - skills/quickbooks/.gitignore (new)
+  - skills/quickbooks/SKILL.md (new)
+  - skills/quickbooks/src/index.ts (new)
+  - skills/quickbooks/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - QuickBooks API uses QueryResponse wrapper for all query responses
+  - Customer Balance field shows current open balance for the customer
+  - Invoice status can be derived: Paid (Balance=0), Partial (Balance<Total), Overdue (DueDate passed)
+  - Conflict resolution uses separate conflicts table with JSON local_data and remote_data
+  - SQLite ON CONFLICT clause useful for upsert operations: `INSERT ... ON CONFLICT(qb_id) DO UPDATE ...`
+  - Use `local_modified` flag to track entities that have local changes not yet pushed
+  - Type assertions for JSON responses: `await response.json() as { QueryResponse?: { Customer?: any[] } }`
+---
+
+
+## 2026-02-10 16:35 CET - US-019
+- Created reports skill - Generate financial reports (P&L, Balance Sheet, Cash Flow)
+- Built on top of quickbooks and receipts-ocr skills for data aggregation
+- Implemented comprehensive financial reporting features:
+  - P&L Reports: Track revenue from QuickBooks invoices and expenses from receipts
+  - Balance Sheets: Assets, liabilities, and equity calculation from customer balances and transactions
+  - Cash Flow Reports: Operating, investing, and financing activities with net change tracking
+  - Professional HTML export with styled reports ready for PDF conversion
+  - Scheduled reports system with daily/weekly/monthly automation support
+  - Report history tracking with filtering by type
+- Database schema:
+  - `scheduled_reports` - Configuration for automated report generation
+  - `report_history` - Audit trail of all generated reports
+- CLI commands:
+  - status, health - Dependency health check (QuickBooks + Receipts OCR)
+  - pl [period] [year] [month] - Generate P&L reports
+  - balance [date] - Generate balance sheets
+  - cashflow [period] [year] [month] - Generate cash flow reports
+  - export <type> [path] - Export reports to styled HTML
+  - history [type] [limit] - View report generation history
+  - schedule create/list/delete - Manage scheduled reports
+- Typecheck passes
+- Files changed:
+  - skills/reports/package.json (new)
+  - skills/reports/tsconfig.json (new)
+  - skills/reports/.gitignore (new)
+  - skills/reports/SKILL.md (new)
+  - skills/reports/src/index.ts (new - main library)
+  - skills/reports/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - Financial reports can aggregate data from multiple skills (quickbooks + receipts-ocr)
+  - HTML generation with inline CSS is a good approach for PDF-ready reports
+  - Use `getDateRange()` helper to calculate period boundaries (monthly, quarterly, yearly)
+  - Revenue comes from QuickBooks invoices, expenses from confirmed receipts
+  - Balance sheet balances when: Assets = Liabilities + Equity
+  - Cash flow net change should equal: Operating + Investing + Financing
+  - Type safety for union types like `ReportPeriod` requires careful casting in CLI args
+  - Handle optional fields like `health.message` with fallback values
+---
+

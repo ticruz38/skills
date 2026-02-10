@@ -295,7 +295,7 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: quickbooks-auth"
     },
     {
@@ -311,7 +311,7 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: quickbooks, receipts-ocr. Uses model for summaries"
     },
     {
