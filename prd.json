@@ -754,7 +754,7 @@
         "Typecheck passes"
       ],
       "priority": 48,
-      "passes": false,
+      "passes": true,
       "notes": "Uses main model. Optional: Zendesk API"
     },
     {
