@@ -1,0 +1,19 @@
+{
+  "name": "@openclaw/review-monitor",
+  "version": "1.0.0",
+  "description": "Monitor and respond to reviews on Google and Yelp with sentiment analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
