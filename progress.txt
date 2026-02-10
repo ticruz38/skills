@@ -2572,3 +2572,47 @@
   - Feedback can trigger pipeline stage updates (high interest → offer stage)
 ---
 
+
+## 2026-02-10 20:45 CET - US-057
+- Created pantry-tracker skill - Track pantry inventory with barcode scanning, expiration dates, and low stock alerts
+- Implemented comprehensive inventory management features:
+  - Barcode scanning support with automatic restocking of existing items
+  - Quantity tracking with customizable units and categories
+  - Expiration date tracking with alerts (expired, expiring soon, warning)
+  - Low stock alerts with configurable thresholds per item
+  - Automatic shopping list generation from low stock and expired items
+  - 10 categories: produce, meat, seafood, dairy, bakery, frozen, pantry, beverages, household, other
+- Database schema:
+  - `pantry_items` table with barcode, name, quantity, unit, category, expiration_date, low_stock_threshold, notes
+  - Indexes on barcode, category, name, and expiration_date for efficient queries
+- Full CLI with commands:
+  - add, scan - Add items with barcode support
+  - list, get, search - Query and view items
+  - update, consume, restock, delete - Item management
+  - alerts, expiring - Alert views
+  - shopping-list - Generate shopping lists
+  - stats, health - Reporting
+- Smart features:
+  - Auto-restock when scanning existing barcodes
+  - Merge quantities when adding items with same name/barcode
+  - Status indicators in list view (✓ normal, ⚡ low stock, ⚠️ expiring soon, 🔴 expired)
+  - Shopping list sorted by category with reasons (low_stock/expired)
+- Typecheck passes
+- No external dependencies - works entirely offline with local SQLite
+- Files changed:
+  - skills/pantry-tracker/package.json (new)
+  - skills/pantry-tracker/tsconfig.json (new)
+  - skills/pantry-tracker/.gitignore (new)
+  - skills/pantry-tracker/SKILL.md (new)
+  - skills/pantry-tracker/src/index.ts (new - main library)
+  - skills/pantry-tracker/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-057 passes: true)
+- **Learnings for future iterations:**
+  - Barcode scanning can be simulated with manual entry - real barcode scanners just type the code
+  - When adding items, check for existing barcodes first, then existing names (for non-barcoded items)
+  - Auto-restock pattern: scan → find → add quantity, rather than creating duplicate entries
+  - Status icons (✓⚡⚠️🔴) provide quick visual feedback in terminal listings
+  - Shopping list integration works by analyzing low stock and expired items, not direct skill dependency
+  - Categories help organize shopping lists by store section
+---
+
