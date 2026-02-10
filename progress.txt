@@ -1175,3 +1175,90 @@
   - Stage progression: pre_due → on_due → post_due → final based on days relative to due date
 ---
 
+## 2026-02-10 17:30 CET - US-027
+- Created client-tracker skill - Track client payment behavior and history
+- Built on top of invoices skill for client and invoice data
+- Implemented comprehensive client tracking features:
+  - Extended client profiles with payment statistics (total invoices, revenue, outstanding)
+  - Payment history sync from invoices with days-late calculation
+  - Credit risk scoring algorithm with 4 weighted factors:
+    - On-time payment rate (40% weight)
+    - Average payment days (30% weight)
+    - Outstanding vs overdue ratio (20% weight)
+    - Payment history length (10% weight)
+  - Risk levels: low (80-100), medium (60-79), high (0-59)
+  - Outstanding balances report with sorting by amount
+  - Communication log for tracking client interactions
+  - CSV export for client data
+- Database schema:
+  - payment_history table for tracking paid invoices with days_late
+  - communication_log table for client interaction tracking
+- Full CLI with commands:
+  - list, profile - Client viewing
+  - payments, risk - Payment history and risk assessment
+  - log, communications - Communication tracking
+  - balances, stats - Reporting
+  - export, sync - Data management
+- Typecheck passes
+- Files changed:
+  - skills/client-tracker/package.json (new)
+  - skills/client-tracker/tsconfig.json (new)
+  - skills/client-tracker/.gitignore (new)
+  - skills/client-tracker/SKILL.md (new)
+  - skills/client-tracker/src/index.ts (new - main library)
+  - skills/client-tracker/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - Risk scoring algorithms should use weighted factors for balanced assessment
+  - Days late calculation: Math.max(0, Math.ceil((paidDate - dueDate) / (1000 * 60 * 60 * 24)))
+  - When syncing from dependent skills, use INSERT OR REPLACE for idempotency
+  - Payment history can be derived from invoices with status='paid' and payments array
+  - Risk factors should include both positive and negative indicators
+  - Communication logs enable CRM-style functionality without external dependencies
+---
+
+
+## 2026-02-10 17:35 CET - US-028
+- Created expense-categorizer skill - Auto-categorize expenses from receipts with learning from corrections
+- Built on top of receipts-ocr skill for receipt data
+- Implemented comprehensive categorization features:
+  - Smart categorization using rule-based and ML-inspired algorithms
+  - 12 default categories (Groceries, Dining, Gas, Pharmacy, Office, Electronics, Transportation, Entertainment, Retail, Utilities, Travel, Healthcare)
+  - Custom category support with user-defined keywords
+  - Learning system that improves accuracy from user corrections
+  - Bulk categorization for processing multiple receipts at once
+  - Confidence scoring for each categorization
+  - Merchant-to-category mapping based on history
+- Database schema includes:
+  - categories table with keywords (JSON) and parent category support
+  - merchant_mappings table with confidence scores and receipt counts
+  - learning_records table for tracking corrections and improving accuracy
+- Categorization algorithm prioritizes:
+  1. Merchant mappings (highest priority, learned from corrections)
+  2. Keyword matching against merchant names
+  3. Keyword matching against receipt content
+  4. Line item analysis
+- CLI commands:
+  - status/health - System status
+  - categories, add-category, delete-category - Category management
+  - suggest, categorize, bulk - Categorization operations
+  - correct - Apply corrections (teaches the system)
+  - merchants, map-merchant, delete-mapping - Merchant management
+  - stats, accuracy, history - Analytics and reporting
+- Typecheck passes
+- Files changed:
+  - skills/expense-categorizer/package.json (new)
+  - skills/expense-categorizer/tsconfig.json (new)
+  - skills/expense-categorizer/.gitignore (new)
+  - skills/expense-categorizer/SKILL.md (new)
+  - skills/expense-categorizer/src/index.ts (new)
+  - skills/expense-categorizer/src/cli.ts (new)
+  - prd.json (updated US-028 passes: true)
+- **Learnings for future iterations:**
+  - When querying SQLite with different field names (snake_case vs camelCase), create separate local interface types
+  - Learning system stores corrections and uses them to improve merchant mappings
+  - Merchant mappings get confidence boost (0.95) when verified by user correction
+  - Categorization confidence levels: >=5 keywords (90%), >=3 keywords (75%), >=1 keyword (60%), <1 keyword (40%)
+  - Use INSERT OR IGNORE for seeding default data to avoid duplicates
+  - JSON.stringify/parse for storing arrays (keywords) in SQLite
+---
+
