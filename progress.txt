@@ -702,3 +702,44 @@
   - Payment tracking allows partial payments - update balance and status accordingly
 ---
 
+
+## 2026-02-10 16:30 CET - US-017
+- Created receipts-ocr skill - Extract data from receipt photos using Google Vision API
+- Built on top of google-oauth skill for authentication
+- Implemented comprehensive OCR features:
+  - Google Vision API integration with DOCUMENT_TEXT_DETECTION
+  - Smart parsing for merchant names, amounts, dates, and line items
+  - Confidence scoring for each extracted field (merchant, total, tax, date)
+  - Auto-categorization based on merchant and content keywords
+  - Payment method detection (Credit Card, Cash, Check, Digital Wallet)
+- SQLite storage for:
+  - Receipt records with all extracted fields and confidence scores
+  - Line items table with quantity, unit price, total, confidence
+  - Status tracking: pending → confirmed/corrected/rejected
+- Full CLI with commands:
+  - status, health - Connection monitoring
+  - scan <image> - Process and save receipt with --copy and --notes options
+  - text <image> - Extract text without saving to database
+  - list, get - Query receipts with filtering
+  - update, confirm, reject - Manual correction workflow
+  - delete - Remove receipts and associated images
+  - stats - Show spending breakdown by status and category
+  - export [path] - CSV export for accounting
+- Typecheck passes
+- Files changed:
+  - skills/receipts-ocr/package.json (new)
+  - skills/receipts-ocr/tsconfig.json (new)
+  - skills/receipts-ocr/.gitignore (new)
+  - skills/receipts-ocr/SKILL.md (new)
+  - skills/receipts-ocr/src/index.ts (new)
+  - skills/receipts-ocr/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Google Vision API uses `images:annotate` endpoint with base64-encoded images
+  - DOCUMENT_TEXT_DETECTION is better than TEXT_DETECTION for structured documents like receipts
+  - Confidence scoring helps users prioritize which receipts need manual review
+  - Status workflow (pending → confirmed/corrected/rejected) enables data quality tracking
+  - Line item extraction uses regex patterns to identify prices at end of lines
+  - Categories are inferred from merchant names and receipt content keywords
+  - CSV export should escape quotes and wrap fields in quotes for proper parsing
+---
+
