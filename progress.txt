@@ -1620,3 +1620,51 @@
   - Timeline calculations adapt based on days until occasion (14 days to shop, 7 days to order, 1 day to wrap)
 ---
 
+## 2026-02-10 18:18 CET - US-037
+- Created recipe-suggester skill - Suggest recipes based on dietary preferences, ingredients, and cuisine
+- Implemented comprehensive features:
+  - 30 curated recipes across 10 cuisines (Italian, Mexican, Asian, Thai, Greek, Mediterranean, American, Indian, Japanese, French)
+  - 9 dietary filters: vegetarian, vegan, gluten-free, keto, paleo, dairy-free, nut-free, low-carb, low-sodium
+  - 3 difficulty levels: easy, medium, hard
+  - 6 meal types: breakfast, lunch, dinner, snack, dessert, appetizer
+  - Ingredient-based recipe search with match percentage
+  - Multi-factor scoring algorithm for recipe suggestions
+  - Recipe favorites and cooking history tracking
+  - Nutritional information for recipes
+- Scoring algorithm prioritizes:
+  - Dietary matching (30 points for all requirements)
+  - Cuisine matching (25 points)
+  - Meal type matching (20 points)
+  - Difficulty matching (15 points)
+  - Time constraints (10 points)
+  - Tag matching (8 points per match)
+- Ingredient search finds recipes by available ingredients with configurable match threshold
+- SQLite storage for favorites and cooking history
+- Full CLI with commands:
+  - suggest/search - Find recipes with filters (--dietary, --cuisine, --difficulty, --meal, --time, --servings)
+  - by-ingredients - Find recipes matching available ingredients
+  - get/view - View full recipe details with ingredients and instructions
+  - random - Get random recipe suggestion with optional filters
+  - cuisine, dietary, difficulty, quick - List recipes by category
+  - diets, cuisines, meals - List available filters
+  - stats - Database statistics
+  - cooked - Mark recipe as cooked with rating and notes
+  - favorite/fav, favorites - Manage favorite recipes
+- Typecheck passes
+- Files changed:
+  - skills/recipe-suggester/package.json (new)
+  - skills/recipe-suggester/tsconfig.json (new)
+  - skills/recipe-suggester/.gitignore (new)
+  - skills/recipe-suggester/SKILL.md (new)
+  - skills/recipe-suggester/src/index.ts (new - main library)
+  - skills/recipe-suggester/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-037 passes: true)
+- **Learnings for future iterations:**
+  - Curated recipe database approach works well for local-only skills (no API needed)
+  - Multi-factor scoring algorithm provides better recommendations than simple filtering
+  - Ingredient matching with percentage threshold helps users find recipes they can make
+  - Recipe data structure should include: id, name, description, cuisine, dietary[], difficulty, mealType, prepTime, cookTime, servings, ingredients[], instructions[], tags[], nutritional info
+  - SQLite tracking for user interactions (favorites, history) adds value without external dependencies
+  - CLI argument parsing for comma-separated lists: use `value.split(',').map(v => v.trim())`
+---
+

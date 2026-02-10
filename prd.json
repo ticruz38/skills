@@ -589,7 +589,7 @@
         "Typecheck passes"
       ],
       "priority": 37,
-      "passes": false,
+      "passes": true,
       "notes": "Uses main model. Optional: Spoonacular API"
     },
     {
