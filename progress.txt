@@ -1,3 +1,24 @@
+## 2026-02-10 14:48 CET - US-003
+- Created binance-auth skill - Binance API key management for trading skills
+- Built on top of auth-provider skill for secure credential storage
+- Implemented multi-profile support for multiple Binance accounts
+- Added support for both production and testnet environments
+- Created BinanceAuthClient class with connect, disconnect, healthCheck, getBalance methods
+- Implemented CLI with status, connect, health, list, validate, balance, disconnect commands
+- API key validation checks for 64-character hex format
+- Files changed:
+  - skills/binance-auth/package.json
+  - skills/binance-auth/tsconfig.json
+  - skills/binance-auth/SKILL.md
+  - skills/binance-auth/src/index.ts
+  - skills/binance-auth/src/cli.ts
+- **Learnings for future iterations:**
+  - When auth-provider methods are async (getBinanceClient, getApiKey), need to await them
+  - Can instantiate BinanceProviderAdapter directly with credentials for validation before storing
+  - Use `await client.isConnected()` since it's now async (checks credentials from storage)
+  - Filter non-zero balances with: `.filter((b: {free: string, locked: string}) => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0)`
+---
+
 ## Codebase Patterns
 - Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
 - Use `src/` directory for TypeScript source files
