@@ -1821,3 +1821,86 @@
   - Day-by-day schedule generation calculates dates from trip start date
 ---
 
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **SQLite run result**: To get `lastID` after INSERT, use a custom promisified wrapper that captures `this.lastID` from the callback:
+  ```typescript
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err: Error | null) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+  ```
+- **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
+- **Database column naming**: SQLite returns snake_case column names. Create separate Record interfaces (snake_case) and convert to main interfaces (camelCase):
+  ```typescript
+  interface InvoiceRecord {
+    id?: number;
+    invoice_number: string;
+    // ... snake_case columns
+  }
+  // Convert when fetching:
+  return {
+    id: record.id,
+    invoiceNumber: record.invoice_number,
+    // ...
+  };
+  ```
+- **Seeding data**: When seeding default data, use `runWithResult()` in a loop with await instead of prepared statements for proper async handling
+
+---
+
+## 2026-02-10 18:53 CET - US-042
+- Created property-alerts skill - Real estate property listing alerts and monitoring
+- Implemented comprehensive property monitoring features:
+  - Property search with multiple filter criteria (price, beds, baths, sqft, type, status, keywords)
+  - Saved searches with SQLite storage for persistent search criteria
+  - Instant alert system for 5 alert types: new_listing, price_drop, price_increase, status_change, back_on_market
+  - Price change detection with history tracking
+  - Multi-source support (Zillow API with simulated fallback)
+- Database schema:
+  - saved_searches table with full criteria serialization and alert settings
+  - properties table for tracking all seen properties
+  - price_history table for price change audit trail
+  - alerts table for notification management with read/unread status
+- Sample property data for simulated mode (5 properties across Austin, Dallas, Houston)
+- Full CLI with commands:
+  - search - Property search with filters
+  - save-search, list-searches, delete-search - Search management
+  - check - Alert checking with change detection
+  - alerts, read, read-all, delete-alert - Alert management
+  - history - Price history viewing
+  - stats, health - Monitoring
+- Typecheck passes
+- Files changed:
+  - skills/property-alerts/package.json (new)
+  - skills/property-alerts/tsconfig.json (new)
+  - skills/property-alerts/.gitignore (new)
+  - skills/property-alerts/SKILL.md (new)
+  - skills/property-alerts/src/index.ts (new)
+  - skills/property-alerts/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Property alert detection compares current results with cached properties to identify changes
+  - 5 alert types cover the main real estate use cases: new listings, price changes, status changes
+  - Price history table tracks all price events for audit trail
+  - Change detection should check for both new properties and properties that went off-market
+  - Alert messages should include full property context for user decision-making
+  - Database schema should store property_id as unique key for tracking across searches
+---
+
