@@ -1131,3 +1131,47 @@
   - Copy-paste ready output format is useful for social media workflows
 ---
 
+## 2026-02-10 17:25 CET - US-026
+- Created payment-reminders skill - Automated payment reminder emails for invoice chasing
+- Built on top of invoices and email skills for data and email delivery
+- Implemented comprehensive reminder system:
+  - Escalating reminder schedules with configurable days before/after due date
+  - 3 default schedules: Standard (7,3 days before / 7,14,30 after), Gentle, Aggressive
+  - 7 default email templates across 4 stages: pre_due, on_due, post_due, final
+  - 3 tone options: friendly, firm, urgent
+  - Template variable system: {{clientName}}, {{invoiceNumber}}, {{amount}}, {{dueDate}}, etc.
+  - Client-specific settings (enable/disable, custom schedules)
+  - Full reminder history tracking with success/failure status
+  - Dry-run mode for testing
+  - Preview functionality to see reminders before sending
+- SQLite storage for:
+  - reminder_schedules - Configurable schedules with JSON arrays for days
+  - reminder_templates - Email templates with stage/tone classification
+  - client_settings - Per-client reminder preferences
+  - reminder_history - Audit trail of all sent reminders
+- Full CLI with commands:
+  - status/health - Check connection to dependencies
+  - schedules - List reminder schedules
+  - templates - List templates by stage
+  - client-settings/enable/disable - Manage client preferences
+  - pending - List reminders ready to send
+  - send-all --dry-run - Preview all pending reminders
+  - preview/send - Work with specific invoices
+  - history/stats - View activity and statistics
+- Typecheck passes
+- Files changed:
+  - skills/payment-reminders/package.json (new)
+  - skills/payment-reminders/tsconfig.json (new)
+  - skills/payment-reminders/.gitignore (new)
+  - skills/payment-reminders/SKILL.md (new)
+  - skills/payment-reminders/src/index.ts (new - main library)
+  - skills/payment-reminders/src/cli.ts (new - CLI interface)
+- **Learnings for future iterations:**
+  - When a dependency skill returns `Type | null` and you're using `find()` which returns `Type | undefined`, explicitly type the variable as `Type | null`
+  - Template variable substitution uses regex: `replace(/\{\{(\w+)\}\}/g, ...)`
+  - JSON arrays in SQLite are stored as strings and parsed with `JSON.parse()` when retrieved
+  - Use dynamic imports for ES module skills: `const { EmailSkill } = await import('@openclaw/email')`
+  - The `daysBeforeDue` and `daysAfterDue` arrays define when reminders trigger
+  - Stage progression: pre_due → on_due → post_due → final based on days relative to due date
+---
+
