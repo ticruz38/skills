@@ -43,10 +43,45 @@
   - Filter non-zero balances with: `.filter((b: {free: string, locked: string}) => parseFloat(b.free) > 0 || parseFloat(b.locked) > 0)`
 ---
 
+## 2026-02-10 15:29 CET - US-007
+- Created calendar skill - Google Calendar integration for events and availability
+- Built on top of google-oauth skill for authentication
+- Implemented full Google Calendar API integration:
+  - List events with time filters and pagination
+  - Create events with attendees and recurrence rules
+  - Update and delete events
+  - Find free time slots using freeBusy API
+  - Handle recurring events (RRULE format)
+  - List user's calendars
+  - Get single event details
+  - Get upcoming events (next N days)
+  - Get today's events
+  - SQLite cache for events, calendars, and sync tokens
+- Implemented CLI with all commands: status, calendars, list, get, create, update, delete, free, upcoming, today, health
+- RecurrenceRule interface supports DAILY, WEEKLY, MONTHLY, YEARLY with interval, count, until, byDay, byMonthDay
+- Free time finder merges overlapping busy periods and returns available slots of specified duration
+- Typecheck passes
+- Files changed:
+  - skills/calendar/package.json (new)
+  - skills/calendar/tsconfig.json (new)
+  - skills/calendar/.gitignore (new)
+  - skills/calendar/SKILL.md (new)
+  - skills/calendar/src/index.ts (new)
+  - skills/calendar/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Google Calendar API uses `calendars/{calendarId}/events` endpoint with calendarId URL-encoded
+  - Free/busy API returns busy periods that need to be merged before calculating free slots
+  - All-day events use `date` field instead of `dateTime`
+  - Recurrence rules use RRULE format (e.g., "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR")
+  - CalendarListEntry has `primary` flag to identify the user's main calendar
+  - Event start/end can be either date (all-day) or dateTime (timed) - check both
+---
+
 ## Codebase Patterns
 - Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
 - Use `src/` directory for TypeScript source files
 - Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
 - Encrypt sensitive data with `crypto-js` AES
 - Store credentials in `~/.openclaw/skills/{skill-name}/`
 - Use environment variables for OAuth client credentials
@@ -56,6 +91,7 @@
 - Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
 - When extending auth-provider interfaces, export new types (UserProfile) from types.ts
 - Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
 
 ---
 
@@ -135,3 +171,42 @@
   - Use `fetch` API with explicit type casting: `await response.json() as Type`
   - Store node_modules in .gitignore - don't commit dependencies
 ---
+---
+
+## 2026-02-10 15:28 CET - US-006
+- Created email skill - Gmail integration for reading, sending, and managing emails
+- Built on top of google-oauth skill for authentication
+- Implemented full Gmail API integration with the following features:
+  - List emails with pagination
+  - Search using Gmail query syntax (from:, to:, is:unread, has:attachment, etc.)
+  - Read full email content with text and HTML bodies
+  - Send emails with support for CC, BCC, attachments
+  - Reply to emails with automatic threading
+  - Thread view to see all messages in a conversation
+  - Mark as read/unread, star/unstar, archive, trash, delete
+  - Download attachments
+  - List Gmail labels
+  - SQLite cache for email metadata
+  - Full CLI with all commands
+- TypeScript implementation following codebase patterns
+- Replaced old Python implementation
+- Typecheck passes
+- Files changed:
+  - skills/email/package.json (new)
+  - skills/email/tsconfig.json (new)
+  - skills/email/.gitignore (new)
+  - skills/email/SKILL.md (updated)
+  - skills/email/src/index.ts (new)
+  - skills/email/src/cli.ts (new)
+  - skills/email/email.py (deleted)
+  - skills/email/onboard.yaml (deleted)
+  - skills/email/requirements.txt (deleted)
+- **Learnings for future iterations:**
+  - sqlite3 module doesn't have a default export - use `import * as sqlite3 from 'sqlite3'`
+  - Always wait for database initialization before closing to avoid race conditions
+  - Use `new sqlite3.Database(path, callback)` pattern with Promise wrapper for async/await
+  - When using `enableCache` with async initialization, ensure `close()` waits for initPromise
+  - Gmail API returns base64url encoded data for attachments
+  - Email threads use the same threadId across all messages in the conversation
+  - Gmail API uses `users/me/messages` endpoint with OAuth authentication
+  - The `run()` promisified helper must check if db is null before calling db.run()
