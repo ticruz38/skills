@@ -1,3 +1,42 @@
-# Ralph Progress Log
-Started: Tue Feb 10 14:02:31 CET 2026
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+
+---
+
+## 2026-02-10 14:16 CET - US-001
+- Created auth-provider skill - foundation for all authentication
+- Implemented OAuth 2.0 with PKCE flow
+- Created encrypted SQLite storage with AES-256
+- Implemented provider adapters: Google, Binance (API key), QuickBooks, Slack
+- Added auto-refresh for expiring tokens
+- Added health check endpoint for all credentials
+- Created CLI for credential management
+- Files changed:
+  - skills/auth-provider/package.json
+  - skills/auth-provider/tsconfig.json
+  - skills/auth-provider/SKILL.md
+  - skills/auth-provider/src/types.ts
+  - skills/auth-provider/src/storage.ts
+  - skills/auth-provider/src/index.ts
+  - skills/auth-provider/src/cli.ts
+  - skills/auth-provider/src/providers/base.ts
+  - skills/auth-provider/src/providers/google.ts
+  - skills/auth-provider/src/providers/binance.ts
+  - skills/auth-provider/src/providers/quickbooks.ts
+  - skills/auth-provider/src/providers/slack.ts
+  - skills/auth-provider/src/providers/index.ts
+- **Learnings for future iterations:**
+  - Use `sqlite3` with serialize() for schema initialization to avoid SQLITE_MISUSE
+  - Use `crypto-js` for AES encryption - pure JS, no native dependencies
+  - Provider adapters should have flexible validateToken signature for provider-specific params
+  - Use `fetch` API with explicit type casting: `await response.json() as Type`
+  - Store node_modules in .gitignore - don't commit dependencies
 ---
