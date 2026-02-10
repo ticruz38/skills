@@ -634,7 +634,7 @@
         "Typecheck passes"
       ],
       "priority": 40,
-      "passes": false,
+      "passes": true,
       "notes": "Optional: Amadeus API. Can use scraping"
     },
     {
@@ -649,7 +649,7 @@
         "Typecheck passes"
       ],
       "priority": 41,
-      "passes": false,
+      "passes": true,
       "notes": "SQLite storage. No external deps"
     },
     {

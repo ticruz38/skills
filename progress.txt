@@ -1747,3 +1747,77 @@
   - Notice period calculation: daysUntil <= advanceNoticeDays means it's time to notify
   - Template preview allows users to see what they'll get before applying
 ---
+
+## 2026-02-10 18:41 CET - US-040
+- Created flight-search skill - Search and compare flights for travel
+- Implemented comprehensive flight search features:
+  - Route search between 35 major airports worldwide
+  - Price comparison with sorting (price, duration, departure, arrival)
+  - Date flexibility with +/- 3 day search
+  - Filter by airline codes and maximum stops
+  - Cabin class selection (economy, premium_economy, business, first)
+  - Round-trip support with separate return flight results
+  - Saved searches with SQLite storage
+  - Results caching (1 hour TTL)
+- Database includes 27 airlines and 35 major airports
+- Simulated flight generation when Amadeus API key not available
+- Direct booking links to Google Flights, Kayak, and Expedia
+- Typecheck passes
+- Files changed:
+  - skills/flight-search/package.json (new)
+  - skills/flight-search/tsconfig.json (new)
+  - skills/flight-search/.gitignore (new)
+  - skills/flight-search/SKILL.md (new)
+  - skills/flight-search/src/index.ts (new)
+  - skills/flight-search/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Flight search skills can work without external APIs by generating realistic simulated data
+  - Use Record<string, number> for multipliers when TypeScript can't infer the type correctly
+  - Default values for optional options should be applied when building result objects
+  - Provide search engine links as fallback when no API key is available
+  - Saved searches pattern is useful for recurring route monitoring
+  - Cabin multipliers: economy=1x, premium_economy=1.8x, business=4x, first=8x
+  - 35 airport database covers most major US and international destinations
+---
+
+## 2026-02-10 18:47 CET - US-041
+- Created itinerary-builder skill - Build day-by-day travel itineraries with scheduling and export
+- Implemented comprehensive trip planning features:
+  - Trip management with destination, dates, and descriptions
+  - Day-by-day activity scheduling with start/end times
+  - 8 activity categories: transport, sightseeing, food, shopping, entertainment, relaxation, accommodation, other
+  - Activity reordering within days (CLI-based "drag-drop")
+  - Travel time estimation between activities
+  - Cost tracking with currency support
+  - Booking reference storage
+- Database schema:
+  - trips table with full trip metadata
+  - activities table with ordering, timing, location, and cost info
+- Export functionality:
+  - generateHTML() creates professional HTML itineraries
+  - exportToHTML() saves to file
+  - Styled with CSS, print-friendly, responsive design
+- Full CLI with commands:
+  - create-trip, list-trips, get-trip, update-trip, delete-trip - Trip management
+  - add-activity, list-activities, get-activity, update-activity, delete-activity - Activity management
+  - reorder, move - Activity organization
+  - schedule - Day-by-day schedule view with travel estimates
+  - export - Export to HTML (PDF-ready)
+  - stats, health - Monitoring
+- Typecheck passes
+- Files changed:
+  - skills/itinerary-builder/package.json (new)
+  - skills/itinerary-builder/tsconfig.json (new)
+  - skills/itinerary-builder/.gitignore (new)
+  - skills/itinerary-builder/SKILL.md (new)
+  - skills/itinerary-builder/src/index.ts (new - main library)
+  - skills/itinerary-builder/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-041 passes: true)
+- **Learnings for future iterations:**
+  - SQLite `all<T>()` generic should be the single row type, not array type
+  - Travel time estimation can use simple heuristics based on activity categories
+  - HTML export with inline CSS is print-friendly and PDF-ready
+  - Activity ordering uses order_index field for drag-drop style reordering
+  - Day-by-day schedule generation calculates dates from trip start date
+---
+

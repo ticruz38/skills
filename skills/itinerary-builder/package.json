@@ -1,0 +1,23 @@
+{
+  "name": "@openclaw/itinerary-builder",
+  "version": "1.0.0",
+  "description": "Build day-by-day travel itineraries with scheduling and export",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "keywords": ["travel", "itinerary", "trip", "planning", "schedule"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  }
+}
