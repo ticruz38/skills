@@ -1,0 +1,30 @@
+# Binance Skill Onboarding
+# Optional - only if you need to ask the user for configuration
+
+questions:
+  - key: api_key
+    question: "Enter your Binance API key:"
+    type: secret
+    env_var: BINANCE_API_KEY
+    required: true
+    help: "Create API keys at https://www.binance.com/en/my/settings/api-management"
+    
+  - key: api_secret
+    question: "Enter your Binance API secret:"
+    type: secret
+    env_var: BINANCE_API_SECRET
+    required: true
+    
+  - key: use_testnet
+    question: "Use testnet (paper trading) for safety?"
+    type: boolean
+    env_var: BINANCE_TESTNET
+    default: true
+    help: "Testnet uses fake money - highly recommended for testing"
+    
+  - key: permissions
+    question: "What permissions does your API key have?"
+    type: choice
+    options: [read_only, spot_trading, margin_trading]
+    default: read_only
+    help: "For safety, we recommend READ-ONLY keys for monitoring only"

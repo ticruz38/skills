@@ -1,0 +1,5 @@
+# Summarizer has no onboarding - it works immediately!
+# This file is optional and can be omitted.
+# If present but empty, no questions are asked.
+
+questions: []

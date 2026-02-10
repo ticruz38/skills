@@ -1,0 +1,25 @@
+{
+  "name": "@ticruz38/skills-binance",
+  "version": "1.0.0",
+  "description": "Binance exchange integration for Clawd bots",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0"
+  },
+  "keywords": ["clawd", "skill", "binance", "trading", "crypto"],
+  "author": "ticruz38",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ticruz38/skills.git",
+    "directory": "skills/binance"
+  }
+}

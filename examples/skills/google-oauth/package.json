@@ -1,0 +1,14 @@
+{
+  "name": "@ticruz38/skill-google-oauth",
+  "version": "1.0.0",
+  "description": "Google OAuth2 skill for OpenClaw agents",
+  "main": "index.js",
+  "scripts": {
+    "test": "node -e \"const S = require('./index.js'); const s = new S(); s.init({MINION_BASE_URL: 'https://minion.do'}).then(console.log)\""
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,25 @@
+# Google OAuth Onboarding
+
+questions:
+  - key: minion_url
+    question: "Minion.do base URL (for OAuth callbacks):"
+    type: text
+    env_var: MINION_BASE_URL
+    default: "https://minion.do"
+    required: true
+    help: "The service that handles OAuth callbacks. Use https://minion.do or your own."
+    
+  - key: instance_id
+    question: "OpenClaw instance ID:"
+    type: text
+    env_var: OPENCLAW_INSTANCE_ID
+    default: "openclaw-local"
+    required: false
+    help: "Unique identifier for this agent instance"
+    
+  - key: api_key
+    question: "Minion API key (optional):"
+    type: secret
+    env_var: MINION_API_KEY
+    required: false
+    help: "Only needed if your minion.do instance requires API authentication"

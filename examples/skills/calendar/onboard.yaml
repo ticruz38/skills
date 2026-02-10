@@ -1,0 +1,19 @@
+# Calendar Skill Onboarding
+
+questions:
+  - key: auth_flow
+    question: "I'll open a browser for Google authorization. Type 'ok' when ready:"
+    type: text
+    help: "You need to grant access to manage your calendar"
+    
+  - key: refresh_token
+    question: "Paste the refresh token from the browser:"
+    type: secret
+    env_var: GOOGLE_REFRESH_TOKEN
+    required: true
+    
+  - key: default_calendar
+    question: "Which calendar should I use by default?"
+    type: text
+    env_var: GOOGLE_CALENDAR_ID
+    default: "primary"

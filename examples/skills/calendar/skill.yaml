@@ -1,0 +1,58 @@
+# Calendar Skill
+# Example of a skill with OAuth flow
+
+name: calendar
+description: "Google Calendar integration for scheduling and events"
+version: 1.0.0
+author: ticruz38
+
+categories:
+  - productivity
+  - scheduling
+
+env:
+  required:
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
+    - GOOGLE_REFRESH_TOKEN
+  optional:
+    - GOOGLE_CALENDAR_ID: "primary"
+    - DEFAULT_TIMEZONE: "UTC"
+
+onboarding:
+  - key: auth_flow
+    question: "I'll open a browser for you to authorize Google Calendar access. Click here when ready: [AUTH LINK]"
+    type: info
+    help: "You need to grant access to manage your calendar"
+    
+  - key: default_calendar
+    question: "Which calendar should I use by default?"
+    type: text
+    env_var: GOOGLE_CALENDAR_ID
+    default: "primary"
+    
+  - key: timezone
+    question: "Your timezone?"
+    type: text
+    env_var: DEFAULT_TIMEZONE
+    default: "America/New_York"
+
+capabilities:
+  - name: list_events
+    description: "List upcoming events"
+    params:
+      - days: number
+      
+  - name: create_event
+    description: "Create a new event"
+    params:
+      - title: string
+      - start: datetime
+      - end: datetime
+      - attendees: array
+      
+  - name: find_free_slots
+    description: "Find available time slots"
+    params:
+      - date: date
+      - duration: number

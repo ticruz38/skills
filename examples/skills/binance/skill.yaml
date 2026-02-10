@@ -1,0 +1,81 @@
+# Binance Trading Skill
+# Example of a complex skill requiring API authentication
+
+name: binance
+description: "Binance exchange integration for trading and market data"
+version: 1.0.0
+author: ticruz38
+license: MIT
+
+categories:
+  - finance
+  - trading
+  - crypto
+
+# Environment variables this skill needs
+env:
+  required:
+    - BINANCE_API_KEY
+    - BINANCE_API_SECRET
+  optional:
+    - BINANCE_TESTNET: "true"
+    - BINANCE_BASE_URL: "https://api.binance.com"
+
+# Onboarding questions - asked after profile questions
+onboarding:
+  - key: api_key
+    question: "Enter your Binance API key:"
+    type: secret
+    env_var: BINANCE_API_KEY
+    required: true
+    help: "Create API keys at https://www.binance.com/en/my/settings/api-management"
+    
+  - key: api_secret
+    question: "Enter your Binance API secret:"
+    type: secret
+    env_var: BINANCE_API_SECRET
+    required: true
+    
+  - key: use_testnet
+    question: "Use testnet (paper trading) for safety?"
+    type: boolean
+    env_var: BINANCE_TESTNET
+    default: true
+    help: "Testnet uses fake money - highly recommended for testing"
+    
+  - key: permissions
+    question: "What permissions does your API key have?"
+    type: choice
+    options: [read_only, spot_trading, margin_trading]
+    default: read_only
+    help: "For safety, we recommend READ-ONLY keys for monitoring only"
+
+# Capabilities this skill provides
+capabilities:
+  - name: get_balance
+    description: "Get account balance for a specific asset"
+    params:
+      - asset: string
+    
+  - name: get_ticker
+    description: "Get current price ticker for a trading pair"
+    params:
+      - symbol: string
+      
+  - name: place_order
+    description: "Place a spot order (requires trading permission)"
+    params:
+      - symbol: string
+      - side: enum[BUY, SELL]
+      - type: enum[MARKET, LIMIT]
+      - quantity: number
+    
+  - name: get_order_history
+    description: "Get historical orders for a symbol"
+    params:
+      - symbol: string
+      - limit: number
+
+integrations:
+  telegram: true
+  slack: true

@@ -1,0 +1,35 @@
+# Summarizer Skill
+# Example of a simple skill with no authentication required
+
+name: summarizer
+description: "Summarize long text using AI"
+version: 1.0.0
+author: ticruz38
+
+categories:
+  - ai
+  - text-processing
+
+# No env vars needed for this simple skill
+env:
+  required: []
+  optional:
+    - DEFAULT_MAX_LENGTH: "150"
+    - SUMMARY_STYLE: "concise"  # concise, detailed, bullet_points
+
+# No onboarding questions - works out of the box
+onboarding: []
+
+capabilities:
+  - name: summarize
+    description: "Summarize text to specified length"
+    params:
+      - text: string
+      - maxLength: number
+      - style: enum[concise, detailed, bullet_points]
+      
+  - name: summarize_url
+    description: "Fetch and summarize a webpage"
+    params:
+      - url: string
+      - maxLength: number
