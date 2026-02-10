@@ -832,3 +832,86 @@
   - Handle optional fields like `health.message` with fallback values
 ---
 
+
+## 2026-02-10 16:45 CET - US-020
+- Created tax-prep skill - Compile tax documents and summaries from invoices and receipts
+- Built on top of invoices and receipts-ocr skills for data aggregation
+- Implemented comprehensive tax preparation features:
+  - Deductible expense categorization with 40+ IRS Schedule C category mappings
+  - Auto-categorization based on merchant names and receipt keywords
+  - Schedule C (Profit or Loss from Business) report generation
+  - 1099 contractor tracking for payments >= $600
+  - TurboTax-compatible CSV export
+  - Complete accountant package with multiple export formats (JSON, HTML, CSV)
+- IRS Category mappings include:
+  - Advertising, Car and Truck, Contract Labor, Insurance
+  - Legal/Professional Services, Office Expense, Rent/Lease
+  - Repairs, Supplies, Taxes/Licenses, Travel, Meals (50% deductible)
+  - Utilities, Interest, Wages, and more
+- Special handling for meals (50% deductible) vs fully deductible categories
+- SQLite storage for category mappings and categorized expenses
+- Full CLI with commands: status, categorize, deductions, schedule-c, contractors, turbotax, package, summary, add-mapping
+- Typecheck passes
+- Files changed:
+  - skills/tax-prep/package.json (new)
+  - skills/tax-prep/tsconfig.json (new)
+  - skills/tax-prep/.gitignore (new)
+  - skills/tax-prep/SKILL.md (new)
+  - skills/tax-prep/src/index.ts (new)
+  - skills/tax-prep/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Skills can aggregate data from multiple other skills (invoices + receipts-ocr)
+  - Category mapping system uses keyword matching with priority scoring
+  - Meals are only 50% deductible while most other business expenses are 100%
+  - Schedule C reports use standard IRS line numbers for each expense category
+  - 1099 threshold is $600 - contractors receiving >= $600 require 1099 forms
+  - Accountant package should include multiple formats: JSON (structured data), HTML (readable reports), CSV (spreadsheet import)
+  - Tax year-based filtering uses YYYY-MM-DD date range queries
+---
+
+## 2026-02-10 16:55 CET - US-021
+- Created content-writer skill - Generate content using AI for blogs, social media, and emails
+- Implemented comprehensive content generation features:
+  - Blog post generation with customizable word count and SEO keywords
+  - Social media captions for Twitter/X, LinkedIn, Instagram, Facebook with platform constraints
+  - Email templates for welcome, follow-up, promotional, newsletter, cold-outreach, thank-you
+  - 8 tone options: professional, casual, friendly, formal, enthusiastic, empathetic, authoritative, witty
+  - Platform-specific formatting (character limits, hashtag recommendations)
+- Template system with 6 default templates:
+  - Blog Post - How-To template with structured sections
+  - Social Media templates for Twitter/X and LinkedIn
+  - Email templates for Welcome, Follow-Up, and Promotional
+  - Variable substitution with {{variableName}} syntax
+- SQLite storage for:
+  - Generated content history with full metadata
+  - Content templates with variables
+  - Tone preferences
+- Full CLI with commands:
+  - generate, g - Generate content with full options
+  - history, h - View generation history
+  - get <id> - Get specific content by ID
+  - templates, t - List available templates
+  - template-get <name> - View template details
+  - stats - View usage statistics
+  - tones - List available tones
+  - platforms - List social platforms with constraints
+  - health - System health check
+- TypeScript implementation following all codebase patterns
+- Typecheck passes
+- No external API dependencies - uses local generation patterns
+- Files changed:
+  - skills/content-writer/package.json (new)
+  - skills/content-writer/tsconfig.json (new)
+  - skills/content-writer/.gitignore (new)
+  - skills/content-writer/SKILL.md (new)
+  - skills/content-writer/src/index.ts (new)
+  - skills/content-writer/src/cli.ts (new)
+- **Learnings for future iterations:**
+  - Content generation skills don't need external API keys - they use the main model
+  - Platform constraints should be enforced (e.g., Twitter 280 char limit)
+  - Template system with variable substitution enables reusable content patterns
+  - Tone modifiers are stored as descriptions that guide content generation
+  - Multiple content types (blog, social, email) can share the same interface
+  - SQLite storage enables content history and template management
+---
+

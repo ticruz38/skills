@@ -1,0 +1,23 @@
+{
+  "name": "@openclaw/content-writer",
+  "version": "1.0.0",
+  "description": "Generate content using AI - blog posts, social media captions, email templates",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "keywords": ["content", "writing", "blog", "social-media", "email"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  }
+}
