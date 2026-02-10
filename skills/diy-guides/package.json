@@ -1,0 +1,23 @@
+{
+  "name": "@openclaw/diy-guides",
+  "version": "1.0.0",
+  "description": "Step-by-step DIY repair guides with video links, tools lists, and difficulty ratings",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli.js"
+  },
+  "keywords": ["diy", "repairs", "home", "guides", "tools", "maintenance"],
+  "author": "OpenClaw",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  }
+}
