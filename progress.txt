@@ -1,3 +1,27 @@
+## 2026-02-10 14:54 CET - US-004
+- Created quickbooks-auth skill - QuickBooks OAuth for accounting integration
+- Built on top of auth-provider skill for secure token management
+- Implemented multi-profile support for multiple QuickBooks companies
+- Added support for both sandbox and production environments
+- Realm ID is stored in token metadata and accessible via getRealmId()
+- Created QuickBooksAuthClient class with initiateAuth, completeAuth, isConnected, getAccessToken, healthCheck, fetch methods
+- Implemented CLI with status, connect, complete, disconnect, health, profiles, env commands
+- Type-safe environment handling with 'sandbox' | 'production' union type
+- Files changed:
+  - skills/quickbooks-auth/package.json
+  - skills/quickbooks-auth/tsconfig.json
+  - skills/quickbooks-auth/.gitignore
+  - skills/quickbooks-auth/SKILL.md
+  - skills/quickbooks-auth/src/index.ts
+  - skills/quickbooks-auth/src/cli.ts
+- **Learnings for future iterations:**
+  - QuickBooks OAuth requires realmId to be captured from the callback URL and passed to completeAuth()
+  - Realm ID is stored in metadata during completeAuth: `this.auth.completeAuth('quickbooks', code, state, { realmId, environment })`
+  - Use `realmId || undefined` when returning to satisfy TypeScript's string | undefined type
+  - QuickBooks API endpoints require both access token AND realmId in the URL path
+  - getApiBaseUrl() returns different URLs for sandbox vs production
+---
+
 ## 2026-02-10 14:48 CET - US-003
 - Created binance-auth skill - Binance API key management for trading skills
 - Built on top of auth-provider skill for secure credential storage
