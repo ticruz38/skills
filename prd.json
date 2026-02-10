@@ -769,7 +769,7 @@
         "Typecheck passes"
       ],
       "priority": 49,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: calendar. SQLite storage"
     },
     {
@@ -784,7 +784,7 @@
         "Typecheck passes"
       ],
       "priority": 50,
-      "passes": false,
+      "passes": true,
       "notes": "Depends: calendar"
     },
     {

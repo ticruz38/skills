@@ -2180,3 +2180,140 @@
   - SQLite storage enables draft history and analytics tracking
   - Skills for support/CRM can follow similar patterns with tickets as the core entity
 ---
+## 2026-02-10 19:43 CET - US-049
+- Created scheduling-links skill - Generate Calendly-style booking links with availability windows and embeddable widgets
+- Built on top of calendar skill for automatic event creation when bookings are made
+- Implemented comprehensive features:
+  - Meeting types with custom durations (15, 30, 45, 60+ minutes)
+  - Availability windows per meeting type (days of week with time ranges)
+  - Booking links with customizable settings (title, welcome/confirmation messages)
+  - Buffer times before/after appointments to prevent back-to-back bookings
+  - Booking constraints (min/max advance booking times)
+  - Required fields configuration (phone, notes)
+  - Embeddable iframe widget code generation
+  - Available slot calculation with conflict detection
+  - Full booking lifecycle (create, cancel, no-show)
+  - Calendar integration for automatic event creation
+  - SQLite storage for all data
+- Database schema:
+  - `meeting_types` - Meeting type definitions with duration and color
+  - `availability_windows` - Weekly availability per meeting type
+  - `booking_links` - Shareable booking links with configuration
+  - `bookings` - Appointment records with calendar event IDs
+- Full CLI with commands:
+  - type-create, type-list, type-get, type-update, type-enable, type-disable, type-delete
+  - availability, set-availability
+  - link-create, link-list, link-get, link-update, link-enable, link-disable, link-delete
+  - link-url, widget
+  - slots, book, bookings, upcoming, cancel, no-show
+  - status, health, stats
+- Typecheck passes
+- Files changed:
+  - skills/scheduling-links/package.json (new)
+  - skills/scheduling-links/tsconfig.json (new)
+  - skills/scheduling-links/.gitignore (new)
+  - skills/scheduling-links/SKILL.md (new)
+  - skills/scheduling-links/src/index.ts (new - main library)
+  - skills/scheduling-links/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-049 passes: true)
+- **Learnings for future iterations:**
+  - Slot availability calculation must check existing bookings and buffer times
+  - Calendar integration is optional - skill works standalone without calendar connection
+  - Embed widget generates iframe HTML code for website integration
+  - Buffer times prevent back-to-back bookings by adding padding
+  - Booking constraints control when people can book (e.g., 24 hours in advance, up to 30 days)
+  - SQLite database uses ON DELETE CASCADE for foreign key relationships
+  - Date parsing for time slots: use new Date(date).getDay() for day of week (0-6)
+---
+
+## Codebase Patterns
+- Skills are TypeScript-based with `SKILL.md` documentation in frontmatter format
+- Use `src/` directory for TypeScript source files
+- Use `sqlite3` package (not better-sqlite3) for SQLite - better compatibility
+- **sqlite3 import**: Use `import * as sqlite3 from 'sqlite3'` (not default import)
+- Encrypt sensitive data with `crypto-js` AES
+- Store credentials in `~/.openclaw/skills/{skill-name}/`
+- Use environment variables for OAuth client credentials
+- Provider adapters implement base interface for OAuth flows
+- PKCE is used for all OAuth flows for security
+- Multi-profile support via (provider, profile) unique key
+- Skills that depend on other skills should use `"@openclaw/auth-provider": "file:../auth-provider"` in package.json
+- When extending auth-provider interfaces, export new types (UserProfile) from types.ts
+- Async methods in AuthProvider require await when called from dependent skills
+- **Race condition prevention**: If using async initialization (like SQLite), ensure `close()` waits for init to complete before cleaning up resources
+- **SQLite run result**: To get `lastID` after INSERT, use a custom promisified wrapper that captures `this.lastID` from the callback:
+  ```typescript
+  function runWithResult(db: sqlite3.Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      db.run(sql, params, function(this: sqlite3.RunResult, err: Error | null) {
+        if (err) reject(err);
+        else resolve({ lastID: this.lastID, changes: this.changes });
+      });
+    });
+  }
+  ```
+- **Dynamic imports for ES modules**: When a dependency skill uses ES modules (type: module), use dynamic import() with async/await instead of static import
+- **Database column naming**: SQLite returns snake_case column names. Create separate Record interfaces (snake_case) and convert to main interfaces (camelCase):
+  ```typescript
+  interface InvoiceRecord {
+    id?: number;
+    invoice_number: string;
+    // ... snake_case columns
+  }
+  // Convert when fetching:
+  return {
+    id: record.id,
+    invoiceNumber: record.invoice_number,
+    // ...
+  };
+  ```
+- **Seeding data**: When seeding default data, use `runWithResult()` in a loop with await instead of prepared statements for proper async handling
+- **Unique constraints**: Add UNIQUE constraints on key fields (like keyword in rules tables) to prevent duplicate entries when seeding default data
+
+---
+
+## 2026-02-10 19:49 CET - US-050
+- Created buffer-time skill - Auto-add buffers between meetings for travel time and preparation
+- Built on top of calendar skill for event management
+- Implemented comprehensive buffer management features:
+  - Configurable default buffer minutes (default: 15)
+  - Travel time calculation based on location changes
+  - Prep time blocks before important meetings
+  - Smart buffer rules system with keyword matching
+  - Same-location detection to skip unnecessary buffers
+  - Meeting gap analysis to find missing buffers
+- Buffer rules with 6 default templates:
+  - External Meetings (client): 30min buffer + 15min prep
+  - Interviews: 30min buffer + 15min prep
+  - Presentations: 30min buffer + 30min prep
+  - Important Calls (call): 15min buffer + 5min prep
+  - Standup: 5min buffer
+  - Lunch: 15min buffer
+- Database schema:
+  - `config` - Settings for default buffer, travel time, prep time
+  - `buffer_rules` - Keyword-based rules with UNIQUE constraint on keyword
+  - `buffers` - Track created buffer events
+- Full CLI with commands:
+  - status, health - System status check
+  - config - Show configuration
+  - set-default - Set default buffer minutes
+  - rules - List buffer rules
+  - add-rule, delete-rule - Rule management
+  - analyze - Find missing buffers in calendar
+  - stats - Usage statistics
+- Typecheck passes
+- Files changed:
+  - skills/buffer-time/package.json (new)
+  - skills/buffer-time/tsconfig.json (new)
+  - skills/buffer-time/.gitignore (new)
+  - skills/buffer-time/SKILL.md (new)
+  - skills/buffer-time/src/index.ts (new - main library)
+  - skills/buffer-time/src/cli.ts (new - CLI interface)
+  - prd.json (updated US-050 passes: true)
+- **Learnings for future iterations:**
+  - Use UNIQUE constraint on key fields (like `keyword TEXT UNIQUE`) to prevent duplicate default data
+  - Travel time calculation can use simple heuristics (same location = 0, virtual = 0, different = 15)
+  - Buffer rules enable flexible per-meeting-type configuration via keyword matching
+  - SQLite config table with `id INTEGER PRIMARY KEY CHECK (id = 1)` ensures single-row config
+  - When seeding with `INSERT OR IGNORE`, UNIQUE constraints are essential for idempotency
+---
