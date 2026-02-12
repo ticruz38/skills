@@ -1,2 +1,26 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Progress and auto-generated files
+progress.txt
+
+# Logs
 logs/
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# OS files
 .DS_Store
+Thumbs.db
