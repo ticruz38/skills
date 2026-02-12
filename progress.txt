@@ -2697,3 +2697,40 @@
   - Auto-analysis only triggers when sentiment/sentimentScore are undefined, not when set to default values
 ---
 
+## 2026-02-10 21:15 CET - US-060
+- Created saved-searches skill - Save and rerun searches automatically with result comparison and new item detection
+- Built on top of web-search and news-aggregator skills for search execution
+- Implemented comprehensive features:
+  - Save search queries for web and news sources
+  - Scheduled execution with configurable intervals
+  - Result comparison to detect new, changed, and removed items
+  - New item detection with alert generation
+  - Snapshot history for tracking changes over time
+  - Alert system for notifying about changes
+- Database schema:
+  - saved_searches table with schedule configuration
+  - search_snapshots table for historical results
+  - search_alerts table for change notifications
+- Full CLI with commands:
+  - create, list, get, update, delete - Search management
+  - run, run-all - Manual execution
+  - snapshots - View historical results
+  - alerts, mark-read - Alert management
+  - due, stats - Monitoring
+- Typecheck passes
+- Files changed:
+  - skills/saved-searches/package.json (new)
+  - skills/saved-searches/tsconfig.json (new)
+  - skills/saved-searches/.gitignore (new)
+  - skills/saved-searches/SKILL.md (new)
+  - skills/saved-searches/src/index.ts (new)
+  - skills/saved-searches/src/cli.ts (new)
+  - prd.json (updated US-060 passes: true)
+- **Learnings for future iterations:**
+  - Dynamic imports work well for depending on ES module skills: `const { WebSearchSkill } = await import('@openclaw/web-search')`
+  - Result comparison uses unique identifiers (url/guid) to track items across runs
+  - Snapshot storage includes full results plus extracted new/changed/removed items
+  - Schedule execution tracks next_run_at and automatically calculates next run time
+  - Alert system creates notifications for all detected changes
+---
+
