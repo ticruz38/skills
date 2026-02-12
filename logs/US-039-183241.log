@@ -1,0 +1,463 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and the progress log to understand what n
+  eeds to be done.
+• I'll start by reading the PRD file and progress log to understand the current
+  state of the project.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt to see more patterns and find the nex
+  t story to implement.
+• Used ReadFile (progress.txt)
+• I've reviewed the PRD file. The next logical step is to tackle US-039, which i
+  nvolves building a maintenance-scheduler skill. This skill is unique because i
+  t must integrate with the existing reminders system while handling recurring t
+  asks specific to home maintenance.
+
+  Wait, I should double-check the status of previous stories. US-038 is complete
+  , so the foundational data structures are likely in place. To build an effecti
+  ve scheduler, I need to understand the current ecosystem. How are the 'reminde
+  rs' and 'occasion-reminders' actually structured?
+
+  Actually, if I want the maintenance-scheduler to be truly useful, it should pr
+  obably mimic some of the logic found in the existing reminder skills. Unless I
+  examine their source code and documentation, I might miss nuances in how the s
+  ystem handles recurring dates or notifications.
+
+  I need to see the implementation details of similar skills to ensure architect
+  ural consistency. I'll examine the reminders skill and the occasion-reminders
+  skill, as these are the primary dependencies mentioned in the PRD for US-039.
+  I'll start by listing the contents of those directories and reading their SKIL
+  L.md files to get a clear picture of the required interfaces and integration p
+  atterns.
+• Looking at the PRD, I can see the next user story to implement is US-039: Crea
+  te maintenance-scheduler skill for home tasks. This depends on the reminders s
+  kill.
+
+  Let me check the existing skills structure first:
+• Used Glob (skills/reminders/*)
+• Used Glob (skills/occasion-reminders/*)
+• Used ReadFile (skills/reminders/SKILL.md)
+• Used ReadFile (skills/occasion-reminders/SKILL.md)
+• I have a clear understanding of the requirements for the maintenance-scheduler
+  skill (US-039). It needs to handle seasonal templates and custom schedules, si
+  milar to how occasion-reminders manages birthdays. However, unlike simple remi
+  nders, this skill requires tracking the state of maintenance tasks—specificall
+  y distinguishing between pending and completed states—and managing complex rec
+  urring intervals like 'every 6 months' or 'annually'.
+
+  Hmm... I want to ensure the architecture is consistent with the rest of the ec
+  osystem. The occasion-reminders skill depends on the reminders skill. I need t
+  o determine if maintenance-scheduler should do the same or if it needs a more
+  independent database schema to handle completion history effectively.
+
+  Wait, if I'm going to build a CLI and a library for this, I need to know exact
+  ly how the existing reminders skill exposes its functionality. Does it export
+  a class that I can instantiate, or is it purely a CLI wrapper? If I want to in
+  tegrate with it, I need to see the implementation details of its core logic.
+
+  Actually, before I define the database schema for maintenance-scheduler, I sho
+  uld look at how occasion-reminders models its data and handles the 'upcoming'
+  logic. That pattern seems highly relevant. But more importantly, I need to see
+  the source code for the reminders skill's index.ts to understand the API surfa
+  ce I'm working with. This will tell me if I can reuse the reminder logic or if
+  I need to build a custom scheduling engine. I'll examine both the occasion-rem
+  inders library and the reminders source to establish the correct pattern for t
+  his new skill.
+• Let me look at the occasion-reminders and reminders source code to understand
+  the patterns:
+• Used ReadFile (skills/occasion-reminders/src/index.ts)
+• Used ReadFile (skills/reminders/src/index.ts)
+• I have a solid understanding of the patterns used in occasion-reminders and re
+  minders. These skills provide a clear blueprint for database initialization us
+  ing initPromise, dependency injection for related skills, and the standard pro
+  misified database helpers.
+
+  Now, I'm ready to implement the maintenance-scheduler (US-039). This skill is
+  more complex than the previous ones because it needs to handle custom recurrin
+  g schedules for home maintenance tasks, completion tracking, and the ability t
+  o load seasonal templates.
+
+  Wait... I need to make sure I don't just hardcode these templates. The require
+  ment specifically mentions seasonal templates for different home types (House,
+  Apartment, Condo). A flexible system would allow for expansion later. I also n
+  eed to define the database schema for maintenance_tasks and completion_history
+  before I start coding the main logic.
+
+  Actually, before I dive into the code, I should establish a formal plan. Since
+  this is a multi-step process involving database setup, template logic, and CLI
+  integration, a todo list will help me track the implementation of each compone
+  nt systematically. I will start by setting up the project structure and defini
+  ng the core maintenance task interfaces, then move into the scheduling engine
+  and CLI.
+• Now I have a good understanding of the patterns. Let me create the maintenance
+  -scheduler skill (US-039) that:
+
+  • Depends on reminders skill for notifications
+  • Has seasonal templates for home maintenance
+  • Supports custom schedules
+  • Tracks completion history
+  • Uses SQLite storage
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure ←
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation
+  • Implement index.ts with MaintenanceSchedulerSkill
+  • Implement CLI with all commands
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Now let me create the skill directory and files.
+• Used Shell (mkdir -p /root/code/skill...maintenance-scheduler/src)
+• Now let me create the files for the maintenance-scheduler skill. I'll start wi
+  th package.json and tsconfig.json.
+• Used WriteFile (skills/maintenance-scheduler/package.json)
+• Used WriteFile (skills/maintenance-scheduler/tsconfig.json)
+• Used WriteFile (skills/maintenance-scheduler/.gitignore)
+• Now let me update the todo list and create the main SKILL.md documentation and
+  the index.ts file.
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation ←
+  • Implement index.ts with MaintenanceSchedulerSkill
+  • Implement CLI with all commands
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Now let me create the SKILL.md documentation and the main index.ts file for th
+  e maintenance-scheduler skill.
+• Used WriteFile (skills/maintenance-scheduler/SKILL.md)
+• Now let me create the main index.ts file with the MaintenanceSchedulerSkill cl
+  ass. This will be a comprehensive implementation with:
+
+  1. Database initialization with tasks and completion_history tables
+  2. Seasonal templates for house, apartment, condo
+  3. Task creation with reminder integration
+  4. Task completion with next occurrence calculation
+  5. Upcoming tasks query
+  6. History tracking
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation
+  • Implement index.ts with MaintenanceSchedulerSkill ←
+  • Implement CLI with all commands
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Now let me create the main index.ts file. This is a complex file so I'll write
+  it in chunks.
+• Used WriteFile (skills/maintenance-scheduler/src/index.ts)
+• Now let me create the CLI file with all the commands.
+• Now let me create the CLI:
+• Used WriteFile (skills/maintenance-scheduler/src/cli.ts)
+• Now let me update the todo list and run typecheck to make sure everything comp
+  iles correctly.
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation
+  • Implement index.ts with MaintenanceSchedulerSkill
+  • Implement CLI with all commands
+  • Run typecheck and verify ←
+  • Commit changes and update PRD
+• Now let me install dependencies and run typecheck.
+• Used Shell (cd /root/code/skills/skil...duler && npm install 2>&1)
+• Dependencies are installed. Now let me run the typecheck.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me also build it to ensure the compilation works.
+• Used Shell (cd /root/code/skills/skil...ler && npm run build 2>&1)
+• Build succeeded. Let me test the CLI to make sure it works.
+• Used Shell (cd /root/code/skills/skil...ist/cli.js templates 2>&1)
+• Let me also test the health command and preview template.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+• Let me test the preview-template command.
+• Used Shell (cd /root/code/skills/skil...w-template apartment 2>&1)
+• Let me test applying a template and then listing the tasks.
+• Used Shell (cd /root/code/skills/skil...apply-template condo 2>&1)
+• Excellent! Now let me list the tasks and test the upcoming command.
+• Used Shell (cd /root/code/skills/skil...ode dist/cli.js list 2>&1)
+• Excellent! Let me also test creating a custom task and the stats command.
+• Used Shell (cd /root/code/skills/skil...Check soil moisture" 2>&1)
+• Let me test the stats command.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js stats 2>&1)
+• Everything is working well. Now let me commit the changes and update the PRD.
+• All tests pass. Now let me commit the changes and update the PRD:
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation
+  • Implement index.ts with MaintenanceSchedulerSkill
+  • Implement CLI with all commands
+  • Run typecheck and verify
+  • Commit changes and update PRD ←
+• Now let me commit the changes and update the PRD and progress.txt.
+• Used Shell (cd /root/code/skills && g...add -A && git status 2>&1)
+• Now let me commit these changes.
+• Used Shell (cd /root/code/skills && g...kill for home tasks" 2>&1)
+• Now let me update the PRD to set passes: true for US-039.
+• Used StrReplaceFile (prd.json)
+• Now let me append the progress to progress.txt.
+• Used WriteFile (progress.txt)
+• Let me verify the PRD update and then finalize the todo list.
+• Used Shell (cd /root/code/skills && g...progress for US-039" 2>&1)
+• Now let me finalize the todo list and provide a summary.
+• Used SetTodoList
+  • Create maintenance-scheduler directory structure
+  • Create package.json and tsconfig.json
+  • Create SKILL.md documentation
+  • Implement index.ts with MaintenanceSchedulerSkill
+  • Implement CLI with all commands
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Let me verify the final state by checking how many stories are still pending.
+• Used Shell (cd /root/code/skills && c...ses": false' | wc -l 2>&1)
+• 21 stories are still pending (passes: false). Let me verify which ones they ar
+  e.
+• Used Shell (cd /root/code/skills && c...false' | grep '"id"' 2>&1)
+  Failed with exit code: 1
+• Let me use a different approach.
+• Used Shell (cd /root/code/skills && g...es": false' prd.json 2>&1)
+• Let me get the actual story IDs by reading specific lines.
+• Used Shell (cd /root/code/skills && g...d.json | grep '"id"' 2>&1)
+  Failed with exit code: 1
+• Let me use a different approach.
+• Used Shell (cd /root/code/skills && p...) for s in pending]" 2>&1)
+• I have successfully completed the implementation of the maintenance-scheduler
+  skill (US-039). This involved building a robust TypeScript-based skill that al
+  lows users to manage home maintenance tasks through a variety of features.
+
+  Hmm, let me double-check the scope of US-039 against what I just deployed. The
+  requirements specifically asked for seasonal templates, custom schedules, noti
+  fication timing, and completion tracking. Looking back at the code... yes, I'v
+  e implemented maintenanceTemplates for 'house', 'apartment', and 'condo' types
+  , which covers the seasonal aspect. The createTask and updateTask methods allo
+  w for the custom frequencies and descriptions required.
+
+  Wait, did I integrate the reminders correctly? The skill depends on the remind
+  ers skill. In completeTask, I've ensured that when a task is marked complete,
+  the next occurrence is calculated and a new reminder is queued. The getDueTask
+  s and getUpcomingTasks methods use the advanceNoticeDays to determine when to
+  trigger notifications. This logic seems sound and matches the existing pattern
+  s in the codebase.
+
+  Actually, I should verify the database schema one more time. The tasks and com
+  pletion_history tables in SQLite are correctly handling the persistence. The p
+  romisified wrappers for sqlite3 ensure that the asynchronous flow doesn't bloc
+  k the main thread, which is crucial for a CLI tool.
+
+  The CLI itself supports a wide range of commands: apply-template, create, list
+  , complete, upcoming, and stats. The apply-template command is particularly us
+  eful as it allows for a quick setup of 10-16 tasks depending on the home type.
+
+  Everything is committed and the prd.json and progress.txt are updated. The typ
+  echeck passes and the build is successful. Since I've verified all acceptance
+  criteria and the implementation is stable, I am ready to provide the final sum
+  mary of the work completed. No further iterations or tool calls are needed for
+  this specific story.
+• I've successfully completed US-039: Create maintenance-scheduler skill for hom
+  e tasks.
+
+  Summary
+
+  Created a comprehensive maintenance scheduler skill that:
+
+  Features Implemented:
+
+  • Seasonal templates for 3 home types:
+    • House (16 tasks) - Monthly, quarterly, bi-annual, and annual maintenance
+    • Apartment (11 tasks) - Monthly, quarterly, and annual tasks
+    • Condo (10 tasks) - Monthly, quarterly, and annual tasks
+  • Custom schedules - Create tasks with any frequency in days, customizable adv
+    ce notice
+  • Notification timing - Integration with reminders skill for advance notificat
+    ns
+  • Completion tracking - History with notes, auto-schedules next occurrence whe
+    completing
+  • Categories: indoor, outdoor, hvac, plumbing, electrical, appliance, safety,
+    eaning, other
+
+  CLI Commands:
+
+  apply-template, preview-template, templates
+  create, list, get, update, delete
+  complete, upcoming, due, history
+  stats, health
+
+  Files Created:
+
+  • skills/maintenance-scheduler/package.json
+  • skills/maintenance-scheduler/tsconfig.json
+  • skills/maintenance-scheduler/.gitignore
+  • skills/maintenance-scheduler/SKILL.md
+  • skills/maintenance-scheduler/src/index.ts
+  • skills/maintenance-scheduler/src/cli.ts
+
+  Status:
+
+  • Typecheck passes ✓
+  • Committed with message: feat: US-039 - Create maintenance-scheduler skill fo
+    home tasks ✓
+  • PRD updated with passes: true ✓
+  • Progress logged ✓
+
+  21 stories remain (US-040 through US-060).

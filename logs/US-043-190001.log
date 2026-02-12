@@ -1,0 +1,378 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and progress log to understand what needs
+  to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• The progress log is quite long. Let me continue reading it to see the current
+  state, and also check the prd.json to find the highest priority story with pas
+  ses: false.
+• Used ReadFile (progress.txt)
+• Used Shell (cd /root/code/skills && git status)
+• Now I need to find the highest priority user story with passes: false. From th
+  e PRD, I can see that US-043 through US-060 are still pending (passes: false).
+  Let me pick the highest priority one - which is US-043 "Create client-crm skil
+  l for realtor contacts".
+
+  Let me verify the current branch and start implementing US-043.
+• Now I can see the status. Let me find the highest priority story with passes:
+  false:
+• Used Shell (cd /root/code/skills && n...ty:', highest.priority);")
+• Used Glob (skills/*)
+• I need to implement US-043: "Create client-crm skill for realtor contacts". Th
+  is is a real estate client relationship management skill. Let me check the pro
+  gress.txt for patterns and check if there's an existing skill structure to fol
+  low.
+
+  The skill should:
+
+  • Contact profiles
+  • Property preferences
+  • Communication history
+  • Pipeline tracking
+
+  It's noted that this is "SQLite storage. No external deps".
+
+  Let me check the progress.txt for patterns from similar skills, and look at so
+  me existing skills for reference.
+• I'll implement US-043: Create client-crm skill for realtor contacts. Let me ch
+  eck the patterns and reference similar skills:
+• Used ReadFile (skills/client-tracker/src/index.ts)
+• Used ReadFile (property-alerts/src/index.ts)
+  File not found
+• Let me check the structure of the property-alerts skill and look at other simi
+  lar skills.
+• Used Glob (skills/property-alerts/*)
+• Used ReadFile (skills/property-alerts/src/index.ts)
+• Now I have a good understanding of the patterns. Let me create the client-crm
+  skill for realtor contacts. Based on the PRD requirements:
+
+  • Contact profiles
+  • Property preferences
+  • Communication history
+  • Pipeline tracking
+  • SQLite storage
+  • No external deps
+
+  Let me create this skill now.
+• Now I have a good understanding of the patterns. Let me create the client-crm
+  skill for real estate agents:
+• Used Shell (mkdir -p /root/code/skills/skills/client-crm/src)
+• Now let me create the SKILL.md file for the client-crm skill.
+• Used WriteFile (skills/client-crm/SKILL.md)
+• Now let me create the main TypeScript implementation file for the client-crm s
+  kill.
+• Used WriteFile (skills/client-crm/src/index.ts)
+• Now let me create the CLI file for the client-crm skill.
+• Used WriteFile (skills/client-crm/src/cli.ts)
+• Now let me create the package.json and tsconfig.json files for the client-crm
+  skill.
+• Used WriteFile (skills/client-crm/package.json)
+• Now let me create the tsconfig.json file.
+• Used WriteFile (skills/client-crm/tsconfig.json)
+• Now let me create the .gitignore file.
+• Used WriteFile (skills/client-crm/.gitignore)
+• Now let me build the skill to ensure it compiles correctly.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• The typecheck passed. Now let me build the project and run a quick test.
+• Typecheck passes! Let me build the project and test it:
+• Used Shell (cd /root/code/skills/skil...crm && npm run build 2>&1)
+• Build succeeded. Let me test the CLI to make sure it works.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+  Failed with exit code: 1
+• Used Shell (cd /root/code/skills/skil... lead --urgency high 2>&1)
+  Failed with exit code: 1
+• There's an issue with how I'm importing sqlite3. Let me fix that. The issue is
+  with ES modules and the sqlite3 import.
+• I need to fix the sqlite3 import for ES modules:
+• Used StrReplaceFile (skills/client-crm/src/index.ts)
+• I also need to update the tsconfig to allow default imports and update the pac
+  kage.json to enable esModuleInterop. Let me check the existing skills' configu
+  ration.
+• Used ReadFile (skills/client-tracker/tsconfig.json)
+• The tsconfig looks the same. Let me check how the client-tracker skill handles
+  the sqlite3 import:
+• Used Shell (head -20 /root/code/skill...ient-tracker/src/index.ts)
+• I see - client-tracker uses import * as sqlite3 from 'sqlite3' but it's a Comm
+  onJS project, not ES module. Let me check if client-tracker is using CommonJS
+  or ES modules.
+• Used Shell (cat /root/code/skills/ski...json | grep -A 5 '"type"')
+  Failed with exit code: 1
+• Let me check if there's a type field in the package.json
+• Used ReadFile (skills/client-tracker/package.json)
+• Ah, I see - client-tracker doesn't have "type": "module" so it's CommonJS. My
+  skill has "type": "module" which makes it an ES module. The way to use sqlite3
+  with ES modules is different.
+
+  Let me check how other ES module skills handle this.
+• Used Shell (cat /root/code/skills/ski...s/package.json | head -15)
+• Let me check if property-alerts has type:module
+• Used Shell (cat /root/code/skills/ski...perty-alerts/package.json)
+• It doesn't have type:module either. Let me check how the skill actually import
+  s sqlite3 in its code.
+• Used Shell (head -10 /root/code/skill...perty-alerts/src/index.ts)
+• I see, property-alerts uses import * as sqlite3 from 'sqlite3' and doesn't use
+  "type": "module". So it's a CommonJS module. Let me remove the "type": "module
+  " from my package.json and add @types/sqlite3 as a dev dependency.
+• Let me fix the module type - I'll make it CommonJS like other skills:
+• Used StrReplaceFile (skills/client-crm/package.json)
+• Now I need to update the tsconfig to use CommonJS modules instead of NodeNext.
+• Used StrReplaceFile (skills/client-crm/tsconfig.json)
+• Now I need to revert the sqlite3 import back to the namespace import and add @
+  types/sqlite3 as a dev dependency. Also, I need to update the import in the CL
+  I file.
+• Used StrReplaceFile (skills/client-crm/src/index.ts)
+• Used StrReplaceFile (skills/client-crm/src/cli.ts)
+• Used StrReplaceFile (skills/client-crm/package.json)
+• Now let me rebuild and test again.
+• Used Shell (cd /root/code/skills/skil...all && npm run build 2>&1)
+• Build succeeded. Now let me test it.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+• Health check works! Now let me test adding a client and some other operations.
+• Used Shell (cd /root/code/skills/skil... lead --urgency high 2>&1)
+• Excellent! Let me test more commands.
+• Used Shell (cd /root/code/skills/skil... --budget-max 600000 2>&1)
+• Let me test more commands to verify the full functionality.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js get 1 2>&1)
+• Let me test preferences and communications.
+• Used Shell (cd /root/code/skills/skil...ckyard,good schools" 2>&1)
+• Let me test communications, pipeline updates, and other features.
+• Used Shell (cd /root/code/skills/skil...ne 1 --stage viewing 2>&1)
+• Let me test stats, follow-ups, and other features.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js stats 2>&1)
+• Excellent! All functionality is working. Let me test follow-ups and search.
+• Used Shell (cd /root/code/skills/skil...follow-ups --days 10 2>&1)
+• Everything is working correctly. Let me test a few more features like search a
+  nd by-location.
+• Used Shell (cd /root/code/skills/skil...by-location "Austin" 2>&1)
+• Excellent! All features are working. Now let me run the typecheck again and up
+  date the PRD.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• All checks pass. Now let me update the PRD to set US-043 passes: true and comm
+  it the changes.
+• Now let me update the PRD and commit the changes:
+• Used StrReplaceFile (prd.json)
+• Now let me commit the changes.
+• Used Shell (cd /root/code/skills && g...or realtor contacts" 2>&1)
+• Now let me append the progress to progress.txt.
+• Used WriteFile (progress.txt)
+• Now let me check if there are more stories to complete.
+• Let me check the remaining stories:
+• Used Shell (cd /root/code/skills && n...og(s.id, '-', s.title));")
+• 17 stories remaining. Let me verify everything is committed and summarize what
+  was done.
+• Used Shell (cd /root/code/skills && git status)
+• I need to commit the progress.txt changes too.
+• Used Shell (cd /root/code/skills && g...progress for US-043" 2>&1)
+• All changes are committed. Let me verify the current status.
+• Used Shell (cd /root/code/skills && g...pleted/total*100)}%)\`);")
+• 43 out of 60 stories are completed (72%). There are still 17 stories remaining
+  . I should report the successful completion of US-043.
+• ✅ US-043 Completed: Client CRM Skill
+
+  I have successfully implemented the client-crm skill for real estate client re
+  lationship management. Here's a summary:
+
+  What was implemented:
+
+  Features:
+
+  • Contact profiles - Name, email, phone, address, client type (buyer/seller/re
+    er/investor/vendor/other)
+  • Property preferences - Price range, bedrooms, bathrooms, sqft, locations, pr
+    erty types, must-have/nice-to-have features
+  • Communication history - Track calls, emails, meetings, showings, texts, note
+  • Pipeline tracking - 7 stages: lead → qualified → viewing → offer → under_con
+    act → closed → archived
+  • Urgency levels - low, medium, high, urgent
+  • Follow-up management - Set follow-up dates with automatic upcoming reminders
+  • Search capabilities - Text search, location-based search, feature-based sear
+  • Statistics & reporting - Pipeline stats, client breakdowns, total pipeline v
+    ue
+  • CSV import/export - Data portability
+
+  CLI Commands:
+
+  client-crm add/list/get/update/delete    # Client management
+  client-crm search                        # Text search
+  client-crm pipeline/pipeline-list        # Pipeline management
+  client-crm preferences/preferences-get   # Property preferences
+  client-crm log/communications            # Communication tracking
+  client-crm follow-ups/set-follow-up      # Follow-up management
+  client-crm by-location/by-feature        # Preference search
+  client-crm export/import                 # Data exchange
+  client-crm stats/health                  # Reporting
+
+  Technical Details:
+
+  • TypeScript with SQLite storage
+  • 3 database tables: clients, preferences, communications
+  • JSON arrays for flexible location/type/feature storage
+  • Full typecheck passes
+  • CommonJS module format (consistent with other skills)
+
+  Progress:
+
+  • 43/60 stories completed (72%)
+  • 17 stories remaining

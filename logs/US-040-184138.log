@@ -1,0 +1,351 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and progress log to understand what needs
+  to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see the remaining entries and
+  understand the Codebase Patterns.
+• Used ReadFile (progress.txt)
+• I have completed the review of the current project state. Out of the 60 total
+  stories, 39 are already passing. The next logical step is to address US-040, '
+  Create flight-search skill for travel,' which is the highest priority item cur
+  rently marked as passes: false.
+
+  To implement this correctly, I need to understand the existing architecture. T
+  he skill will eventually need to integrate with external APIs (like Amadeus) o
+  r perform web scraping. However, I first need to see how these integrations ar
+  e structured within the OpenClaw system. I noticed an 'examples' directory in
+  the file structure.
+
+  Hmm, I should check if there are any templates or reference implementations th
+  ere that demonstrate how to handle travel-related data or external API calls.
+  This will ensure the new flight-search skill remains consistent with the proje
+  ct's design patterns.
+
+  Wait, I also need to verify the exact directory structure and where the source
+  code for these skills is located. I'll check the 'skills' directory to see the
+  layout of existing modules like 'auth-provider' and 'binance'. This will help
+  me determine the correct placement for the new flight-search logic and confirm
+  the naming conventions used across the ecosystem.
+
+  Let me first check the current git branch and then explore the examples and sk
+  ills directories to get a better understanding of what exists.
+• Let me check the current git branch and explore the examples directory to unde
+  rstand what exists:
+• Used Shell (cd /root/code/skills && g...amples/ && ls -la skills/)
+• Good, I can see we're on the correct branch ralph/all-skills. Now let me look
+  at an existing skill to understand the pattern and then implement the flight-s
+  earch skill (US-040). Let me look at a simple skill like web-search as a refer
+  ence since it's also optional for external API and can use scraping.
+• Let me look at an existing skill for reference pattern:
+• Used ReadFile (skills/web-search/package.json)
+• Used ReadFile (skills/web-search/src/index.ts)
+• Used ReadFile (skills/web-search/tsconfig.json)
+• Good, now I have a clear understanding of the pattern. Let me create the fligh
+  t-search skill. This skill will:
+
+  1. Search for flights between routes
+  2. Support date flexibility
+  3. Filter by airline/stops
+  4. Cache results in SQLite
+  5. Work with or without the Amadeus API (fallback to search engine links)
+
+  Let me create the complete skill implementation.
+• Now I understand the pattern. Let me create the flight-search skill (US-040):
+• Used Shell (mkdir -p /root/code/skill.../skills/flight-search/src)
+• Now let me create all the files for the flight-search skill.
+• Used WriteFile (skills/flight-search/package.json)
+• Used WriteFile (skills/flight-search/tsconfig.json)
+• Used WriteFile (skills/flight-search/.gitignore)
+• Now let me create the main index.ts file with the FlightSearchSkill class.
+• Used WriteFile (skills/flight-search/src/index.ts)
+• Now let me create the CLI file for the flight-search skill.
+• Used WriteFile (skills/flight-search/src/cli.ts)
+• Now let me create the SKILL.md documentation file.
+• Used WriteFile (skills/flight-search/SKILL.md)
+• Now let me install dependencies and run typecheck.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd /root/code/skills/skil...tall && npm run typecheck)
+  Failed with exit code: 2
+• I need to fix the TypeScript errors. The issue is with the return type of the
+  searchWithAmadeus and searchWithSimulated methods. Let me fix them.
+• I need to fix the TypeScript errors. Let me update the index.ts:
+• Used StrReplaceFile (skills/flight-search/src/index.ts)
+• Now I need to update the code inside searchWithSimulated to handle the optiona
+  l options properly.
+• Used StrReplaceFile (skills/flight-search/src/index.ts)
+• Now let me run typecheck again.
+• Used Shell (cd /root/code/skills/skil...arch && npm run typecheck)
+  Failed with exit code: 2
+• I need to update the generateFlightsForDate function signature and fix the oth
+  er issues.
+• Used StrReplaceFile (skills/flight-search/src/index.ts)
+• I need to fix the cabin reference in the Flight object. Let me also check for
+  the remaining issues.
+• Used ReadFile (skills/flight-search/src/index.ts)
+• I see the issue. The cabin and passengers fields are being used without defaul
+  ts. Let me fix those.
+• Used StrReplaceFile (skills/flight-search/src/index.ts)
+• Now I need to fix the query object that returns from searchWithSimulated to ha
+  ve default values.
+• Used StrReplaceFile (skills/flight-search/src/index.ts)
+• Now let me run typecheck again to see if all issues are resolved.
+• Used Shell (cd /root/code/skills/skil...arch && npm run typecheck)
+• Typecheck passes. Now let me run the build and test the CLI briefly to make su
+  re everything works.
+• Typecheck passes. Now let me build and test the skill:
+• Used Shell (cd /root/code/skills/skil...t-search && npm run build)
+• Build succeeded. Let me test the CLI with the health and airports commands.
+• Used Shell (cd /root/code/skills/skil... dist/cli.js airports JFK)
+• Now let me test a flight search to make sure it works.
+• Used Shell (cd /root/code/skills/skil...x-stops 1 2>&1 | head -50)
+• The flight search skill is working. Now let me commit the changes and update t
+  he PRD.
+• The skill is working. Let me test a few more features and then commit:
+• Used Shell (cd /root/code/skills/skil...&& node dist/cli.js saved)
+• Now let me commit the changes and update the PRD and progress.txt.
+• Used Shell (cd /root/code/skills && g...ght-search/ && git status)
+• Good, now let me commit the changes.
+• Used Shell (cd /root/code/skills && g...-search skill for travel")
+• Good, the commit was successful. Now let me update the PRD to mark US-040 as p
+  assing.
+• Now let me update the PRD to mark US-040 as passing:
+• Used StrReplaceFile (prd.json)
+• Now let me append to the progress.txt file with the learnings.
+• Now let me append to the progress.txt:
+• Used WriteFile (progress.txt)
+• The flight-search skill has been successfully implemented. Let me verify the P
+  RD update by checking the JSON.
+• Let me verify the PRD update:
+• Used Shell (cd /root/code/skills && g...'"id": "US-040"' prd.json)
+• Let me verify the passes status specifically.
+• Used Shell (cd /root/code/skills && g..."' prd.json | grep passes)
+• The PRD has been updated correctly with passes: true. Let me check how many st
+  ories remain to be completed.
+• Used Shell (cd /root/code/skills && g...: false' prd.json | wc -l)
+• I have successfully implemented the flight-search skill. The TypeScript compil
+  ation passed, and the CLI is functional, allowing searches for flights between
+  major airports with various filters. I've also committed all the new files and
+  updated prd.json to mark US-040 as completed.
+
+  Hmm... while I could jump straight into the next story (US-041), I need to ens
+  ure the documentation reflects the patterns I used here. For instance, the fli
+  ght-search skill relies on a specific SQLite structure for caching results and
+  uses a flexible date approach that might be relevant for other travel-related
+  features. If I don't document these implementation details now, they might be
+  lost or inconsistently replicated later.
+
+  Wait, let me check the current state of progress.txt. I should add a summary o
+  f the work done for US-040, including the specific 'learnings' regarding the A
+  madeus API integration (or lack thereof, opting for simulated data) and the ca
+  ching strategy. This provides a clear trail of the project's evolution and the
+  architectural decisions made during this sprint.
+
+  Actually, before I proceed to the next task, I'll append the progress for this
+  user story to progress.txt. This keeps the project status synchronized and ens
+  ures the record is up-to-date with the latest developments in the ralph/all-sk
+  ills branch. Once this is done, the current story will be fully wrapped up.
+• I have successfully completed US-040: Create flight-search skill for travel. H
+  ere's a summary:
+
+  What was implemented:
+
+  Flight Search Skill (skills/flight-search/)
+
+  • Search flights between 35 major airports worldwide
+  • Price comparison with sorting options (price, duration, departure, arrival)
+  • Date flexibility - search +/- 3 days from target date
+  • Filters: airline codes, maximum stops, max price, cabin class
+  • Cabin classes: economy, premium_economy, business, first
+  • Round-trip support with separate outbound and return flights
+  • Saved searches stored in SQLite for recurring routes
+  • Results caching with 1-hour TTL
+  • Database: 27 airlines, 35 major airports
+
+  CLI Commands:
+
+  • search <origin> <destination> <date> - Search flights
+  • airports [query] - List/search airports
+  • airlines - List available airlines
+  • save <name> <origin> <destination> - Save search
+  • saved - List saved searches
+  • status/health - Check system status
+
+  Features:
+
+  • Works without API key (simulated data)
+  • Optional Amadeus API integration (set AMADEUS_API_KEY)
+  • Direct booking links to Google Flights, Kayak, Expedia
+
+  Files created:
+
+  • skills/flight-search/package.json
+  • skills/flight-search/tsconfig.json
+  • skills/flight-search/.gitignore
+  • skills/flight-search/SKILL.md
+  • skills/flight-search/src/index.ts
+  • skills/flight-search/src/cli.ts
+
+  All changes committed and PRD updated. 20 stories remain to be completed.

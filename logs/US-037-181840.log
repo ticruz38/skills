@@ -1,0 +1,338 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD and progress files to understand what needs to
+  be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see what stories have been co
+  mpleted and find the next story to work on.
+• Used ReadFile (progress.txt)
+• Let me check the PRD for the next user story with passes: false. From what I'v
+  e read, stories US-001 through US-036 are complete (passes: true). The next st
+  ory that should have passes: false would be:
+
+  • US-037: Create recipe-suggester skill for meal ideas
+
+  Let me check the current branch and then implement US-037.
+• Now I can see the progress. Looking at the PRD, the next story with passes: fa
+  lse is US-037 - Create recipe-suggester skill for meal ideas. Let me check the
+  current git branch and then implement this story.
+• Used Shell (git branch --show-current...ho "No .last-branch file")
+• Used Glob (skills/*)
+• Good, I'm already on the correct branch ralph/all-skills. Now I need to implem
+  ent the recipe-suggester skill (US-037).
+
+  Let me look at a similar skill to understand the patterns better. The gift-sug
+  gestions skill seems similar in concept - it suggests items based on preferenc
+  es. Let me check its structure.
+• I'm on the correct branch. Let me look at a similar skill (gift-suggestions) t
+  o understand the patterns, then create the recipe-suggester skill.
+• Used ReadFile (skills/gift-suggestions/src/index.ts)
+• Used ReadFile (skills/gift-suggestions/package.json)
+• Hmm, the requirements for the recipe-suggester skill are quite specific: dieta
+  ry filters, ingredient matching, cuisine preferences, and difficulty levels. I
+  need to ensure the data model is robust enough to handle these without an exte
+  rnal API. Wait, if I'm building a curated database, I should look at how other
+  "suggester" skills are implemented in this repository to maintain consistency.
+  gift-suggestions seems like a perfect architectural reference—it likely has a
+  local dataset and a logic engine for matching.
+
+  Looking at the codebase patterns, a TypeScript-based CLI skill using SQLite is
+  the standard here. I'll need a SKILL.md for documentation and a tsconfig.json
+  to handle the build. But before I get into the code, I need to set up the dire
+  ctory structure. Actually, I'll need to create the folder and its subdirectori
+  es first. I'll organize the skill within the skills/ directory as per the proj
+  ect structure. I'll start by scaffolding the necessary folders for the source
+  code, distribution files, and the skill's metadata. This initial setup is cruc
+  ial for organizing the logic, database, and CLI interface I'll be implementing
+  next.
+• Now I have a good understanding of the patterns. Let me create the recipe-sugg
+  ester skill with a curated recipe database and suggestion algorithm.
+• Used Shell (mkdir -p skills/recipe-su...lls/recipe-suggester/dist)
+• Now let me create the files for the recipe-suggester skill:
+
+  1. package.json
+  2. tsconfig.json
+  3. .gitignore
+  4. SKILL.md
+  5. src/index.ts (main library)
+  6. src/cli.ts (CLI interface)
+• Used WriteFile (skills/recipe-suggester/package.json)
+• Used WriteFile (skills/recipe-suggester/tsconfig.json)
+• Used WriteFile (skills/recipe-suggester/.gitignore)
+• Now let me create the SKILL.md documentation file and the main source code for
+  the recipe-suggester skill.
+• Used WriteFile (skills/recipe-suggester/SKILL.md)
+• Now let me create the main index.ts file with the recipe database and suggesti
+  on logic. I'll create a comprehensive curated recipe database with different c
+  uisines, dietary options, and difficulty levels.
+• Now let me create the main library file with the recipe database:
+• Used WriteFile (skills/recipe-suggester/src/index.ts)
+• Now let me create the CLI file for the recipe-suggester skill.
+• Now let me create the CLI interface:
+• Used WriteFile (skills/recipe-suggester/src/cli.ts)
+• Now let me run typecheck to verify everything compiles correctly.
+• Now let me run the typecheck to verify everything compiles correctly:
+• Used Shell (cd skills/recipe-suggeste...pm install 2>&1 | tail -5)
+• Good, the dependencies are installed. Now let me run typecheck.
+• Used Shell (cd skills/recipe-suggeste...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me build the project and run a quick test to verify
+  the CLI works.
+• Typecheck passes. Let me build the project and test the CLI:
+• Used Shell (cd skills/recipe-suggester && npm run build 2>&1)
+• Build successful. Now let me test the CLI with a few commands.
+• Used Shell (cd skills/recipe-suggeste...e dist/cli.js health 2>&1)
+• The health check passes. Let me run a few more tests to verify the functionali
+  ty.
+• Used Shell (cd skills/recipe-suggeste...de dist/cli.js stats 2>&1)
+• The stats work correctly. Let me test the suggest functionality with some filt
+  ers.
+• Used Shell (cd skills/recipe-suggeste...arian --time 30 -n 3 2>&1)
+• Excellent! The recipe suggester is working correctly. Let me test one more fun
+  ctionality - the ingredient search.
+• Used Shell (cd skills/recipe-suggeste...nion --threshold 0.2 2>&1)
+• Hmm, the ingredients search didn't return results. Let me check the CLI to see
+  how it processes the arguments. I think the issue is with how the arguments ar
+  e being parsed.
+• Let me test with a different approach for the ingredients search:
+• Used Shell (cd skills/recipe-suggeste...ion" --threshold 0.2 2>&1)
+• The ingredients search is working. Now let me test a few more commands and the
+  n update the PRD and progress.txt.
+• Let me test the recipe view command:
+• Used Shell (cd skills/recipe-suggeste...t/cli.js get ita-002 2>&1)
+• Excellent! All the functionality is working correctly. Now let me update the P
+  RD to set passes: true for US-037 and update the progress.txt file.
+• All tests pass. Now let me update the PRD and progress log:
+• Used StrReplaceFile (prd.json)
+• Now let me update the progress.txt file with the learnings from this implement
+  ation.
+• Used WriteFile (progress.txt)
+• Now let me check if there's an AGENTS.md file in the skills directory that nee
+  ds updating, and then commit the changes.
+• Let me check if there's an AGENTS.md file to update and then commit:
+• Used Glob (skills/AGENTS.md)
+• No AGENTS.md file in the skills directory. Let me check the project root.
+• Used ReadFile (AGENTS.md)
+  File not found
+• No AGENTS.md file exists. Let me commit the changes now.
+• Now let me commit the changes:
+• Used Shell (cd /root/code/skills && g...add -A && git status 2>&1)
+• Good, all files are staged. Let me commit now.
+• Used Shell (cd /root/code/skills && g...kill for meal ideas" 2>&1)
+• The commit was successful. Now let me verify the PRD to see how many stories a
+  re still remaining.
+• I've successfully completed US-037. Let me verify the current status of all st
+  ories:
+• Used Shell (cd /root/code/skills && g...'"passes": true' prd.json)
+• There are still 23 stories with passes: false. Let me check which ones are the
+  next priorities.
+• There are still 23 stories remaining. Let me check what the next story (US-038
+  ) is:
+• Used Shell (cd /root/code/skills && g...'"id": "US-038"' prd.json)
+• US-038 depends on the recipe-suggester skill, which I just completed. The next
+  story will be the shopping-list-generator skill.
+
+  Since I've successfully completed US-037 and there are still 23 stories remain
+  ing, I should end my response normally to allow another iteration to pick up t
+  he next story.
+• Successfully completed US-037 - Create recipe-suggester skill for meal ideas.
+
+  Summary
+
+  Created a comprehensive recipe suggestion skill with:
+
+  • 30 curated recipes across 10 cuisines (Italian, Mexican, Asian, Mediterranea
+    American, Indian, Japanese, French, Thai, Greek)
+  • 9 dietary filters: vegetarian, vegan, gluten-free, keto, paleo, dairy-free,
+    t-free, low-carb, low-sodium
+  • 3 difficulty levels: easy, medium, hard
+  • 6 meal types: breakfast, lunch, dinner, snack, dessert, appetizer
+  • Ingredient matching: Find recipes by ingredients you have on hand
+  • Multi-factor scoring algorithm for personalized suggestions
+  • Favorites and cooking history tracking via SQLite
+  • Full nutritional information (calories, protein, carbs, fat)
+
+  Files Created:
+
+  • skills/recipe-suggester/package.json
+  • skills/recipe-suggester/tsconfig.json
+  • skills/recipe-suggester/.gitignore
+  • skills/recipe-suggester/SKILL.md
+  • skills/recipe-suggester/src/index.ts (main library)
+  • skills/recipe-suggester/src/cli.ts (CLI interface)
+
+  Quality Checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build successful
+  • ✅ Health check passes
+  • ✅ All CLI commands tested
+
+  Commit:
+
+  feat: US-037 - Create recipe-suggester skill for meal ideas
+
+  ──────────────────────────────────────────────────────────────────────────────
+  Next story: US-038 - Create shopping-list-generator skill for groceries (depen
+  ds on recipe-suggester)

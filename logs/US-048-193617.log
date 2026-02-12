@@ -1,0 +1,479 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by understanding the task. I'm an autonomous coding agent working
+  on a software project. I need to:
+
+  1. Read the PRD at prd.json
+  2. Read the progress log at progress.txt
+  3. Check I'm on the correct branch from PRD branchName
+  4. Pick the highest priority user story where passes: false
+  5. Implement that single user story
+  6. Run quality checks
+  7. Update AGENTS.md files if needed
+  8. Commit changes
+  9. Update PRD to set passes: true
+  10. Append progress to progress.txt
+
+  Let me start by reading the PRD and progress files.
+• I'll start by reading the PRD and progress files to understand what needs to b
+  e implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• The progress.txt file has 1000 lines but seems to continue. Let me read more o
+  f it to get the full picture of what's been done and find the Codebase Pattern
+  s section.
+• Let me continue reading the progress file to see more patterns and recent work
+  :
+• Used ReadFile (progress.txt)
+• Used Shell (git branch --show-current && git status --short)
+• I've identified the remaining tasks: US-048, US-049, US-050, US-051, US-052, U
+  S-053, US-054, US-055, US-056, US-057, US-058, US-059, and US-060. That's quit
+  e a list, but I need to prioritize. US-048 is the highest priority and lowest
+  ID among the pending stories.
+
+  US-048 requires the creation of a response-drafts skill. According to the PRD,
+  this skill is meant to draft support responses using the main AI model, with a
+  n optional integration for the Zendesk API. It needs to support tone matching,
+  KB integration, and provide multiple solution options.
+
+  Hmm, looking at the complexity, I see this skill has dependencies on existing
+  ones. I need to check the current state of the workspace first. Does the /root
+  /code/skills directory contain any existing drafts or partial implementations?
+  It's better to verify the file system before I start defining new directory st
+  ructures or models.
+
+  Wait, I also need to be mindful of the dependency chain. If response-drafts re
+  lies on a knowledge base or a specific tone-matching utility, I should find wh
+  ere those are located. Checking the progress.txt might give me clues about the
+  current status of US-048, but the prd.json already confirmed it's passes: fals
+  e.
+
+  Actually, before I commit to a specific implementation path for the tone match
+  ing or the Zendesk API wrapper, I need to see if there's already a skills fold
+  er or a specific response-drafts path created in the environment. If the direc
+  tory is empty, I'm starting from a clean slate. If it has files, I need to eva
+  luate what's already there.
+
+  Let me stop and gather this context. I'll list the contents of the primary ski
+  lls directory and look for any existing 'response' or 'draft' related files. T
+  his will tell me if I'm building on top of existing boilerplate or creating th
+  e skill architecture from scratch. This reconnaissance is essential before I b
+  egin the actual development for US-048.
+• Let me check the remaining stories and look at existing skills to understand t
+  he patterns better:
+• Used Shell (ls -la /root/code/skills/skills/ | head -60)
+• Used Grep ("passes": false)
+• I've analyzed the PRD and identified that the highest priority story is US-048
+  . This involves creating a 'response-drafts' skill that utilizes the main mode
+  l for tone matching, knowledge base integration, and providing multiple soluti
+  on options. An optional integration point is the Zendesk API.
+
+  Before I proceed with the implementation of this new skill, I need to understa
+  nd the existing architecture. We already have 'draft-responses' and 'engagemen
+  t-replies' skills in the system. It is highly probable that US-048 shares func
+  tional requirements or architectural patterns with these existing modules. For
+  instance, the mechanism for tone matching and the way these skills interface w
+  ith the knowledge base might already be standardized.
+
+  Wait, I should also consider the interaction model. If the new skill is meant
+  to handle support responses, does it act as a replacement or an extension? To
+  determine this, I need to see how the current skills are structured. Are they
+  using a specific base class or a particular handler pattern?
+
+  Actually, the requirement mentions an 'Optional: Zendesk API.' This suggests t
+  hat the skill should ideally be platform-agnostic at its core, with adapters f
+  or external tools. I need to verify if the existing 'draft-responses' skill fo
+  llows this pattern or if it is tightly coupled to a specific workflow.
+
+  By examining the SKILL.md files for these related skills, I can extract the de
+  sign patterns, configuration parameters, and API schemas already in use. This
+  will ensure that my implementation of the 'response-drafts' skill remains cons
+  istent with the rest of the ecosystem and adheres to the established best prac
+  tices for model interaction and data retrieval.
+
+  Therefore, I will examine the documentation for the 'draft-responses' and 'eng
+  agement-replies' skills to gather the necessary technical context before I sta
+  rt defining the new skill's structure. This step is essential to avoid duplica
+  tion of effort and to ensure the new skill integrates seamlessly with the curr
+  ent knowledge base and tone-matching infrastructure.
+• Let me look at a similar skill to understand the patterns:
+• Used ReadFile (skills/draft-responses/SKILL.md)
+• Used ReadFile (skills/engagement-replies/SKILL.md)
+• I've completed the analysis of the current skills/ directory. The high-priorit
+  y task is US-048, which involves creating a 'response-drafts' skill. This skil
+  l needs to handle tone matching, knowledge base integration, and multiple solu
+  tion options. There's an optional requirement for Zendesk API support, but I s
+  hould focus on the core functionality first to ensure the acceptance criteria
+  are met.
+
+  Hmm, looking at the existing 'draft-responses' skill, it's heavily focused on
+  email. US-048 is specifically for support responses, which implies a different
+  set of requirements like potential Zendesk integration and knowledge base look
+  ups. While I could try to extend the existing skill, the PRD suggests a more s
+  pecialized implementation for support contexts.
+
+  Wait, I need to consider the implementation path carefully. I'll need to set u
+  p a new package structure with package.json and tsconfig.json, and then implem
+  ent the core logic in index.ts and the CLI in cli.ts. The knowledge base integ
+  ration will likely involve reading from a local store, while tone matching sho
+  uld probably be handled via the main model API.
+
+  Actually, before I start writing the boilerplate code for the new directory, I
+  need to organize my workflow. I have the core implementation to handle, and th
+  en I'll need to ensure the code is documented in SKILL.md. To manage this proc
+  ess systematically and ensure I don't miss any steps, I'll set up a task list.
+  This will allow me to track the 'in-progress' status of the skill creation and
+  the 'pending' status of the documentation. I'll start with the foundational im
+  plementation work.
+• Now I'll implement US-048: Create response-drafts skill for support replies. L
+  et me set up a todo list and create the skill.
+• Used SetTodoList
+  • Create response-drafts skill structure ←
+  • Implement main library (index.ts)
+  • Implement CLI (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and build
+  • Update PRD and progress.txt
+• I've reviewed the project requirements for the response-drafts skill. It's des
+  igned to draft support replies, integrating with a knowledge base and providin
+  g multiple solution options. To implement this, I need to decide on the archit
+  ecture and dependencies.
+
+  Hmm, the skill requires SQLite storage for drafts and templates. Looking at th
+  e existing codebase, there's a clear preference for the sqlite3 library rather
+  than better-sqlite3. I also notice that other skills like ticket-triage and en
+  gagement-replies have already laid out a pattern for project structure, using
+  src/index.ts for the main logic and src/cli.ts for the interface.
+
+  Wait, I should also consider the optional Zendesk API support. I don't need to
+  implement the actual API client yet, but I should structure the package.json t
+  o allow for those dependencies later. The response-drafts skill needs to handl
+  e tone matching—professional, empathetic, technical—which suggests I'll need a
+  flexible template engine or at least a robust configuration in the code.
+
+  Actually, before I dive into the TypeScript logic, I need to establish the pac
+  kage's foundation. A well-defined package.json is essential for managing the s
+  qlite3 dependency and setting up the build scripts. Since I want to keep the d
+  evelopment process clean and reproducible, I'll start by creating the director
+  y structure and the manifest file.
+
+  I'll need to ensure the package.json includes the correct types for Node.js an
+  d SQLite. Once this file is in place, I can move on to tsconfig.json and the s
+  ource files. Starting with the package definition is the most logical step to
+  anchor the new skill within the existing ecosystem.
+• Used Shell (mkdir -p /root/code/skill...kills/response-drafts/src)
+• Now let me create the package.json file first.
+• Used WriteFile (skills/response-drafts/package.json)
+• Used WriteFile (skills/response-drafts/tsconfig.json)
+• Used WriteFile (skills/response-drafts/.gitignore)
+• I've analyzed the requirements for the ResponseDraftsSkill. This skill needs t
+  o go beyond simple text generation; it must interact with a Knowledge Base (KB
+  ) to suggest solutions, maintain a history of all drafts, and support a flexib
+  le templating system for common support queries.
+
+  Hmm, looking at the existing codebase patterns in this repository, most skills
+  utilize SQLite for local state persistence. For this skill, I'll need tables f
+  or drafts, templates, kb_articles, and usage_history. The drafts table is stra
+  ightforward (id, ticket_id, content, tone), but the kb_articles and kb_mapping
+  s tables are critical for the 'KB integration' requirement. I'll store the art
+  icle ID and a local snippet, mapping it to common ticket tags or keywords.
+
+  Wait, how should I handle the 'tone matching'? I'll define a set of supported
+  tones: professional, empathetic, technical, casual, and apologetic. When gener
+  ating a draft, the skill will check the ticket sentiment (if available) and th
+  e user's preference to select the appropriate tone modifiers. For the 'Multipl
+  e Options' requirement, the generateDrafts method should be able to return a p
+  rimary response and one or two alternatives, perhaps one being more technical
+  and another being more empathetic.
+
+  Actually, I should ensure the Skill class is robust. I'll use an in-memory cac
+  he for the KB to keep lookups fast, but I'll persist everything to SQLite as s
+  pecified. The constructor should handle the database initialization and seedin
+  g default templates if they don't exist.
+
+  I need to be careful with the method signatures. generateDrafts(ticketId, tick
+  etContent, options) should return a Promise that resolves to an array of draft
+  objects. Each draft object will have the text, the tone used, and the IDs of t
+  he KB articles that informed the suggestion.
+
+  I have a clear plan for the implementation now. I'll define the main class, th
+  e database initialization logic, and the core drafting algorithms in a single
+  file to maintain consistency with the existing skill structure. I'll start by
+  writing the complete implementation to skills/response-drafts/src/index.ts.
+• Now let me create the main library file (index.ts):
+• Used WriteFile (skills/response-drafts/src/index.ts)
+• Now let me create the CLI file.
+• Now let me create the CLI:
+• Used WriteFile (skills/response-drafts/src/cli.ts)
+• Now let me create the SKILL.md documentation.
+• Now let me create the SKILL.md documentation:
+• Used WriteFile (skills/response-drafts/SKILL.md)
+• Now let me update the todo list, build and typecheck the skill.
+• Used SetTodoList
+  • Create response-drafts skill structure
+  • Implement main library (index.ts)
+  • Implement CLI (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and build ←
+  • Update PRD and progress.txt
+• Used Shell (cd /root/code/skills/skil...rafts && npm install 2>&1)
+• NPM install worked. Now let me run typecheck and build.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me build it.
+• Used Shell (cd /root/code/skills/skil...fts && npm run build 2>&1)
+• Build succeeded. Let me test the CLI to make sure everything works.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+• Excellent! Let me test the generate command and a few more to ensure it all wo
+  rks.
+• Used Shell (cd /root/code/skills/skil...--tags "login,error" 2>&1)
+• The skill is working great! Let me test a few more commands and then update th
+  e PRD and progress.txt.
+• Used Shell (cd /root/code/skills/skil...ist/cli.js templates 2>&1)
+• Everything is working correctly. Now let me update the PRD to set passes: true
+  for US-048 and update the progress.txt file.
+• Used SetTodoList
+  • Create response-drafts skill structure
+  • Implement main library (index.ts)
+  • Implement CLI (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and build
+  • Update PRD and progress.txt ←
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me search for the exact format of the US-048 entry in the PRD.
+• Used Grep (US-048)
+• Let me see the full entry for US-048 and the surrounding content.
+• Used ReadFile (prd.json)
+• Now I can see the exact format. Let me fix the replacement.
+• Used StrReplaceFile (prd.json)
+• Now let me append to the progress.txt file with details of what was implemente
+  d.
+• Now let me append the progress to progress.txt:
+• Used Shell (cat >> /root/code/skills/...s the core entity --- EOF)
+• Now let me commit the changes.
+• Now let me commit the changes:
+• Used Shell (cd /root/code/skills && g...for support replies" 2>&1)
+• The commit was successful. Now let me check if all stories are complete, or if
+  there are more stories with passes: false.
+• Let me check if there are any remaining stories to complete:
+• Used Shell (grep -c '"passes": false'...root/code/skills/prd.json)
+• There are still 12 stories remaining with passes: false. Let me list them to c
+  onfirm.
+• Used Grep ("id": "US-)
+• There are 12 remaining stories with passes: false. Let me update the todo list
+  and finish.
+• Used SetTodoList
+  • Create response-drafts skill structure
+  • Implement main library (index.ts)
+  • Implement CLI (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and build
+  • Update PRD and progress.txt
+• The user story US-048 has been successfully implemented. Let me provide a summ
+  ary of what was accomplished.
+• I've successfully completed US-048: Create response-drafts skill for support r
+  eplies.
+
+  Summary
+
+  Created the response-drafts skill with the following features:
+
+  Core Features
+
+  • 6 Response Tones: professional, empathetic, technical, casual, apologetic, c
+    fident
+  • Automatic Tone Detection: Based on ticket priority, keywords, and sentiment
+  • KB Integration: Keyword-mapped knowledge base articles with relevance scorin
+  • Multiple Draft Options: Template-based, AI-style, and alternative tone varia
+    s
+  • Template System: 5 built-in templates with variable substitution support
+
+  Database Schema
+
+  • response_drafts - Stores generated drafts with metadata
+  • response_templates - Template library
+  • kb_articles - Knowledge base content
+  • kb_mappings - Keyword-to-article associations
+
+  CLI Commands
+
+  • health, generate, drafts, all-drafts, templates, use-template
+  • add-template, kb, kb-add, send, stats, tones
+
+  Files Created
+
+  • skills/response-drafts/package.json
+  • skills/response-drafts/tsconfig.json
+  • skills/response-drafts/.gitignore
+  • skills/response-drafts/SKILL.md
+  • skills/response-drafts/src/index.ts (main library)
+  • skills/response-drafts/src/cli.ts (CLI interface)
+
+  Quality Checks
+
+  • ✅ Typecheck passes
+  • ✅ Build successful
+  • ✅ CLI tested and working
+
+  Remaining stories: 12 (US-049 through US-060)

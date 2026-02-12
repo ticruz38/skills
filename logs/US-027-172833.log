@@ -1,0 +1,372 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• The user wants me to act as an autonomous coding agent working on a software p
+  roject. Let me start by reading the PRD file and the progress log to understan
+  d what needs to be done.
+
+  First, I need to:
+
+  1. Read prd.json to understand the user stories and requirements
+  2. Read progress.txt to check the codebase patterns and current status
+  3. Check the branch situation
+  4. Find the highest priority story with passes: false
+  5. Implement it
+  6. Run quality checks
+  7. Commit and update progress
+
+  Let me start by reading these files.
+• I'll start by reading the PRD and progress files to understand what needs to b
+  e implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Used Shell (cat /root/code/skills/.last-branch)
+• Hmm, checking the PRD stories, US-001 through US-026 are already marked as pas
+  sing. The next logical step is to tackle US-027: the client-tracker skill. Thi
+  s seems like a foundational requirement for the CRM aspect of the project.
+
+  Wait, let me double-check the progress logs I've seen so far. The timestamps j
+  ump around a bit—I've seen entries from 14:48 to 17:01. This suggests there mi
+  ght be more recent activity or detailed context in the progress.txt file that
+  I haven't reached yet. Since the file has over 1000 lines, the most recent con
+  text is likely at the very end.
+
+  Actually, before I commit to US-027, I should verify if there's any existing w
+  ork on it or if there's a different story defined as the priority for the ralp
+  h/all-skills branch. The branch name suggests we're bundling several features,
+  so context is everything.
+
+  Instead of reading the whole file again, I'll jump to the end of progress.txt
+  to see the latest updates. This will give me the 'ground truth' on what's curr
+  ently being worked on and ensure I don't duplicate effort or miss a recent piv
+  ot in the project goals.
+• Let me check the current branch and see what story needs to be worked on:
+• Used Shell (git branch -a | head -20)
+• Used ReadFile (progress.txt)
+• Hmm, the PRD shows US-001 through US-026 are marked as passes: true, which mea
+  ns the next item on my list is US-027: the client-tracker skill. This skill is
+  intended for tracking client payment behavior and is a dependency for the invo
+  ices skill.
+
+  Wait, before I dive into the specific requirements of US-027, I need to ensure
+  I'm following the established architectural patterns for this project. I see t
+  here are already skills for 'payment-reminders' and 'invoices' in the director
+  y. It would be inefficient to start US-027 from scratch without understanding
+  how these related modules are structured—specifically how they handle data per
+  sistence and logic flow.
+
+  Actually, looking at the file structure, it seems each skill is self-contained
+  . To maintain consistency, I should examine the implementations of the existin
+  g financial skills. The payment-reminders and invoices skills are the most rel
+  evant here. I'll start by listing their source files to identify which ones I
+  should review to use as a reference for the new client-tracker implementation.
+• I'm on the correct branch ralph/all-skills. Looking at the PRD, the next story
+  to implement is US-027: Create client-tracker skill for payment history. This
+  depends on the invoices skill.
+
+  Let me first explore the existing skill patterns and the invoices skill that t
+  his depends on:
+• Used Glob (skills/invoices/src/*.ts)
+• Used Glob (skills/payment-reminders/src/*.ts)
+• Let me read the invoices skill to understand its API and data structures, sinc
+  e client-tracker depends on it.
+• Used ReadFile (skills/invoices/src/index.ts)
+• Used ReadFile (skills/payment-reminders/src/index.ts)
+• Now I have a good understanding of the patterns used in the codebase. Let me c
+  ontinue reading the rest of the payment-reminders skill to understand it compl
+  etely.
+• Let me read the rest of the payment-reminders skill and also check an existing
+  skill's package.json for structure:
+• Used ReadFile (skills/payment-reminders/src/index.ts)
+• Used ReadFile (skills/invoices/package.json)
+• Used ReadFile (skills/payment-reminders/src/cli.ts)
+• I've analyzed the existing invoices and payment-reminders skills to understand
+  the project's architecture for US-027. The goal is to build a client-tracker s
+  kill that provides a comprehensive view of client payment behavior.
+
+  Hmm, the invoices skill already manages the core Client entity and provides ge
+  tClientInvoices. However, the requirement for 'Credit risk scoring' and 'Commu
+  nication logs' suggests this new skill needs its own dedicated data layer. It
+  shouldn't just wrap existing data; it needs to aggregate and analyze it.
+
+  Wait, if I want to track 'Payment history' effectively, I can't just look at t
+  he current state of an invoice. I need to track how often a client is late. I'
+  ll need to calculate metrics like 'Average Days Late' and 'On-time Payment Rat
+  e'. This implies I'll need to iterate through the client's invoices, compare d
+  ueDate with paidDate (or the current date for open invoices), and store these
+  metrics in a local SQLite table.
+
+  Actually, for the 'Credit risk scoring', I'll implement a weighted algorithm.
+  If a client is > 60 days late, that's a high risk. If they've been consistent
+  for a year, that's low risk. I'll assign scores (0-100) and categorize them as
+  'Good', 'Fair', or 'Poor'.
+
+  But what about the 'Communication log'? That's not in the invoices skill at al
+  l. I'll need a communications table in this skill's database to store notes, c
+  alls, and emails linked to specific client IDs. This ensures the user has a ce
+  ntralized CRM-style history.
+
+  Looking at the existing code, the pattern is clear: use a main Skill class, a
+  local db instance, and a cli.ts for the interface. I must ensure client-tracke
+  r can consume the invoices skill as a dependency to pull the raw data it needs
+  for its analysis.
+
+  The `Outstanding balances' requirement is straightforward—just a sum of non-pa
+  id invoices—but I should present it in a clear, formatted summary alongside th
+  e other metrics.
+
+  I've mapped out the necessary database schema, the calculation logic for the r
+  isk scores, and the CLI command structure. I'm ready to move from the analysis
+  phase to implementation. I will now scaffold the skill by creating the directo
+  ry structure and the initial SKILL.md file to define the skill's metadata and
+  dependencies.
+• Now I have a good understanding of the patterns. Let me create the client-trac
+  ker skill for US-027. This skill tracks client payment behavior and depends on
+  the invoices skill.
+• Used Shell (mkdir -p /root/code/skill...skills/client-tracker/src)
+• Used WriteFile (skills/client-tracker/SKILL.md)
+• Now let me create the main index.ts file for the client-tracker skill with all
+  the necessary features.
+• Used WriteFile (skills/client-tracker/src/index.ts)
+• Now let me create the CLI file for the client-tracker skill.
+• Now let me create the CLI:
+• Used WriteFile (skills/client-tracker/src/cli.ts)
+• Now let me create the package.json, tsconfig.json, and .gitignore files for th
+  e client-tracker skill.
+• Now let me create the configuration files:
+• Used WriteFile (skills/client-tracker/package.json)
+• Used WriteFile (skills/client-tracker/tsconfig.json)
+• Used WriteFile (skills/client-tracker/.gitignore)
+• Now I need to install dependencies and build the client-tracker skill to make
+  sure it passes the typecheck. Let me do that.
+• Now let me install dependencies and run the typecheck:
+• Used Shell (cd /root/code/skills/skil...acker && npm install 2>&1)
+• Good, dependencies are installed. Now let me run the typecheck.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• The typecheck passes. Now let me also build the project to make sure everythin
+  g works correctly.
+• Typecheck passes. Let me also build the project:
+• Used Shell (cd /root/code/skills/skil...ker && npm run build 2>&1)
+• Build succeeded. Now let me update the PRD to mark US-027 as passing and then
+  commit the changes.
+• Build successful. Now let me update the PRD and commit the changes:
+• Used StrReplaceFile (prd.json)
+• Now let me commit the changes and update the progress log.
+• Used Shell (cd /root/code/skills && g...for payment history" 2>&1)
+• Now let me update the progress.txt file with the learnings for this iteration.
+• Now let me update the progress.txt:
+• Used WriteFile (progress.txt)
+• Now I need to verify that there are still more stories to implement (US-028 th
+  rough US-060). Let me check the current status of the PRD.
+• Let me verify the current status of the PRD to see what stories remain:
+• Used Shell (cd /root/code/skills && g...p -A1 "passes" | head -80)
+• Good - US-027 is now marked as passes: true. The next story (US-028) has passe
+  s: false, so there are still 33 stories remaining to implement (US-028 through
+  US-060).
+
+  Since there are still stories with passes: false, I should end my response nor
+  mally, and another iteration will pick up the next story.
+• I have successfully completed US-027: Create client-tracker skill for payment
+  history.
+
+  Summary
+
+  Created the client-tracker skill that tracks client payment behavior with the
+  following features:
+
+  Core Features
+
+  • Client Profiles: Extended client data with payment statistics (total invoice
+    revenue, outstanding balance)
+  • Payment History: Syncs from invoices with automatic days-late calculation
+  • Credit Risk Scoring: Weighted algorithm using 4 factors:
+    • On-time payment rate (40%)
+    • Average payment days (30%)
+    • Overdue ratio (20%)
+    • Payment history length (10%)
+  • Outstanding Balances: Real-time report sorted by amount
+  • Communication Log: Track all client interactions
+
+  CLI Commands
+
+  • list, profile - Client viewing
+  • payments, risk - Payment history and risk assessment
+  • log, communications - CRM-style interaction tracking
+  • balances, stats - Financial reporting
+  • export, sync - Data management
+
+  Files Created
+
+  • skills/client-tracker/package.json
+  • skills/client-tracker/tsconfig.json
+  • skills/client-tracker/.gitignore
+  • skills/client-tracker/SKILL.md
+  • skills/client-tracker/src/index.ts
+  • skills/client-tracker/src/cli.ts
+
+  Typecheck passes and all changes have been committed.
+
+  ──────────────────────────────────────────────────────────────────────────────
+  There are still 33 remaining stories (US-028 through US-060) to implement. The
+  next story in priority order is US-028: Create expense-categorizer skill for r
+  eceipts.

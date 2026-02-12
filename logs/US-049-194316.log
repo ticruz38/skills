@@ -1,0 +1,434 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by understanding the task. I'm working as an autonomous coding ag
+  ent on a software project. I need to:
+
+  1. Read the PRD at prd.json
+  2. Read the progress log at progress.txt
+  3. Check the correct branch
+  4. Pick the highest priority user story where passes: false
+  5. Implement that single user story
+  6. Run quality checks
+  7. Update AGENTS.md files if needed
+  8. Commit changes
+  9. Update the PRD to set passes: true
+  10. Append progress to progress.txt
+
+  Let me start by reading the PRD and progress files.
+• I'll start by reading the PRD and progress files to understand what needs to b
+  e done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see more of the completed sto
+  ries and find the highest priority story that hasn't been completed yet.
+• Let me continue reading the progress file to see the full picture:
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to find the last completed story
+  and then identify what needs to be done next.
+• Used ReadFile (progress.txt)
+• Now I have a clear picture of the current state. Looking at the PRD, I need to
+  find the highest priority user story that has passes: false.
+
+  From the PRD, the stories with passes: false are:
+
+  • US-049: scheduling-links (priority: 49)
+  • US-050: buffer-time (priority: 50)
+  • US-051: focus-time-blocks (priority: 51)
+  • US-052: report-builder (priority: 52)
+  • US-053: monthly-reports (priority: 53)
+  • US-054: competitor-monitor (priority: 54)
+  • US-055: email-summarizer (priority: 55)
+  • US-056: showing-scheduler (priority: 56)
+  • US-057: pantry-tracker (priority: 57)
+  • US-058: diy-guides (priority: 58)
+  • US-059: review-monitor (priority: 59)
+  • US-060: saved-searches (priority: 60)
+
+  The highest priority story with passes: false is US-049: scheduling-links skil
+  l for booking.
+
+  Let me implement this skill. First, let me check the current branch and the ex
+  isting skills structure.
+• Now I understand the current state. Looking at the PRD, the highest priority s
+  tory with passes: false is US-049: Create scheduling-links skill for booking (
+  priority 49).
+
+  Let me first check the current branch and existing skills structure:
+• Used Shell (git branch --show-current...ls -la skills/ | head -60)
+• I'm currently on the correct branch ralph/all-skills. The scheduling-links ski
+  ll doesn't exist yet. Let me look at a similar skill (like calendar or reserva
+  tion-manager) to understand the pattern and then create the scheduling-links s
+  kill.
+• I'm on the correct branch. Now let me look at an existing skill structure to u
+  nderstand the patterns, and then check the calendar skill since scheduling-lin
+  ks depends on it:
+• Used ReadFile (skills/calendar/src/index.ts)
+• Used ReadFile (skills/calendar/package.json)
+• Okay, I've analyzed the requirements for US-049. The goal is a 'Calendly-style
+  ' booking skill. This involves managing availability windows, handling differe
+  nt meeting types with custom durations, and providing a way for users to book
+  slots. The dependency on the calendar skill for the actual event insertion is
+  a crucial detail, as is the need for SQLite storage for the configuration data
+  .
+
+  Wait, before I dive into the implementation of the TypeScript classes or the C
+  LI logic, I need to establish a consistent project structure. Looking at the e
+  xisting skills in the repository, there's a clear pattern for how these module
+  s are organized. They typically reside in a dedicated subdirectory under skill
+  s/ and include a package.json that defines the local dependencies, such as @op
+  enclaw/calendar.
+
+  Actually, I can't start coding the logic until the directory exists and the en
+  vironment is initialized. The most efficient way to proceed is to create the s
+  kills/scheduling-links directory first. Once that's in place, I'll need to set
+  up the package.json to reflect the skill's metadata and its dependency on the
+  calendar integration. This will ensure that the module is correctly linked wit
+  hin the local ecosystem. I'll start by preparing the directory and the manifes
+  t file.
+• Now let me create the scheduling-links skill. This skill generates Calendly-st
+  yle booking links with availability windows and embeddable widgets.
+• Used Shell (mkdir -p skills/scheduling-links/src)
+• Used WriteFile (skills/scheduling-links/package.json)
+• Used WriteFile (skills/scheduling-links/tsconfig.json)
+• Used WriteFile (skills/scheduling-links/.gitignore)
+• Okay, the foundation for the scheduling-links skill is set. Now I need to impl
+  ement the core logic in src/index.ts. This involves two main challenges: manag
+  ing the local state for meeting types and availability windows in SQLite, and
+  integrating with the existing calendar skill to actually book the slots.
+
+  Hmm, the PRD specifically mentions 'multiple meeting types'—this means I can't
+  just hardcode a single availability setting. I'll need a flexible schema to st
+  ore different durations and custom availability windows per link. And for the
+  'embeddable widget' requirement, I'll need to ensure the booking logic is deco
+  upled enough to be called via CLI or a future API.
+
+  Wait, I should also consider how to handle the SQLite race conditions mentione
+  d in the progress notes. Using runWithResult for the ID lookups is safer than
+  relying on the default runner.
+
+  Actually, before I dive into the code, I'll formalize the plan. I need to ensu
+  re I cover the database initialization, the meeting type definitions, and the
+  integration points with the calendar. This will prevent me from missing the sp
+  ecific requirements for custom duration and availability windows mentioned in
+  the user story.
+• Now let me create the main skill implementation:
+• Used SetTodoList
+  • Create scheduling-links skill main library (index.ts) ←
+  • Create CLI interface (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and verify build
+  • Commit changes and update PRD
+• Used WriteFile (skills/scheduling-links/src/index.ts)
+• Now let me create the CLI interface for the scheduling-links skill.
+• Now let me create the CLI interface:
+• Used WriteFile (skills/scheduling-links/src/cli.ts)
+• Now let me create the SKILL.md documentation file and then run typecheck to ve
+  rify everything compiles correctly.
+• Used SetTodoList
+  • Create scheduling-links skill main library (index.ts)
+  • Create CLI interface (cli.ts)
+  • Create SKILL.md documentation ←
+  • Run typecheck and verify build
+  • Commit changes and update PRD
+• Used WriteFile (skills/scheduling-links/SKILL.md)
+• Now let me install dependencies and run typecheck to verify everything compile
+  s correctly.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd skills/scheduling-links && npm install 2>&1)
+• Good, dependencies installed. Now let me run typecheck.
+• Used Shell (cd skills/scheduling-link...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• I need to fix the private method issue. The getMeetingTypeById method is being
+  accessed in the CLI but it's private. Let me fix this by either making it publ
+  ic or handling it differently.
+• Let me fix the type error - the getMeetingTypeById method is private but CLI n
+  eeds to access meeting type info:
+• Used StrReplaceFile (skills/scheduling-links/src/index.ts)
+• Now let me run typecheck again to verify the fix.
+• Used Shell (cd skills/scheduling-link...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me run a quick test to make sure the CLI works.
+• Typecheck passes! Let me run a quick test to verify the CLI works:
+• Used Shell (cd skills/scheduling-link...e dist/cli.js status 2>&1)
+• The CLI works. Now let me test a few more commands to make sure the basic func
+  tionality works.
+• Let me test a few more CLI commands:
+• Used Shell (cd skills/scheduling-link...A test meeting type" 2>&1)
+• The meeting type creation works. Let me test listing and creating a booking li
+  nk.
+• Used Shell (cd skills/scheduling-link...ist/cli.js link-list 2>&1)
+• Excellent! Everything works. Now let me commit the changes and update the PRD.
+• Excellent! Let me also test the available slots and widget generation:
+• Used Shell (cd skills/scheduling-link....js widget book-test 2>&1)
+• Everything works as expected. Now let me update the todo list, clean up the te
+  st data, commit the changes and update the PRD.
+• Used SetTodoList
+  • Create scheduling-links skill main library (index.ts)
+  • Create CLI interface (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and verify build
+  • Commit changes and update PRD ←
+• Used Shell (cd skills/scheduling-link...add -A && git status 2>&1)
+• Good, the changes are staged. Now let me commit and update the PRD.
+• Used Shell (git commit -m "feat: US-0...s skill for booking" 2>&1)
+• Now let me update the PRD to set passes: true for US-049 and then append to pr
+  ogress.txt.
+• Now let me update the PRD to mark US-049 as passed:
+• Used StrReplaceFile (prd.json)
+• Now let me append to progress.txt with the progress report for US-049.
+• Used WriteFile (progress.txt)
+• I've successfully completed US-049. Let me verify the changes and check if the
+  re are any remaining stories to implement.
+• Let me verify the changes and check the next story:
+• Used Shell (grep -E '"id":|"passes":'...asses": false' | head -20)
+• Hmm, let me review the current state of the project after finishing US-049. I'
+  ve completed the scheduling-links skill. Wait, I should double-check US-050—is
+  it definitely marked as passing? Yes, the PRD confirms it's done. That means t
+  he remaining backlog for this milestone consists of 10 specific stories, from
+  US-051 to US-060.
+
+  Let me look closer at the next one: US-051. The goal is to implement 'focus-ti
+  me-blocks'. This is a high-priority item because it directly addresses the cor
+  e requirement of protecting deep work time. Actually, I've already set up the
+  foundational calendar logic in previous tasks, so adding this specific logic s
+  hould be straightforward. Since I've met the requirements for the current stor
+  y and verified the PRD status, there's no more code to write for US-049. I'm n
+  ow at a clean breakpoint. I've synchronized all local changes, and the environ
+  ment is stable. The most logical next step is to finalize this iteration and p
+  resent the summary of what was accomplished. There's no reason to delay the co
+  mpletion status since the acceptance criteria for the scheduling links are ful
+  ly met.
+• Used SetTodoList
+  • Create scheduling-links skill main library (index.ts)
+  • Create CLI interface (cli.ts)
+  • Create SKILL.md documentation
+  • Run typecheck and verify build
+  • Commit changes and update PRD
+• I've successfully completed US-049. Let me summarize what was done:
+
+  1. Created the scheduling-links skill with the following features:
+    • Meeting types with custom durations
+    • Availability windows per meeting type
+    • Booking links with customizable settings
+    • Buffer times and booking constraints
+    • Embeddable widget code generation
+    • Available slot calculation with conflict detection
+    • Full booking lifecycle management
+    • Calendar integration for automatic event creation
+    • SQLite storage
+  2. Typecheck passes
+  3. Commit created with message: feat: US-049 - Create scheduling-links skill f
+     booking
+  4. PRD updated to set passes: true for US-049
+  5. Progress appended to progress.txt
+
+  Since there are still stories with passes: false (US-051 through US-060), I sh
+  ould not signal completion with <promise>COMPLETE</promise>. Instead, I'll end
+  normally and the next iteration will pick up the next story (US-051).
+• I have successfully completed US-049: Create scheduling-links skill for bookin
+  g.
+
+  Summary
+
+  What was implemented:
+
+  • Full scheduling-links skill with Calendly-style booking functionality
+  • Meeting types with custom durations (15, 30, 45, 60+ minutes)
+  • Availability windows per meeting type (days of week with time ranges)
+  • Booking links with customizable settings (title, welcome/confirmation messag
+    )
+  • Buffer times before/after appointments
+  • Booking constraints (min/max advance booking times)
+  • Embeddable iframe widget code generation
+  • Available slot calculation with conflict detection
+  • Full booking lifecycle (create, cancel, no-show)
+  • Calendar integration for automatic event creation
+  • SQLite storage for all data
+
+  Files created:
+
+  • skills/scheduling-links/package.json
+  • skills/scheduling-links/tsconfig.json
+  • skills/scheduling-links/.gitignore
+  • skills/scheduling-links/SKILL.md
+  • skills/scheduling-links/src/index.ts (main library)
+  • skills/scheduling-links/src/cli.ts (CLI interface)
+
+  Verification:
+
+  • Typecheck passes ✅
+  • CLI commands tested and working ✅
+  • Commit created: feat: US-049 - Create scheduling-links skill for booking
+
+  Remaining stories: There are still 10 stories with passes: false:
+
+  • US-051: focus-time-blocks
+  • US-052: report-builder
+  • US-053: monthly-reports
+  • US-054: competitor-monitor
+  • US-055: email-summarizer
+  • US-056: showing-scheduler
+  • US-057: pantry-tracker
+  • US-058: diy-guides
+  • US-059: review-monitor
+  • US-060: saved-searches

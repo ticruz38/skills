@@ -1,0 +1,356 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and the progress log to understand what n
+  eeds to be implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see all the completed stories
+  and understand the codebase patterns better.
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt to see the rest of the completed stor
+  ies and identify the next story to work on.
+• Used ReadFile (progress.txt)
+• The current task is to implement US-046, the reservation-manager skill. This r
+  equires a system that handles restaurant table management and availability, wh
+  ile specifically depending on the calendar skill for scheduling. Looking at th
+  e file structure, I expect the codebase is organized into individual skill dir
+  ectories.
+
+  Hmm, I need to understand how these skills interact—specifically, how the rese
+  rvation-manager will communicate with the calendar skill to block out times an
+  d check for conflicts. Is there a common interface or a shared library for ski
+  ll-to-skill communication? Before I can define the database schema for the res
+  ervation-manager, I need to see how existing skills like calendar are structur
+  ed and how they expose their functionality.
+
+  Wait, I also need to see if there are any shared types or utility functions I
+  should be using to maintain consistency with the rest of the project. Checking
+  the directory layout is the first step to identifying the relevant files for t
+  he calendar dependency and the intended location for the new skill's logic. I'
+  ll start by listing the contents of the skills directory to get an overview of
+  the project's organization and existing components.
+• Now I understand the current state. Looking at the PRD:
+
+  • US-001 through US-045 are complete (passes: true)
+  • US-046 through US-060 are pending (passes: false)
+
+  The next highest priority story is US-046: Create reservation-manager skill fo
+  r restaurants.
+
+  Let me check the existing skills structure and the calendar skill (which US-04
+  6 depends on):
+• Used Shell (ls -la skills/)
+• Let me look at the calendar skill since reservation-manager depends on it. I'l
+  l also check an existing skill structure for reference.
+• Used ReadFile (skills/calendar/src/index.ts)
+• Used ReadFile (skills/meetings/src/index.ts)
+• I've identified US-046 as the next logical step in the implementation phase. T
+  his story requires the creation of a reservation-manager skill, which involves
+  building a system for table management, availability checking, and SMS confirm
+  ations. This is a significant piece of functionality that bridges the gap betw
+  een the calendar system and the booking workflow.
+
+  Hmm, looking at the dependencies, this skill relies heavily on the calendar sk
+  ill to ensure that reservations don't overlap with closed hours or existing ev
+  ents. To maintain architectural consistency with previous work like US-043 (cl
+  ient-crm) and US-044 (data-connector), I need to follow the established patter
+  n of creating isolated, modular skills with their own database schema and conf
+  iguration.
+
+  Wait, I should check if I need to initialize a new directory for this. Given t
+  he structure of other tasks, it's highly likely that skills/reservation-manage
+  r/ doesn't exist yet or is empty. Before I can dive into the database design f
+  or tables and reservations, I must ensure the directory structure is in place.
+
+  Actually, a more efficient approach would be to lay the groundwork first. This
+  means creating the necessary directory paths and then immediately setting up t
+  he package.json and tsconfig.json files. This ensures that the environment is
+  ready for the TypeScript implementation of the management logic and SMS handle
+  rs. By starting with the directory and configuration files, I'm mirroring the
+  successful setup used in previous skills.
+
+  I'll start by creating the skill directory and scaffolding the basic configura
+  tion files needed for TypeScript compilation and module resolution.
+• Now I'll implement US-046: Create reservation-manager skill. Let me create the
+  skill directory structure and files:
+• Used Shell (mkdir -p skills/reservation-manager/src)
+• Now let me create all the necessary files for the reservation-manager skill. I
+  'll start with package.json, tsconfig.json, .gitignore, and then the main sour
+  ce files.
+• Used WriteFile (skills/reservation-manager/package.json)
+• Used WriteFile (skills/reservation-manager/tsconfig.json)
+• Used WriteFile (skills/reservation-manager/.gitignore)
+• Now let me create the main index.ts file with the ReservationManager skill imp
+  lementation. This will be a comprehensive implementation following the pattern
+  s from previous skills.
+• Now let me create the main library file:
+• Used WriteFile (skills/reservation-manager/src/index.ts)
+• Now let me create the CLI file for the reservation-manager skill.
+• Now let me create the CLI file:
+• Used WriteFile (skills/reservation-manager/src/cli.ts)
+• Now let me create the SKILL.md documentation file for the reservation-manager
+  skill.
+• Now let me create the SKILL.md documentation:
+• Used WriteFile (skills/reservation-manager/SKILL.md)
+• Now let me install the dependencies and run typecheck to ensure everything com
+  piles correctly.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd skills/reservation-manager && npm install 2>&1)
+• Good, dependencies installed. Now let me run typecheck to ensure the TypeScrip
+  t compiles correctly.
+• Used Shell (cd skills/reservation-man...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• There's a type error in the CLI file. Let me fix it.
+• Let me fix the type error:
+• Used ReadFile (skills/reservation-manager/src/cli.ts)
+• The issue is that duration expects a number but we're passing number | undefin
+  ed. Let me check the Reservation interface to see if duration is optional or r
+  equired. Looking at the createReservation method signature, duration should be
+  handled properly. Let me fix this.
+• Used StrReplaceFile (skills/reservation-manager/src/cli.ts)
+• Now let me run typecheck again.
+• Used Shell (cd skills/reservation-man...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me build the project to ensure everything compiles c
+  orrectly.
+• Now let me build the project:
+• Used Shell (cd skills/reservation-man...ger && npm run build 2>&1)
+• Build succeeds. Now let me update the PRD to mark US-046 as passed and update
+  the progress.txt file with the implementation details.
+• Excellent! The build passes. Now let me update the PRD and progress log:
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me check the exact format in the prd.json file.
+• Used Grep (US-046)
+• Let me look at the exact format of the US-046 entry in the prd.json file.
+• Used ReadFile (prd.json)
+• Now let me fix the PRD entry for US-046 by replacing the passes: false with pa
+  sses: true.
+• Used StrReplaceFile (prd.json)
+• Now let me update the progress.txt file with the implementation details.
+• Now let me append to the progress log:
+• Used WriteFile (progress.txt)
+• Now let me commit the changes. Let me first check the git status to see what f
+  iles were added/modified.
+• Now let me commit the changes:
+• Used Shell (cd /root/code/skills && git status)
+• Let me add all the changes and commit.
+• Used Shell (cd /root/code/skills && g...ill for restaurants" 2>&1)
+• The commit was successful. Now let me verify that everything is working by che
+  cking if there are still stories with passes: false.
+• Let me verify the current state of the PRD:
+• Used Grep ("passes": false)
+• There are still 14 stories with passes: false (US-047 through US-060). The cur
+  rent story (US-046) has been completed successfully.
+
+  Let me provide a summary of what was done.
+• I have successfully completed US-046: Create reservation-manager skill for res
+  taurants.
+
+  Summary
+
+  What was implemented:
+
+  The reservation-manager skill is a comprehensive restaurant table reservation
+  system with:
+
+  1. Table Management
+    • Add, update, delete tables with capacity and section tracking
+    • Active/inactive status for tables
+  2. Availability Checking
+    • Find available time slots for any date and party size
+    • Conflict detection to prevent double-booking
+    • Auto-assignment of best-fitting tables
+  3. Reservation Management
+    • Full CRUD operations for reservations
+    • Status workflow: confirmed → seated → completed (or cancelled/no_show)
+    • Support for special requests and occasions
+  4. Calendar Integration
+    • Syncs reservations to Google Calendar
+    • Automatic event creation and updates
+  5. SMS Notifications
+    • Confirmation, reminder, and cancellation message templates
+    • Variable substitution ({{guestName}}, {{time}}, etc.)
+  6. Configuration
+    • Restaurant name, hours, time slots
+    • Default reservation duration and buffer times
+    • SMS enable/disable toggle
+
+  Files created:
+
+  • skills/reservation-manager/package.json
+  • skills/reservation-manager/tsconfig.json
+  • skills/reservation-manager/.gitignore
+  • skills/reservation-manager/SKILL.md
+  • skills/reservation-manager/src/index.ts (main library)
+  • skills/reservation-manager/src/cli.ts (CLI interface)
+
+  Quality checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build succeeds
+  • ✅ Committed with message: feat: US-046 - Create reservation-manager skill f
+    restaurants
+
+  ──────────────────────────────────────────────────────────────────────────────
+  14 stories remain (US-047 through US-060).

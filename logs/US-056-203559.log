@@ -1,0 +1,462 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• The user wants me to act as an autonomous coding agent called "Ralph". I need
+  to:
+
+  1. Read the PRD at prd.json
+  2. Read the progress log at progress.txt
+  3. Check the branch
+  4. Pick the highest priority user story where passes: false
+  5. Implement it
+  6. Run quality checks
+  7. Update AGENTS.md if needed
+  8. Commit changes
+  9. Update the PRD
+  10. Append progress to progress.txt
+
+  Let me start by reading the PRD and progress files.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see the remaining content.
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt to see if there are more recent entri
+  es and find the highest priority story that still needs to be implemented.
+• Used ReadFile (progress.txt)
+• Now I have the complete picture. Looking at the PRD, the remaining stories wit
+  h passes: false are:
+
+  1. US-056 (Priority 56) - showing-scheduler skill - Schedule property showings
+     epends: calendar, client-crm)
+  2. US-057 (Priority 57) - pantry-tracker skill - Track pantry inventory
+  3. US-058 (Priority 58) - diy-guides skill - Step-by-step repair guides
+  4. US-059 (Priority 59) - review-monitor skill - Monitor and respond to review
+  5. US-060 (Priority 60) - saved-searches skill - Save and rerun searches autom
+     cally
+
+  The highest priority story with passes: false is US-056 - showing-scheduler sk
+  ill. This skill depends on calendar and client-crm skills.
+
+  Let me check the current branch and then start implementing the showing-schedu
+  ler skill.
+• Now I have the full picture. Looking at the PRD, the highest priority story wi
+  th passes: false is:
+
+  US-056 - showing-scheduler skill (Priority 56)
+
+  • Title: "Create showing-scheduler skill for real estate"
+  • Description: Schedule property showings
+  • Dependencies: calendar, client-crm
+  • Acceptance Criteria: Calendar coordination, Lockbox code storage, Client fee
+    ack collection, Route optimization, Typecheck passes
+
+  Let me check the current branch and start implementing this skill.
+• Used Shell (git branch --show-current && git status)
+• Used Glob (skills/calendar/SKILL.md)
+• Used Glob (skills/client-crm/SKILL.md)
+• Good, I'm on the correct branch ralph/all-skills. Now let me read the SKILL.md
+  files for the dependencies (calendar and client-crm) to understand how to use
+  them.
+• Used ReadFile (skills/calendar/SKILL.md)
+• Used ReadFile (skills/client-crm/SKILL.md)
+• Now I have a good understanding of the dependencies. Let me also look at the s
+  tructure of a similar skill to understand the pattern better. Let me look at a
+  n existing skill that depends on calendar and another skill.
+• Let me also look at a skill that integrates with calendar to understand the im
+  plementation pattern better:
+• Used ReadFile (skills/reservation-manager/src/index.ts)
+• Now I have a good understanding of the patterns. Let me create the showing-sch
+  eduler skill that:
+
+  1. Depends on calendar and client-crm skills
+  2. Implements property showing scheduling
+  3. Includes lockbox code storage
+  4. Client feedback collection
+  5. Route optimization
+
+  Let me now create the showing-scheduler skill.
+• Now I have a good understanding of the patterns. Let me create the showing-sch
+  eduler skill. I'll set up the complete structure:
+• Used SetTodoList
+  • Create showing-scheduler directory structure ←
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Let me now create the showing-scheduler skill. I'll start with the directory s
+  tructure and package.json.
+• Used Shell (mkdir -p skills/showing-scheduler/src)
+• Now let me create the package.json file with the dependencies on calendar and
+  client-crm skills.
+• Used WriteFile (skills/showing-scheduler/package.json)
+• Used WriteFile (skills/showing-scheduler/tsconfig.json)
+• Used WriteFile (skills/showing-scheduler/.gitignore)
+• Now let me create the SKILL.md documentation file.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation ←
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Now let me create the SKILL.md documentation file for the showing-scheduler sk
+  ill.
+• Used WriteFile (skills/showing-scheduler/SKILL.md)
+• Now let me create the main library file (src/index.ts) for the showing-schedul
+  er skill. This will be a comprehensive file that includes all the functionalit
+  y.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library ←
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Now let me create the main library file. This is a large file so I'll create i
+  t in parts.
+• Used WriteFile (skills/showing-scheduler/src/index.ts)
+• Now I need to continue with the main library methods. Let me append the remain
+  ing methods to the index.ts file.
+• Used WriteFile (skills/showing-scheduler/src/index.ts)
+• Now let me continue adding the route optimization and statistics methods to co
+  mplete the index.ts file.
+• Used WriteFile (skills/showing-scheduler/src/index.ts)
+• Now I need to create the CLI file. Let me create a comprehensive CLI interface
+  .
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface ←
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Now let me create the CLI file. This is going to be a large file so I'll creat
+  e it in parts.
+• Used WriteFile (skills/showing-scheduler/src/cli.ts)
+• Now let me update the todo list and run the typecheck and build.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build ←
+  • Update prd.json and progress.txt
+  • Commit changes
+• Now let me run npm install and then typecheck.
+• Used Shell (cd skills/showing-scheduler && npm install 2>&1)
+• Good, npm install succeeded. Now let me run typecheck.
+• Used Shell (cd skills/showing-schedul...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• I have three TypeScript errors to fix:
+
+  1. ClientCRMConfig doesn't have 'profile' property - I need to check how Clien
+     MSkill is configured
+  2. Type issue with keyof Showing on updates
+  3. followUpRequested type issue
+
+  Let me check the client-crm skill's index.ts to understand the constructor sig
+  nature.
+• Let me check the client-crm skill configuration:
+• Used ReadFile (skills/client-crm/src/index.ts)
+• Let me check how ClientCRMSkill is constructed by reading more of the file:
+• Used ReadFile (skills/client-crm/src/index.ts)
+• I see - the ClientCRMConfig only has dataDir, not profile. I need to fix my co
+  de to not pass profile to the CRM. Let me also fix the other type issues.Let m
+  e fix the three TypeScript errors:1. Remove profile from ClientCRMSkill constr
+  uctor (only use dataDir) 2. Fix the keyof issue by using a different approach
+  3. Fix the followUpRequested type issue
+• I see the issues. Let me fix the TypeScript errors:
+• Used StrReplaceFile (skills/showing-scheduler/src/index.ts)
+• Now let me run typecheck again.
+• Used Shell (cd skills/showing-schedul...&& npm run typecheck 2>&1)
+• Typecheck passed! Now let me run the build.
+• Typecheck passed! Now let me build:
+• Used Shell (cd skills/showing-scheduler && npm run build 2>&1)
+• Build succeeded! Now let me update the todo list, update prd.json, and update
+  progress.txt.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt ←
+  • Commit changes
+• Now let me update prd.json to set US-056 as passes: true, and add to progress.
+  txt.
+• Used StrReplaceFile (prd.json)
+• Now let me append to progress.txt with the learnings from this implementation.
+• Used WriteFile (progress.txt)
+• Now let me commit the changes.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes ←
+• Now let me commit the changes with a proper commit message.
+• Used Shell (git add -A && git status)
+• Now let me commit these changes.
+• Used Shell (git commit -m "feat: US-0...er skill for real estate")
+• Commit was successful. Now let me update the todo list and verify the remainin
+  g stories.
+• Used SetTodoList
+  • Create showing-scheduler directory structure
+  • Create package.json with dependencies
+  • Create tsconfig.json
+  • Create SKILL.md documentation
+  • Implement src/index.ts main library
+  • Implement src/cli.ts CLI interface
+  • Create .gitignore
+  • Run typecheck and build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Let me verify the remaining stories with passes: false to see if there are mor
+  e to implement.
+• Let me verify the remaining incomplete stories:
+• Used Grep ("passes": false)
+• There are still 4 remaining stories with passes: false:
+
+  • US-057 (Priority 57): pantry-tracker skill
+  • US-058 (Priority 58): diy-guides skill
+  • US-059 (Priority 59): review-monitor skill
+  • US-060 (Priority 60): saved-searches skill
+
+  Since not all stories are complete, I should end my response normally without
+  the COMPLETE promise.
+• I've successfully completed US-056 - the showing-scheduler skill. Here's a sum
+  mary of what was implemented:
+
+  Summary
+
+  Showing Scheduler Skill - A real estate property showing management system wit
+  h the following features:
+
+  Core Features
+
+  • Property Showing Scheduling: Schedule showings with client linking, date/tim
+    duration
+  • Calendar Integration: Automatic Google Calendar event creation and sync
+  • Lockbox Management: Secure storage and retrieval of lockbox codes with acces
+    notes
+  • Client Feedback Collection: Ratings (1-5), interest levels, comments, pros/c
+    s, price opinions
+  • Route Optimization: Nearest neighbor algorithm for efficient multi-showing r
+    tes
+
+  Database Schema
+
+  • showings table - property details, client linking, lockbox codes, calendar e
+    nt IDs
+  • feedback table - ratings, interest levels, pros/cons, follow-up tracking
+
+  CLI Commands
+
+  • schedule, list, get, update, cancel, complete, confirm, no-show - CRUD opera
+    ons
+  • lockbox, set-lockbox - Lockbox code management
+  • feedback, feedback-get - Client feedback collection
+  • route, optimize - Route optimization
+  • today, upcoming - Quick viewing commands
+  • stats, health - Monitoring
+
+  Dependencies
+
+  • @openclaw/calendar - For calendar integration
+  • @openclaw/client-crm - For client data management
+
+  ──────────────────────────────────────────────────────────────────────────────
+  Remaining stories to complete:
+
+  • US-057 (Priority 57): pantry-tracker skill
+  • US-058 (Priority 58): diy-guides skill
+  • US-059 (Priority 59): review-monitor skill
+  • US-060 (Priority 60): saved-searches skill

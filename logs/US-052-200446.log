@@ -1,0 +1,448 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• The user wants me to work as a Ralph autonomous coding agent. Let me start by
+  reading the PRD and progress log to understand what needs to be done.
+
+  1. First, I'll read the prd.json file
+  2. Then read progress.txt to check Codebase Patterns
+  3. Check the branch and implement the highest priority user story with passes:
+     lse
+  4. Run quality checks
+  5. Commit and update progress
+
+  Let me start by reading the PRD and progress files.
+• I'll start by reading the PRD and progress log to understand what needs to be
+  implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see the remaining entries and
+  find the Codebase Patterns section.
+• Let me continue reading the progress.txt to see more recent entries and check
+  the current branch:
+• Used ReadFile (progress.txt)
+• Used Shell (git branch --show-current && git status --short)
+• I've identified the remaining tasks: US-052 through US-060. These cover a wide
+  range of functionalities, including financial reporting, automated monitoring,
+  and calendar management. Specifically, US-056 (showing-scheduler) stands out a
+  s a critical component for the real estate vertical, requiring integration wit
+  h both the calendar and client-crm modules.
+
+  Hmm, I notice I've already read the relevant sections in progress.txt up to li
+  ne 1999. But wait, checking the file size, there's definitely more content bel
+  ow that isn't currently visible in my context. Before I dive into implementati
+  on for US-052, I need to see if any recent commits or manual logs in the progr
+  ess file provide specific architectural constraints for these remaining storie
+  s.
+
+  Actually, if the real estate features like US-056 depend on previous work, I s
+  hould verify the current state of the skills/ directory first. I'll examine th
+  e bottom of the progress log for the latest updates and then list the existing
+  skills to ensure I don't duplicate logic or miss a dependency. This will give
+  me a clear baseline before I start modifying the codebase.
+• Let me read the remaining progress.txt and check the skills directory:
+• Used ReadFile (progress.txt)
+• Used Shell (ls -la skills/ | head -60)
+• I have successfully reviewed the progress logs. The implementation of US-051 i
+  s complete, and I am now up to speed on the requirements for the remaining use
+  r stories. Looking at the PRD, I see that US-052 (report-builder) is the next
+  logical step in the sequence. This skill is designed to automate data reports
+  by pulling information from the data-connector and utilizing the chart-generat
+  or for visualization, which is a critical integration point for the platform.
+
+  However, to implement US-052 effectively, I need to generate a consistent inte
+  rnal dataset that can be used to test the reporting logic. While I have the sp
+  ecifications for the report-builder itself, I need to verify the exact configu
+  ration and structure of the datasets that were used in the preceding stories t
+  o ensure continuity.
+
+  Wait... before I dive into the code for US-052, I must ensure my understanding
+  of the test data environment is accurate. The files in skills/data-connector/
+  and skills/chart-generator/ likely contain the specific schemas and sample dat
+  a references I need. By reading the SKILL.md files and any relevant source cod
+  e like src/index.ts from these directories, I can confirm how the data is bein
+  g ingested and transformed. This will allow me to build the report-builder on
+  a solid foundation that aligns with the existing components.
+
+  I will proceed by examining the documentation and entry points for both the da
+  ta-connector and chart-generator skills. This will provide the necessary techn
+  ical context for the data structures I need to report on.
+• I'm on the correct branch ralph/all-skills. Looking at the PRD, the remaining
+  stories with passes: false are US-052 through US-060. The highest priority rem
+  aining is US-052: Create report-builder skill for automated reports.
+
+  Let me check the dependencies to understand the existing patterns:
+• Used ReadFile (skills/data-connector/SKILL.md)
+• Used ReadFile (skills/chart-generator/SKILL.md)
+• Used ReadFile (skills/email/src/index.ts)
+• I've analyzed the dependencies for US-052: the report-builder skill is a meta-
+  skill that orchestrates data-connector, chart-generator, and email. Now I need
+  to plan the implementation.
+
+  Hmm, how should the data flow work? The user wants scheduled reports. This imp
+  lies a persistent state to store the 'schedule' configuration—likely in a loca
+  l database or a JSON file. I also need to consider the aggregation logic and h
+  ow to pass that data to the chart generator.
+
+  Wait, I should check the existing codebase patterns first. Does the project us
+  e a specific directory structure for skills? Looking at the skills/ folder, it
+  seems each skill is a self-contained module.
+
+  Actually, I'll start by creating the report-builder directory and a package.js
+  on file. This will define the skill's metadata and its dependencies on the oth
+  er local skill packages. Before I dive into the TypeScript implementation of t
+  he scheduler and aggregator, I need to see how the other skills are structured
+  to maintain consistency.
+
+  Let me look at one of the simpler skills to understand the file structure and
+  build patterns. I'll check skills/focus-time-blocks. This should give me a cle
+  ar template for the src/index.ts entry point and the CLI setup.
+• Now I understand the requirements for US-052. The report-builder skill depends
+  on data-connector, chart-generator, and email. It needs to:
+
+  • Build automated data reports
+  • Scheduled reports with templates
+  • Data aggregation
+  • PDF/Excel export
+  • Email delivery
+
+  Let me create the skill:
+• Used Shell (mkdir -p skills/report-bu...config.json, .gitignore" )
+• Now let me create the main library file (index.ts) for the report-builder skil
+  l.
+• Used WriteFile (skills/report-builder/src/index.ts)
+• Now let me create the CLI file for the report-builder skill.
+• Now let me create the CLI file:
+• Used WriteFile (skills/report-builder/src/cli.ts)
+• Now let me create the SKILL.md documentation file.
+• Now let me create the SKILL.md documentation:
+• Used WriteFile (skills/report-builder/SKILL.md)
+• Now let me install dependencies and run typecheck to make sure everything comp
+  iles correctly.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd skills/report-builder && npm install 2>&1)
+• Dependencies installed. Now let me run typecheck to make sure the code compile
+  s.
+• Used Shell (cd skills/report-builder && npm run typecheck 2>&1)
+  Failed with exit code: 2
+• There's a type error on line 721. Let me check and fix it.
+• Let me fix the type error:
+• Used ReadFile (skills/report-builder/src/index.ts)
+• Hmm, the TypeScript compiler is flagging line 721. It seems template.valueColu
+  mn is typed as string | undefined, but reportData.headers.indexOf() strictly e
+  xpects a string.
+
+  Wait, I added a check for template.valueColumn on line 717, so logically it sh
+  ould be defined within that block. But TypeScript's static analysis doesn't na
+  rrow the type across the complex conditional or within the nested map function
+  call.
+
+  Actually, to resolve this without changing the logic, I should use a non-null
+  assertion. Since I've confirmed valueColumn is required for this branch to exe
+  cute, casting it as string is the most direct fix. I'll modify line 721 to ens
+  ure the type is handled correctly during the index lookup.
+• Used StrReplaceFile (skills/report-builder/src/index.ts)
+• Now let me run typecheck again.
+• Used Shell (cd skills/report-builder && npm run typecheck 2>&1)
+• Typecheck passes. Now let me also run the build to make sure everything compil
+  es correctly.
+• Typecheck passes. Let me run the build and test the CLI:
+• Used Shell (cd skills/report-builder && npm run build 2>&1)
+• Build successful. Now let me test the CLI by running the health check.
+• Used Shell (cd skills/report-builder && npm run status 2>&1)
+• The skill is working. The status shows degraded because data-connector and ema
+  il dependencies aren't configured, but the core functionality works. The chart
+  -generator shows as working since it has no external dependencies.
+
+  Now let me also test creating a template and listing templates:
+• Let me test a few more CLI commands:
+• Used Shell (cd skills/report-builder ...cli -- template-list 2>&1)
+• Good, the CLI is working. Now let me also test the stats command:
+• Used Shell (cd skills/report-builder ...npm run cli -- stats 2>&1)
+• I see a small issue with the stats - there's a "null enabled" showing because
+  the database returns null for sum when there are no rows. This is a minor disp
+  lay issue but I should fix it. Let me update the stats display in the CLI.
+
+  Actually, this is just a display issue in the CLI. The core functionality work
+  s. Let me fix this:
+• Let me fix the stats display issue:
+• Used ReadFile (skills/report-builder/src/cli.ts)
+• Let me find the stats section in the CLI.
+• Used Grep (case 'stats':)
+• The issue is that when the database returns null for the enabled count and his
+  tory counts (because there are no rows), it displays as "null" instead of "0".
+  Let me fix this in the index.ts to ensure we always return numbers.
+• Used ReadFile (skills/report-builder/src/index.ts)
+• Let me find the getStats method in the index.ts.
+• Used Grep (async getStats)
+• I see the issue. When the SUM returns NULL (because there are no rows), it pas
+  ses through as null. I need to handle null values by converting them to 0. Let
+  me fix this.
+• Let me fix the null handling in the getStats method:
+• Used StrReplaceFile (skills/report-builder/src/index.ts)
+• Now let me rebuild and test again.
+• Used Shell (cd skills/report-builder ...npm run cli -- stats 2>&1)
+• Now the stats display correctly with 0 instead of null. Let me also verify the
+  typecheck still passes and then update the PRD and progress log.
+• Now let me run typecheck one more time, then update the PRD and commit:
+• Used Shell (cd skills/report-builder && npm run typecheck 2>&1)
+• Typecheck passes. Now let me update the PRD to mark US-052 as passing, and add
+  to the progress log.
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me check the exact format in the prd.json file for US-052.
+• Used ReadFile (prd.json)
+• I see, the format is different than expected. Let me fix the replacement.
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me try a different approach - just replace the specific line.
+• Used Shell (sed -i 's/"id": "US-052"/...rying different approach")
+• Actually, let me use a simpler approach with line number-based replacement.
+• Used Shell (sed -n '817,819p' prd.json)
+• Line 818 has the "passes": false that I need to change. Let me use sed to repl
+  ace that specific line.
+• Used Shell (sed -i '818s/"passes": fa...ed -n '815,822p' prd.json)
+• Hmm, the sed command didn't work as expected. Let me try a different approach
+  with a simpler replacement.
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me try to read the exact bytes from the file.
+• Used Shell (cat -A prd.json | sed -n '817,820p')
+• Let me try a simple Python script to update the JSON file.
+• Used Shell (node -e " const fs = requ...('US-052 not found'); } ")
+  Failed with exit code: 1
+• It looks like the prd.json file might be corrupted. Let me check what happened
+  .
+• Used Shell (sed -n '800,810p' prd.json)
+• Oh no! My earlier sed command corrupted the file. Let me fix it by restoring t
+  he proper structure.
+• Used Shell (git checkout prd.json && ...ed -n '805,825p' prd.json)
+• Good, the file is restored. Now let me update it correctly using a proper Pyth
+  on script.
+• Used Shell (python3 << 'EOF' import j...('\n') print('Done') EOF )
+• Now let me verify the change and then append to progress.txt.
+• Used Shell (grep -A 2 '"id": "US-052"' prd.json)
+• Let me also check the passes field was updated.
+• Used Shell (grep -A 12 '"id": "US-052"' prd.json | tail -5)
+• The PRD is updated. Now let me append the progress report to progress.txt.
+• Now let me append the progress report:
+• Used Shell (cat >> progress.txt << 'E...echo "Progress appended" )
+• Now let me commit all changes.
+• Now let me commit the changes:
+• Used Shell (git add -A && git status)
+• Good, all files are staged. Let me commit with the proper message.
+• Used Shell (git commit -m "feat: US-0... echo "Commit successful")
+• The commit was successful. Now let me check if there are more stories to compl
+  ete. Looking at the PRD, the remaining stories with passes: false are:
+
+  • US-053: Create monthly-reports skill for expenses
+  • US-054: Create competitor-monitor skill for tracking
+  • US-055: Create email-summarizer skill for thread summaries
+  • US-056: Create showing-scheduler skill for real estate
+  • US-057: Create pantry-tracker skill for inventory
+  • US-058: Create diy-guides skill for home repairs
+  • US-059: Create review-monitor skill for reputation
+  • US-060: Create saved-searches skill for research automation
+
+  Since there are still stories with passes: false, I should end my response nor
+  mally and let the next iteration continue with US-053.
+• I've completed US-052: Create report-builder skill for automated reports. Here
+  's a summary:
+
+  Summary
+
+  Created report-builder skill - A comprehensive automated report generation sys
+  tem that:
+
+  • Creates report templates with data aggregation (sum, average, count, min, ma
+  • Schedules automated reports (daily, weekly, monthly, quarterly, yearly)
+  • Exports reports in multiple formats: HTML (with SVG charts), CSV, JSON, PDF-
+    ady
+  • Delivers reports via email with attachments
+  • Tracks report generation history
+
+  Key features:
+
+  • Depends on data-connector, chart-generator, and email skills
+  • Template system for reusable report configurations
+  • Schedule system with next-run calculation
+  • Due report execution with cron-friendly interface
+  • Comprehensive CLI for all operations
+
+  Files created:
+
+  • skills/report-builder/src/index.ts - Main library (35KB)
+  • skills/report-builder/src/cli.ts - CLI interface (20KB)
+  • skills/report-builder/SKILL.md - Documentation
+  • skills/report-builder/package.json, tsconfig.json, .gitignore
+
+  Verification:
+
+  • ✅ Typecheck passes
+  • ✅ Build succeeds
+  • ✅ CLI commands work (status, template-list, stats)
+
+  The commit has been made with message: feat: US-052 - Create report-builder sk
+  ill for automated reports
+
+  There are still 8 remaining stories to complete (US-053 through US-060).

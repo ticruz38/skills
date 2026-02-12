@@ -1,0 +1,321 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and the progress log to understand what n
+  eeds to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to see all the patterns and rece
+  nt entries.
+• Used ReadFile (progress.txt)
+• Used Shell (git branch)
+• I have finished reviewing the comprehensive project documentation. With the ra
+  lph/all-skills branch checked out and up to date, I am ready to implement the
+  next component.
+
+  Wait, I need to be careful about the dependency chain. While US-033: inbox-tri
+  age has the next highest priority (33), it requires the email skill to be func
+  tional. US-034: draft-responses also depends on email. However, US-035: gift-s
+  uggestions is the first story with passes: false that has no external dependen
+  cies—it only uses the main model and SQLite. This makes it the most practical
+  starting point for this iteration.
+
+  The requirements for the gift-suggestions skill are quite specific: recipient-
+  based suggestions, interest matching, budget filtering, and trend awareness. I
+  'll need to design a system that stores recipient profiles and uses the model
+  to generate contextual suggestions based on various constraints.
+
+  Actually, before I start writing any code, I should verify the existing direct
+  ory structure in the skills folder. I want to ensure I'm following the establi
+  shed naming conventions and see if there are any templates or shared resources
+  I should be aware of. Checking the current skills will give me the necessary c
+  ontext to scaffold the new skill correctly.
+• I'm on the correct branch ralph/all-skills. Looking at the PRD, I can see that
+  US-033 is the highest priority story with passes: false. Let me check the exis
+  ting skills structure and then implement the inbox-triage skill.
+• Used Glob (skills/*)
+• I've confirmed that US-033: inbox-triage is the priority. It requires the emai
+  l skill for integration and the main model for AI-powered classification.
+
+  Hmm, the goal is an AI-powered email prioritization system. I'll need to defin
+  e three core components: a classification engine for sorting emails, a priorit
+  y scoring algorithm, and a system that supports bulk actions with undo functio
+  nality.
+
+  Wait, I need to see how the project handles skill-specific dependencies. Looki
+  ng at the existing skills/email directory, I can determine the correct package
+  .json structure and how to reference the local skill.
+
+  Actually, before I can write any logic for the triage system, I need to examin
+  e the SKILL.md for the email dependency. I need to know the exact API for fetc
+  hing emails and whether there's a specific interface for message metadata that
+  I should adhere to.
+
+  I'll check the email skill's manifest first. This will provide the necessary c
+  ontext on how to interact with the email service and ensure the triage skill i
+  s built on the correct foundations.
+• Now I'll implement US-033: inbox-triage skill. This skill depends on the email
+  skill and uses the main model for AI-powered email classification.
+• Used ReadFile (skills/email/SKILL.md)
+• Now I understand the email skill API. Let me create the inbox-triage skill whi
+  ch will:
+
+  1. Use the email skill to fetch emails
+  2. Use the main model (via local functions) to classify emails
+  3. Provide priority scoring and categorization
+  4. Support bulk actions with undo
+  5. Store classifications in SQLite
+
+  Let me create the inbox-triage skill structure.
+• Now I'll create the inbox-triage skill. Let me set up the directory structure
+  and files.
+• Used Shell (mkdir -p skills/inbox-triage/src)
+• Now let me create all the necessary files for the inbox-triage skill.
+• Used WriteFile (skills/inbox-triage/package.json)
+• Used WriteFile (skills/inbox-triage/tsconfig.json)
+• Used WriteFile (skills/inbox-triage/.gitignore)
+• Now let me create the main index.ts file with the InboxTriageSkill class.
+• Used WriteFile (skills/inbox-triage/src/index.ts)
+• Now let me create the CLI file.
+• Used WriteFile (skills/inbox-triage/src/cli.ts)
+• Now let me create the SKILL.md documentation.
+• Used WriteFile (skills/inbox-triage/SKILL.md)
+• Now let me build the skill and run typecheck.
+• Now let me build the skill and run typecheck:
+• Used Shell (cd skills/inbox-triage && npm install 2>&1)
+• Good, npm install completed. Now let me run typecheck.
+• Used Shell (cd skills/inbox-triage && npm run typecheck 2>&1)
+• Typecheck passes! Now let me build the skill.
+• Used Shell (cd skills/inbox-triage && npm run build 2>&1)
+• Build succeeded! Now let me update the prd.json to mark US-033 as passing, and
+  then update the progress.txt with the new entry.
+• Excellent! Typecheck and build pass. Now let me update the PRD and progress lo
+  g:
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me check the exact format of the JSON file around US-033.
+• Used ReadFile (prd.json)
+• I see, the JSON is formatted with specific whitespace. Let me use a simpler st
+  ring replacement.
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me try a different approach and look at the exact content.
+• Used Shell (grep -n '"passes": false' prd.json | head -20)
+• Let me use sed to replace line 532.
+• Used Shell (sed -i '532s/"passes": fa...'"id": "US-033"' prd.json)
+• Now let me verify the change was made.
+• Used Shell (grep -A10 '"id": "US-033"' prd.json | head -15)
+• Let me check if passes was changed.
+• Used Shell (grep -A15 '"id": "US-033"' prd.json | grep passes)
+• The PRD is updated. Now let me commit the changes and update progress.txt.
+• Now let me commit the changes:
+• Used Shell (cd /root/code/skills && git add -A && git status)
+• I notice that the dist folder isn't being committed because it's in .gitignore
+  . That's correct - we only commit source files. Let me now update progress.txt
+  and then commit.
+• Used Shell (cd /root/code/skills && c...F echo "Progress updated")
+• Now let me commit all the changes.
+• Used Shell (cd /root/code/skills && g...l for email sorting" 2>&1)
+• The commit was successful. Now let me verify that US-033 is marked as passing
+  in the PRD.
+• Used Shell (grep -A15 '"id": "US-033"...root/code/skills/prd.json)
+• US-033 is marked as passing. Let me check if there are any remaining stories w
+  ith passes: false.
+• Let me verify how many stories remain to be completed:
+• Used Shell (grep -c '"passes": false'...root/code/skills/prd.json)
+• There are still 27 stories remaining with passes: false. The inbox-triage skil
+  l has been successfully implemented and committed. Let me provide a summary.
+• I've successfully completed US-033: Create inbox-triage skill for email sortin
+  g.
+
+  Summary
+
+  Implemented:
+
+  • AI Classification System: Automatically categorizes emails into 9 categories
+    urgent, important, newsletter, promotional, social, updates, forums, spam, u
+    nown) with 5 priority levels
+  • Priority Scoring: 0-100 score with multi-factor algorithm analyzing sender p
+    terns, subject keywords, content indicators, and Gmail labels
+  • Bulk Actions: Archive, mark as read, and trash operations with 24-hour undo
+    pport
+  • Sender Rules: Custom rules for specific senders to override AI classificatio
+  • Review Workflow: Track reviewed/unreviewed classifications with manual corre
+    ion capability
+  • Statistics: Detailed breakdown of email distribution by category and priorit
+
+  Files Created:
+
+  • skills/inbox-triage/src/index.ts - Main library (30KB)
+  • skills/inbox-triage/src/cli.ts - CLI interface (12KB)
+  • skills/inbox-triage/SKILL.md - Documentation
+  • skills/inbox-triage/package.json, tsconfig.json, .gitignore
+
+  All Quality Checks Pass:
+
+  • ✅ TypeScript typecheck passes
+  • ✅ Build successful
+  • ✅ Committed with message: feat: US-033 - Create inbox-triage skill for emai
+    sorting
+
+  27 stories remain with passes: false (stories US-034 through US-060).

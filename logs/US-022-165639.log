@@ -1,0 +1,389 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by understanding the task. I'm an autonomous coding agent working
+  on a software project. I need to:
+
+  1. Read the PRD at prd.json
+  2. Read the progress log at progress.txt
+  3. Check I'm on the correct branch from PRD branchName
+  4. Pick the highest priority user story where passes: false
+  5. Implement that single user story
+  6. Run quality checks
+  7. Update AGENTS.md files if needed
+  8. Commit changes
+  9. Update the PRD to set passes: true
+  10. Append progress to progress.txt
+
+  Let me start by reading the necessary files.
+• I'll start by reading the PRD and progress files to understand what needs to b
+  e implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me analyze the PRD and progress to find the highest priority story with pa
+  sses: false:
+
+  From the PRD, I can see that:
+
+  • US-001 through US-021 have passes: true
+  • US-022 has passes: false and is the next highest priority story with priorit
+    22
+
+  US-022: Create social-scheduler skill for posting
+
+  • Description: Schedule posts to social platforms
+  • Acceptance Criteria:
+    • Queue management
+    • Optimal timing suggestions
+    • Multi-platform support
+    • Draft approval workflow
+    • SQLite storage
+    • Typecheck passes
+  • Priority: 22
+  • Passes: false
+  • Notes: Depends: google-oauth (YouTube). Uses model for content
+
+  Let me check the current branch and then look at existing skills to understand
+  the patterns.
+• Now I understand the task. I need to find the highest priority story with pass
+  es: false. Looking at the PRD, US-022 through US-060 all have passes: false. T
+  he highest priority is US-022: Create social-scheduler skill for posting (prio
+  rity 22).
+
+  Let me first check the git branch and explore the existing skill patterns:
+• Used Shell (git branch --show-current && cat .last-branch)
+• Used Glob (skills/*)
+• I'm on the correct branch ralph/all-skills. Let me look at an existing skill t
+  o understand the patterns, especially one that uses SQLite and has scheduling
+  capabilities (like reminders or meetings). The content-writer skill is also a
+  good reference since it's recent and well-structured.
+• Good, I'm on the correct branch. Let me examine some existing skills to unders
+  tand the patterns, particularly ones with scheduling and SQLite storage:
+• Used ReadFile (skills/content-writer/src/index.ts)
+• Used ReadFile (skills/content-writer/package.json)
+• Used ReadFile (skills/reminders/src/index.ts)
+• I've analyzed the existing skill architecture, and the patterns for the social
+  -scheduler are becoming clear. It needs to be a TypeScript-based system using
+  SQLite for persistence, which is standard for this project. The core requireme
+  nt is to build a scheduling engine that doesn't just store posts, but manages
+  them through a full lifecycle: from initial draft to approval, and finally to
+  publication.
+
+  Wait, I also need to account for the 'optimal timing suggestions' mentioned in
+  the PRD. This implies a logic layer that can analyze historical engagement or
+  at least provide sensible defaults for different platforms. And the draft appr
+  oval workflow is crucial—it suggests a state-based model where a post isn't im
+  mediately queued but requires a status change.
+
+  Actually, looking at the dependencies, I'll need to integrate with google-oaut
+  h to handle YouTube uploads later, and likely use the internal model for gener
+  ating the actual content. To keep this manageable and ensure I hit every accep
+  tance criteria—like queue management and multi-platform support—I should forma
+  lize the roadmap before I start writing code. I'll initialize a todo list to t
+  rack the creation of the skill's directory, the database schema, the scheduler
+  logic, and the final integration. This will keep the implementation focused an
+  d systematic.
+• Now I have a good understanding of the patterns. Let me create the social-sche
+  duler skill. This skill needs:
+
+  • Queue management for scheduled posts
+  • Optimal timing suggestions
+  • Multi-platform support
+  • Draft approval workflow
+  • SQLite storage
+• Used SetTodoList
+  • Create social-scheduler directory structure and config files ←
+  • Implement main skill class with SQLite storage
+  • Implement CLI interface
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Let me start by creating the directory structure and files for the social-sche
+  duler skill.
+• Used Shell (mkdir -p skills/social-scheduler/src)
+• Now let me create the package.json and tsconfig.json files.
+• Used WriteFile (skills/social-scheduler/package.json)
+• Used WriteFile (skills/social-scheduler/tsconfig.json)
+• Used WriteFile (skills/social-scheduler/.gitignore)
+• Now let me create the main SKILL.md file and the main index.ts file with the f
+  ull implementation.
+• Used WriteFile (skills/social-scheduler/SKILL.md)
+• Now let me create the main index.ts file. This is going to be a comprehensive
+  implementation.
+• Used WriteFile (skills/social-scheduler/src/index.ts)
+• Now let me create the CLI file.
+• Used SetTodoList
+  • Create social-scheduler directory structure and config files
+  • Implement main skill class with SQLite storage
+  • Implement CLI interface ←
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Used WriteFile (skills/social-scheduler/src/cli.ts)
+• Now let me run the typecheck to make sure everything compiles correctly.
+• Used SetTodoList
+  • Create social-scheduler directory structure and config files
+  • Implement main skill class with SQLite storage
+  • Implement CLI interface
+  • Run typecheck and verify ←
+  • Commit changes and update PRD
+• Used Shell (cd skills/social-schedule...m install 2>&1 | tail -10)
+• Good, npm install succeeded. Now let me run the typecheck.
+• Used Shell (cd skills/social-schedule...&& npm run typecheck 2>&1)
+• Typecheck passes. Let me also build the project to make sure everything compil
+  es correctly.
+• Used Shell (cd skills/social-scheduler && npm run build 2>&1)
+• The build succeeded. Now let me test the CLI quickly to make sure it works.
+• Used Shell (cd skills/social-schedule...pm run cli -- health 2>&1)
+• The skill is working. Let me test a few more commands to make sure everything
+  is functioning correctly.
+• Used Shell (cd skills/social-schedule...ptimal-times twitter 2>&1)
+• Let me test queueing a post and then listing posts.
+• Used Shell (cd skills/social-schedule...r --when "in 1 hour" 2>&1)
+• Let me test a few more commands - listing posts, queueing with approval, appro
+  ving a post, and stats.
+• Used Shell (cd skills/social-schedule...tomorrow" --approval 2>&1)
+• Let me test the list command and stats.
+• Used Shell (cd skills/social-schedule... npm run cli -- list 2>&1)
+• Let me test the stats and approve commands.
+• Used Shell (cd skills/social-schedule...npm run cli -- stats 2>&1)
+• Now let me test the approve command.
+• Used Shell (cd skills/social-schedule...-notes "Looks good!" 2>&1)
+• Excellent! Let me test the get command to see all the details.
+• Used Shell (cd skills/social-schedule...npm run cli -- get 2 2>&1)
+• The skill is working correctly. Now let me update the todo list, commit the ch
+  anges, and update the PRD.
+• Used SetTodoList
+  • Create social-scheduler directory structure and config files
+  • Implement main skill class with SQLite storage
+  • Implement CLI interface
+  • Run typecheck and verify
+  • Commit changes and update PRD ←
+• Used Shell (cd /root/code/skills && git add -A && git status)
+• Good, all the files are staged. Let me commit the changes and update the PRD.
+• Used Shell (cd /root/code/skills && g...r skill for posting" 2>&1)
+• Now let me update the PRD to set passes: true for US-022.
+• Used StrReplaceFile (prd.json)
+• Now let me append the progress to progress.txt.
+• Used Shell (cat >> /root/code/skills/...data per platform --- EOF)
+• Let me update the todo list to show completion, and verify the PRD was updated
+  correctly.
+• Used SetTodoList
+  • Create social-scheduler directory structure and config files
+  • Implement main skill class with SQLite storage
+  • Implement CLI interface
+  • Run typecheck and verify
+  • Commit changes and update PRD
+• Used Shell (cd /root/code/skills && g...'"id": "US-022"' prd.json)
+• Let me check the passes field for US-022 in the PRD to make sure it was update
+  d correctly.
+• Used Shell (cd /root/code/skills && g...'"id": "US-022"' prd.json)
+• Let me check the full entry including the passes field.
+• Used Shell (cd /root/code/skills && g...'"id": "US-022"' prd.json)
+• The PRD has been updated with passes: true for US-022. Let me verify there are
+  still more stories to complete by checking how many have passes: false.
+• Used Shell (cd /root/code/skills && g..."passes": false' prd.json)
+• There are still 38 stories with passes: false. The next one to work on is US-0
+  23. Since there are still incomplete stories, I should not return COMPLETE. Le
+  t me provide a summary of what was done.
+• I have successfully completed US-022: Create social-scheduler skill for postin
+  g.
+
+  Summary
+
+  What was implemented:
+
+  • Social Scheduler skill with comprehensive post scheduling capabilities
+  • Queue management: SQLite storage for posts with status tracking
+  • Multi-platform support: Twitter/X, LinkedIn, Facebook, Instagram, YouTube, G
+    eric
+  • Optimal timing suggestions: Platform-specific best posting times based on in
+    stry research
+  • Draft approval workflow: Full workflow from draft → pending_approval → sched
+    ed → published/failed/cancelled
+  • Natural language datetime parsing: "tomorrow", "in 2 hours", "tuesday at 9",
+    tc.
+
+  Files created:
+
+  • skills/social-scheduler/package.json
+  • skills/social-scheduler/tsconfig.json
+  • skills/social-scheduler/.gitignore
+  • skills/social-scheduler/SKILL.md
+  • skills/social-scheduler/src/index.ts
+  • skills/social-scheduler/src/cli.ts
+
+  Quality checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build succeeds
+  • ✅ CLI tested and working
+
+  Changes committed:
+
+  • Commit: feat: US-022 - Create social-scheduler skill for posting
+
+  PRD updated:
+
+  • US-022 now has "passes": true
+
+  There are still 38 stories remaining with passes: false. The next story to imp
+  lement is US-023: Create engagement-replies skill for social responses.

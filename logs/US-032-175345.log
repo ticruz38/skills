@@ -1,0 +1,330 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD and progress files to understand what I need t
+  o do.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file since it seems to have more cont
+  ent.
+• Used ReadFile (progress.txt)
+• Looking at the prd.json file, I can see that the next story to implement is US
+  -032 - "Create summarizer skill for text summarization". This skill depends on
+  the main model and doesn't need external API keys. It should:
+
+  1. Summarize articles and documents
+  2. Extract key points
+  3. Have adjustable length
+
+  Let me check the current branch and then implement this skill.
+• Now I understand the project structure. Looking at the PRD, the next story to
+  implement is US-032 - "Create summarizer skill for text summarization". This i
+  s a model-based skill that doesn't need external APIs.
+
+  Let me first check the current branch and explore the existing skills structur
+  e:
+• Used Shell (cd /root/code/skills && git branch --show-current)
+• Used Shell (ls -la /root/code/skills/skills/)
+• Used Shell (cat /root/code/skills/ski...s/web-search/package.json)
+• I have a solid understanding of the project layout. Now, I need to implement t
+  he 'summarizer' skill (US-032). The requirements are clear: it needs to handle
+  article and document summarization, extract key points, and allow for adjustab
+  le summary lengths.
+
+  Wait, since this skill is model-based and doesn't rely on external APIs, I sho
+  uld mirror the architecture of similar existing skills to maintain consistency
+  . content-writer and engagement-replies are the best candidates for this.
+
+  Before I start scaffolding the new skill's files, I need to verify how they ha
+  ndle their SKILL.md metadata and how they structure their TypeScript source fi
+  les. Specifically, I want to see how they define their CLI entry points in src
+  /cli.ts. This will ensure the new summarizer skill integrates perfectly with t
+  he existing framework. I'll start by examining the configurations of these two
+  reference skills.
+• Now I'll create the summarizer skill. Let me look at a similar skill for refer
+  ence:
+• Used ReadFile (skills/content-writer/SKILL.md)
+• Used ReadFile (skills/engagement-replies/src/cli.ts)
+• Now I have a good understanding of the project structure. Let me create the su
+  mmarizer skill with the following features:
+
+  1. Article summarization
+  2. Document summarization
+  3. Key points extraction
+  4. Adjustable length (short, medium, long)
+
+  Let me create the directory structure and all the necessary files.
+• Now I'll create the summarizer skill. Let me create the directory structure an
+  d files:
+• Used Shell (mkdir -p /root/code/skills/skills/summarizer/src)
+• Now let me create all the files for the summarizer skill.
+• Used WriteFile (skills/summarizer/package.json)
+• Used WriteFile (skills/summarizer/tsconfig.json)
+• Used WriteFile (skills/summarizer/.gitignore)
+• Now let me create the main index.ts file for the summarizer skill. This will i
+  nclude:
+
+  1. Text summarization with adjustable length
+  2. Key points extraction
+  3. SQLite storage for history
+  4. Document and article support
+• Used WriteFile (skills/summarizer/src/index.ts)
+• Now let me create the CLI file for the summarizer skill.
+• Now let me create the CLI:
+• Used WriteFile (skills/summarizer/src/cli.ts)
+• Now let me create the SKILL.md documentation file.
+• Used WriteFile (skills/summarizer/SKILL.md)
+• Now let me run the typecheck to make sure everything compiles correctly.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd /root/code/skills/skil...rizer && npm install 2>&1)
+• Good, the dependencies are installed. Now let me run the typecheck to verify e
+  verything compiles.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me build the project and test it to make sure everyt
+  hing works.
+• Typecheck passes. Let me build and test the skill:
+• Used Shell (cd /root/code/skills/skil...zer && npm run build 2>&1)
+• Build succeeded. Let me test the CLI to make sure it works.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+• Used Shell (cd /root/code/skills/skil...rticle -l short -k 3 2>&1)
+• The skill is working. Let me test a few more features like the stats and histo
+  ry commands to make sure everything is functioning properly.
+• Excellent! Let me test a few more features:
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js stats 2>&1)
+• Used Shell (cd /root/code/skills/skil... dist/cli.js history 2>&1)
+• Everything is working. Let me test the file summarization feature and the diff
+  erent formats.
+• Let me test a few more features to ensure complete functionality:
+• Used Shell (cat > /tmp/test-doc.txt <...EOF cat /tmp/test-doc.txt)
+• Good, now let me test the file summarization with different formats.
+• Used Shell (cd /root/code/skills/skil...--format bullet -k 5 2>&1)
+• The skill is working well! Now let me commit the changes and update the PRD.
+• The skill is working well. Now let me commit the changes and update the PRD:
+• Used Shell (cd /root/code/skills && g...add -A && git status 2>&1)
+• The git status looks good. Let me commit the changes.
+• Used Shell (cd /root/code/skills && g... text summarization" 2>&1)
+• Good, now let me update the PRD to set US-032 as passing.
+• Now let me update the PRD and progress log:
+• Used StrReplaceFile (prd.json)
+  No replacements made
+• Let me read the prd.json again to see the exact format.
+• Used ReadFile (prd.json)
+• I see the exact format now. Let me make the replacement with the correct strin
+  g.
+• Used StrReplaceFile (prd.json)
+• Good, now let me update the progress.txt file with the new entry.
+• Now let me append to the progress log:
+• Used WriteFile (progress.txt)
+• The task is complete. Let me verify that everything is working by running one
+  more test.
+• Let me verify the PRD update and run a final verification:
+• Used Shell (cd /root/code/skills && g...'"id": "US-032"' prd.json)
+• Used Shell (cd /root/code/skills/skil...echo "✓ Typecheck passes")
+• The summarizer skill has been successfully implemented. Let me verify the PRD
+  passes flag was updated correctly.
+• Used Shell (cd /root/code/skills && g..."' prd.json | grep passes)
+• Let me search for the passes field specifically.
+• Used Shell (cd /root/code/skills && g... true' prd.json | head -5)
+• The PRD has been updated correctly. The US-032 story now has passes: true. The
+  implementation is complete.
+
+  Let me provide a summary of what was done.
+• The implementation is complete. Here's a summary:
+
+  Completed: US-032 - Create summarizer skill for text summarization
+
+  What was implemented:
+
+  • Summarizer skill that uses local text processing algorithms (no external API
+  • Extractive summarization with sentence scoring based on:
+    • Document-type keywords (article, document, email, meeting, research)
+    • Focus keywords for emphasizing specific topics
+    • Statistical indicators (percentages, currency)
+    • Structural cues and optimal sentence length
+  • Adjustable length: short (10%), medium (20%), long (35%) compression
+  • Output formats: paragraph, bullet points, numbered list
+  • Key points extraction with configurable count
+  • SQLite storage for summary history and statistics
+  • Full CLI with commands: summarize, file, history, get, stats, clear, delete,
+    ealth
+
+  Files created:
+
+  • skills/summarizer/package.json
+  • skills/summarizer/tsconfig.json
+  • skills/summarizer/.gitignore
+  • skills/summarizer/SKILL.md
+  • skills/summarizer/src/index.ts
+  • skills/summarizer/src/cli.ts
+
+  Committed:
+
+  • feat: US-032 - Create summarizer skill for text summarization
+
+  PRD updated:
+
+  • US-032 now has passes: true
+
+  The next story to implement is US-033 - "Create inbox-triage skill for email s
+  orting" which depends on the email skill and uses the model for classification
+  .

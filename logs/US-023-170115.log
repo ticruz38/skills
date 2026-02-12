@@ -1,0 +1,428 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• The user wants me to act as the Ralph autonomous coding agent. Let me start by
+  reading the PRD file and the progress log to understand what needs to be done.
+
+  Let me first read the prd.json and progress.txt files to understand the curren
+  t state.
+• I'll start by reading the PRD and progress files to understand the current sta
+  te of the project.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Okay, I've got a complete picture of the project now. The PRD lists 60 distinc
+  t user stories, and I've already knocked out 22 of them, ranging from auth-pro
+  vider to social-scheduler. The next one in the sequence is US-023: Create enga
+  gement-replies skill for social responses, which is currently marked as passes
+  : false.
+
+  Let's look at the requirements for this one. It's an "engagement-replies" skil
+  l. This means it needs to handle the logic of generating responses to social m
+  edia interactions—likely comments, mentions, or direct messages. The key const
+  raint here is that it must use the "main model." This is interesting because i
+  t means the skill doesn't require any external OAuth providers like Google or
+  Binance. It's a localized logic skill that leverages the core AI capabilities
+  of the platform.
+
+  Looking at the dependencies and patterns... Hmm, the last few skills I've buil
+  t have all followed a very specific TypeScript structure. We use sqlite3 for p
+  ersistence and file:../ for local dependencies. Since this skill doesn't invol
+  ve external auth, the implementation will be much simpler—just the core logic
+  and the database schema for storing reply templates or history.
+
+  Wait, before I jump into scaffolding the new skill directory at skills/engagem
+  ent-replies/, I need to verify my environment. I've been working on the ralph/
+  all-skills branch for quite a while now. It's possible the system switched con
+  texts or a previous operation left the repository in a detached state. If I st
+  art creating files now without checking, I might end up with a mess that requi
+  res manual rebasing later.
+
+  Actually, let me double-check the progress.txt file one more time. It confirms
+  US-022 was completed and US-023 is next. The branch name is definitely ralph/a
+  ll-skills. But I should still confirm this in the terminal. If I'm on the wron
+  g branch, I'll need to switch before proceeding. Also, I need to see if there
+  are any lingering changes in the working directory that need to be stashed or
+  committed before I start the new user story.
+
+  So, the immediate priority is to verify the git state. This ensures I'm buildi
+  ng on the correct foundation. Once confirmed, I'll move straight into the boil
+  erplate setup for the new skill.
+• Let me check the current branch and find the next story to work on:
+• Used Shell (cd /root/code/skills && g...ent && git status --short)
+• I'm on the correct branch ralph/all-skills. The PRD shows US-023 as the next s
+  tory to implement, which is the "engagement-replies skill for social responses
+  ." This skill needs to handle drafting replies, matching tone, and providing q
+  uick templates.
+
+  Hmm, looking at the notes in the PRD, it explicitly states: "Uses main model.
+  No external deps." This is a crucial detail. It means I don't need to worry ab
+  out OAuth flows or third-party APIs for this task; the core logic revolves aro
+  und leveraging the existing AI model to analyze and generate content.
+
+  Wait, I should check how the content-writer skill (US-021) was implemented. Si
+  nce it also relies on the "main model" for generation, its structure—particula
+  rly the interaction with the model—will be the perfect reference. Instead of s
+  tarting from scratch, I can mirror its setup for engagement-replies to ensure
+  consistency. This includes how it handles skill registration and output format
+  ting.
+
+  Actually, before I dive into the code generation, I need to confirm the direct
+  ory layout for these skills. I'll check if skills/content-writer exists and wh
+  at files it contains. This will clarify the expected boilerplate and directory
+  structure for the new skill I'm about to create.
+• I'm on the correct branch. The next story to implement is US-023: Create engag
+  ement-replies skill for social responses. Let me first check the existing cont
+  ent-writer skill as a reference since it also uses the main model:
+• Used Glob (skills/content-writer/**/*)
+• Let me look at the source files of content-writer to understand the structure
+  better.
+• Let me read the source files from content-writer as a reference:
+• Used ReadFile (skills/content-writer/package.json)
+• Used ReadFile (skills/content-writer/src/index.ts)
+• Used ReadFile (skills/content-writer/SKILL.md)
+• I've analyzed the requirements for US-023: the engagement-replies skill needs
+  to handle generating replies, matching tones, offering templates, and checking
+  sentiment.
+
+  Hmm, looking at the existing codebase, the content-writer skill provides a per
+  fect template for this. It's a self-contained module using sqlite3 for local d
+  ata and doesn't rely on external API keys, just like the PRD specifies for thi
+  s new skill. I can follow that same architectural pattern to ensure consistenc
+  y across the skill library.
+
+  Wait, before I start writing the logic for engagement-replies, I need to estab
+  lish the skill's foundation. That means creating the package.json for dependen
+  cies, the tsconfig.json for compilation settings, and the initial SKILL.md doc
+  umentation. I'll also need the .gitignore to keep the repository clean of buil
+  d artifacts and the source directory structure.
+
+  Actually, rather than doing these one by one, I'll set up the entire file tree
+  for the new skill in a single pass. This ensures the environment is ready for
+  the implementation phase.
+• Now I have a good understanding of the patterns. Let me create the engagement-
+  replies skill (US-023). This skill will:
+
+  1. Generate reply suggestions for social media comments/messages
+  2. Match the tone of the incoming message
+  3. Provide quick response templates
+  4. Use sentiment-aware responses
+
+  Let me create the skill files:
+• Used WriteFile (skills/engagement-replies/package.json)
+  Parent directory not found
+• Used WriteFile (skills/engagement-replies/tsconfig.json)
+  Parent directory not found
+• Used WriteFile (skills/engagement-replies/.gitignore)
+  Parent directory not found
+• Used WriteFile (skills/engagement-replies/SKILL.md)
+  Parent directory not found
+• Used Shell (mkdir -p skills/engagement-replies/src)
+• I need to create the parent directory first. Let me try again.
+• Used Shell (mkdir -p /root/code/skill...kills/engagement-replies/)
+• Hmm, I just noticed I created skills/engagement-replies inside the existing sk
+  ills directory. Let me double-check... wait, yes, skills/engagement-replies is
+  indeed inside skills/. That's definitely redundant.
+
+  Looking at the other skills I just examined, they are all in the root director
+  y, not nested. This directory structure needs to be fixed immediately before I
+  proceed with any implementation. I'll move the directory up one level to the r
+  oot and then verify the structure is correct.
+• I see the issue - I created it in the wrong location. Let me fix that:
+• Used Shell (cd /root/code/skills && r...kills/engagement-replies/)
+• Now let me write all the skill files.
+• Now let me write the skill files:
+• Used WriteFile (skills/engagement-replies/package.json)
+• Used WriteFile (skills/engagement-replies/tsconfig.json)
+• Used WriteFile (skills/engagement-replies/.gitignore)
+• Used WriteFile (skills/engagement-replies/SKILL.md)
+• Now let me create the main source file with the full implementation.
+• Now let me create the main TypeScript source file:
+• Used WriteFile (skills/engagement-replies/src/index.ts)
+• Now let me create the CLI file for the engagement-replies skill.
+• Now let me create the CLI file:
+• Used WriteFile (skills/engagement-replies/src/cli.ts)
+• Now let me build the project and run typecheck to ensure everything works corr
+  ectly.
+• Now let me build the skill and run typecheck:
+• Used Shell (cd /root/code/skills/skil...tall && npm run typecheck)
+  Failed with exit code: 2
+• There's a type error - I used 'warm' as a tone in one of the templates, but th
+  e Tone type doesn't include 'warm'. Let me fix that.
+• I need to fix the type error - 'warm' is not a valid Tone. Let me fix that:
+• Used StrReplaceFile (skills/engagement-replies/src/index.ts)
+• Now let me run typecheck again.
+• Used Shell (cd /root/code/skills/skil...ypecheck && npm run build)
+• Typecheck passes and the build is successful. Now let me test the CLI to make
+  sure it works:
+• Typecheck passes. Let me test the CLI to make sure it works:
+• Used Shell (cd /root/code/skills/skil...& node dist/cli.js health)
+• Let me test a few more CLI commands to make sure they work correctly.
+• Used Shell (cd /root/code/skills/skil... twitter -t friendly -n 2)
+• Hmm, looking closely at the generated replies, there's a problem. The tone mod
+  ifiers—the instructions meant to guide the style—are being inserted directly i
+  nto the response text. Wait, I see what happened in src/index.ts. In generateD
+  irectReply and generateEngagingReply, I formatted the return strings as templa
+  te literals, which included the toneModifier variable by value instead of keep
+  ing it as a semantic instruction for the generator.
+
+  Actually, these modifiers should act as system-level prompts or metadata for t
+  he LLM, not as visible parts of the reply to the user. Exposing them makes the
+  output look broken and unprofessional. I need to adjust the string templates i
+  n src/index.ts to ensure the tone logic remains behind the scenes while the ac
+  tual reply content is what gets returned. I'll fix the return statements in bo
+  th the direct and engaging reply generation functions to remove this leakage.
+• I notice the tone modifier text is appearing in the replies. Let me fix that -
+  the tone modifier shouldn't be directly inserted:
+• Used StrReplaceFile (skills/engagement-replies/src/index.ts)
+• Now let me rebuild and test again.
+• Used Shell (cd /root/code/skills/skil... twitter -t friendly -n 3)
+• The replies look much better now. Let me test a few more scenarios including t
+  emplates and a negative sentiment message.
+• Excellent! The replies look clean now. Let me test a few more scenarios:
+• Used Shell (cd /root/code/skills/skil...on":"You\'re the best!"}')
+  Failed with exit code: 2
+• The shell escaping is causing issues. Let me simplify the test.
+• Used Shell (cd /root/code/skills/skil...rating and disappointing")
+• The sentiment analysis for negative messages works. Let me test the templates.
+• Used Shell (cd /root/code/skills/skil...ode dist/cli.js templates)
+• All the templates are loaded correctly. Let me test applying a template.
+• Used Shell (cd /root/code/skills/skil...ciation":"Means a lot!"}')
+• All features are working correctly. Let me test a negative sentiment message t
+  o see if the tone detection works properly.
+• Let me test with a negative sentiment message to see tone matching in action:
+• Used Shell (cd /root/code/skills/skil...ngryUser" -p twitter -n 2)
+• The tone detection correctly switches to empathetic for negative messages. The
+  skill is working as expected.
+
+  Now let me update the PRD to mark the story as complete and add the progress e
+  ntry.
+• The skill is working correctly - tone detection switches to empathetic for neg
+  ative messages. Now let me update the PRD and progress log:
+• Used StrReplaceFile (prd.json)
+• Now let me append the progress to the progress.txt file.
+• Used WriteFile (progress.txt)
+• Now let me commit the changes with the appropriate message.
+• Now let me commit the changes:
+• Used Shell (cd /root/code/skills && git add -A && git status)
+• All files are staged. Let me commit them.
+• Used Shell (cd /root/code/skills && g...ill for social responses")
+• The commit was successful. Let me check if there are more stories to work on b
+  y looking at the prd.json again to find the next story with passes: false.
+• Let me check the next story to work on:
+• Used Shell (cd /root/code/skills && c...asses": false' | head -20)
+• Let me get the story IDs that are not yet complete.
+• Used Shell (cd /root/code/skills && c...' | grep '"id"' | head -5)
+• Let me try a different approach to find the next story.
+• Used Grep ("passes": false)
+• The next story to implement is US-024: Create image-prompts skill for AI image
+  generation. But since I just completed US-023, I should stop here and let the
+  next iteration pick up US-024.
+
+  Let me summarize what was done in this iteration.
+• I've completed US-023: Create engagement-replies skill for social responses.
+
+  Summary
+
+  What was implemented:
+
+  • Engagement Replies Skill - A comprehensive TypeScript skill that generates A
+    powered reply suggestions for social media comments and messages
+
+  Key Features:
+
+  1. Reply Generation - Generates 3 different reply options (direct, engaging, a
+     eciation-focused)
+  2. Tone Matching - Auto-detects tone based on sentiment and message characteri
+     cs, with 8 tone options:
+    • professional, casual, friendly, formal, enthusiastic, empathetic, authorit
+      e, witty
+  3. Platform Optimization - Supports Twitter/X, LinkedIn, Instagram, Facebook,
+     il, and generic platforms
+  4. Sentiment Analysis - Local keyword-based sentiment detection with emotion a
+     ysis and caching
+  5. Quick Templates - 8 built-in templates (thank-you, question-response, compl
+     t-acknowledgment, etc.)
+  6. Full CLI - Commands: generate, sentiment, template, templates, history, sta
+     tones, platforms, health
+
+  Files Created:
+
+  • skills/engagement-replies/package.json
+  • skills/engagement-replies/tsconfig.json
+  • skills/engagement-replies/.gitignore
+  • skills/engagement-replies/SKILL.md
+  • skills/engagement-replies/src/index.ts
+  • skills/engagement-replies/src/cli.ts
+
+  Quality Checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build successful
+  • ✅ CLI tested with positive/negative sentiment messages and templates
+
+  Commit:
+
+  feat: US-023 - Create engagement-replies skill for social responses
+
+  The next story to implement is US-024: Create image-prompts skill for AI image
+  generation.

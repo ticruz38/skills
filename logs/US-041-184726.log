@@ -1,0 +1,439 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and the progress log to understand what n
+  eeds to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Used ReadFile (.last-branch)
+• Let me continue reading the progress.txt file since it was truncated at 1000 l
+  ines.
+• Let me continue reading the progress.txt file to see the rest of the history a
+  nd check the branch status.
+• Used ReadFile (progress.txt)
+• Used Shell (cd /root/code/skills && git branch -a)
+• I have analyzed the prd.json and confirmed that the project is on the ralph/al
+  l-skills branch. The priority is to find the highest-priority story with "pass
+  es": false.
+
+  Scanning through the backlog:
+
+  • US-001 to US-040 are all marked as complete ("passes": true).
+  • US-041 (Create itinerary-builder skill) is the first one that is not passing
+    It has a priority of 41.
+
+  This skill requires building a tool for day-by-day travel itineraries, includi
+  ng features like drag-and-drop scheduling, travel time estimation, and PDF exp
+  ort. It stores data in SQLite and has no external dependencies.
+
+  Wait, I should double-check if there are any other non-passing stories with a
+  higher priority (lower number) that I might have missed. No, the list is seque
+  ntial and US-041 is clearly the next item in the queue.
+
+  Now, before I start implementation, I need to understand the project's existin
+  g architecture and conventions. Looking at the file structure of previous skil
+  ls will be invaluable. I'll examine a representative skill like shopping-list-
+  generator to see how it handles its package.json, tsconfig.json, and source co
+  de structure. This will ensure the new itinerary-builder skill is consistent w
+  ith the rest of the ecosystem. I'll gather this context now before proceeding
+  with the actual code changes.
+• Good! I'm on the correct branch ralph/all-skills. Now let me identify the high
+  est priority story with passes: false.
+
+  Looking at the PRD, stories US-001 to US-040 are complete. The next highest pr
+  iority story is US-041: Create itinerary-builder skill for trip planning with
+  priority 41.
+
+  Let me set up my todo list and explore the existing skills structure to unders
+  tand the patterns.
+• Used SetTodoList
+  • Read existing skill patterns for reference ←
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Used Shell (ls -la /root/code/skills/skills/ | head -30)
+• Used ReadFile (skills/shopping-list-generator/package.json)
+• Used ReadFile (skills/shopping-list-generator/tsconfig.json)
+• Now I understand the pattern. Let me create the itinerary-builder skill. I'll
+  start by setting up the directory structure and files.
+• Let me also check a skill with PDF export capability to understand that patter
+  n:
+• Used Grep (PDF|pdf|export)
+• Used ReadFile (skills/flight-search/src/index.ts)
+• Now let me check an example of PDF export from the invoices skill, then I'll s
+  tart creating the itinerary-builder skill.
+• Used Grep (exportToHTML|generateHTML|exportToPDF)
+• I have a good understanding of the project structure now. The task is to build
+  the itinerary-builder skill, which requires specific features like drag-and-dr
+  op scheduling (via CLI reordering), time estimation, and PDF export.
+
+  Wait, I should formalize the development plan before I start writing the core
+  logic. Looking at the requirements, the SQLite schema for trips and activities
+  is the foundation. Hmm, if I don't map out the steps now, I might overlook the
+  PDF generation or the CLI interface requirements mentioned in the specs.
+
+  Actually, the best approach is to initialize the skill structure first. I'll n
+  eed a dedicated directory for the source and a .gitignore to keep it clean. On
+  ce the environment is set up, I can focus on the library implementation in src
+  /index.ts.
+
+  I'll update the todo list to reflect this sequence: initializing the structure
+  , implementing the core logic, and then building out the CLI. This keeps the d
+  evelopment process aligned with the acceptance criteria while ensuring I don't
+  miss any functional requirements. Let's get the project skeleton ready first.
+• Now I have a good understanding of the patterns. Let me create the itinerary-b
+  uilder skill. I'll update my todo and start implementing.
+• Used SetTodoList
+  • Read existing skill patterns for reference
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Used Shell (mkdir -p /root/code/skill...lls/itinerary-builder/src)
+• Now let me create the package.json and tsconfig.json files for the itinerary-b
+  uilder skill.
+• Used WriteFile (skills/itinerary-builder/package.json)
+• Used WriteFile (skills/itinerary-builder/tsconfig.json)
+• Used WriteFile (skills/itinerary-builder/.gitignore)
+• Now let me create the main library file (src/index.ts) with all the itinerary
+  builder functionality.
+• Now let me create the main library implementation:
+• Used WriteFile (skills/itinerary-builder/src/index.ts)
+• Now let me create the CLI file (src/cli.ts) for the itinerary-builder skill.
+• Now let me create the CLI interface:
+• Used WriteFile (skills/itinerary-builder/src/cli.ts)
+• Now let me create the SKILL.md documentation file.
+• Now let me create the SKILL.md documentation:
+• Used WriteFile (skills/itinerary-builder/SKILL.md)
+• Now let me update my todo and run the typecheck to make sure everything compil
+  es correctly.
+• Used SetTodoList
+  • Read existing skill patterns for reference
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build ←
+  • Update prd.json and progress.txt
+  • Commit changes
+• Used Shell (cd /root/code/skills/skil...ilder && npm install 2>&1)
+• The npm install completed (with some deprecation warnings which are expected f
+  or older packages). Now let me run the typecheck to verify the TypeScript comp
+  iles correctly.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• I have a type error. The issue is with the TypeScript inference for the sqlite
+  3 callback. Let me fix those lines.
+• Let me fix the type errors:
+• Used ReadFile (skills/itinerary-builder/src/index.ts)
+• Used ReadFile (skills/itinerary-builder/src/index.ts)
+• Hmm, the TypeScript compiler is flagging an issue with the db.all<TripRecord[]
+  > calls. Let me look closer at the sqlite3 type definitions and how the generi
+  c is applied.
+
+  Wait... if db.all<T> is defined as all<T>(sql: string, ...): void;, then the g
+  eneric T represents the type of a single row in the result set. By passing Tri
+  pRecord[] as the generic, I'm effectively telling the compiler that the callba
+  ck will receive an array of arrays. But the rows parameter in the callback is
+  already the collection; it should be TripRecord[] implicitly if T is TripRecor
+  d.
+
+  Actually, that's exactly why the .map() call is failing. Since I've set T to T
+  ripRecord[], the compiler thinks rows is a two-dimensional array. When I call
+  .map(row => ...), it infers row as TripRecord[] instead of the expected TripRe
+  cord. This explains the type mismatch.
+
+  But wait, why didn't this show up in other skills that use similar patterns? L
+  ooking at flight-search/src/index.ts... Ah, I see. It uses db.all<TripRecord>(
+  ...) and the callback signature aligns with T being the element type. My usage
+  in the itinerary builder is inconsistent with this pattern.
+
+  I need to change the generic from the array type to the element type. This wil
+  l align the rows parameter in the callback with the expected structure. I will
+  now apply this correction to the listTrips and getActivitiesByTrip methods in
+  /root/code/skills/skills/itinerary-builder/src/index.ts.
+• I see the issue. The sqlite3 all method expects the single row type, not an ar
+  ray type. Let me fix this:
+• Used StrReplaceFile (skills/itinerary-builder/src/index.ts)
+• Now let me run the typecheck again to see if it's fixed.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• The typecheck passes. Now let me build the project to generate the dist files
+  and then run a quick test to verify it works.
+• Typecheck passes. Let me build and test the skill:
+• Used Shell (cd /root/code/skills/skil...der && npm run build 2>&1)
+• The build succeeded. Let me run a quick test to verify the skill works correct
+  ly.
+• Used Shell (cd /root/code/skills/skil...pm run cli -- health 2>&1)
+• The skill is working. Let me do a quick functional test by creating a trip and
+  adding some activities.
+• Let me run a quick functional test:
+• Used Shell (cd /root/code/skills/skil...erry blossom season" 2>&1)
+• Trip created. Let me add some activities.
+• Used Shell (cd /root/code/skills/skil...n "Asakusa" --cost 0 2>&1)
+• Used Shell (cd /root/code/skills/skil...ervation in advance" 2>&1)
+• Used Shell (cd /root/code/skills/skil...oking "SKY-2024-001" 2>&1)
+• Excellent! The activities were created successfully. Let me test the schedule
+  view and export functionality.
+• Used Shell (cd /root/code/skills/skil...un cli -- schedule 1 2>&1)
+• The schedule view is working correctly with travel time estimates between acti
+  vities. Let me test the export functionality and stats.
+• Used Shell (cd /root/code/skills/skil.../tmp/japan-itinerary.html)
+• Excellent! The export functionality works. Let me test the stats command and t
+  hen update the PRD and progress.txt.
+• Used Shell (cd /root/code/skills/skil...npm run cli -- stats 2>&1)
+• All functionality is working. Now let me update the PRD and progress.txt, then
+  commit the changes.
+• All tests pass. Now let me update the PRD and progress.txt:
+• Used StrReplaceFile (prd.json)
+• Used SetTodoList
+  • Read existing skill patterns for reference
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build
+  • Update prd.json and progress.txt ←
+  • Commit changes
+• Now let me append the progress to progress.txt.
+• Used WriteFile (progress.txt)
+• Now let me commit the changes.
+• Used SetTodoList
+  • Read existing skill patterns for reference
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build
+  • Update prd.json and progress.txt
+  • Commit changes ←
+• Used Shell (cd /root/code/skills && g...add -A && git status 2>&1)
+• Good, all the new files are staged. Let me commit them.
+• Used Shell (cd /root/code/skills && g...l for trip planning" 2>&1)
+• The commit was successful. Let me update the todo list to mark it as complete.
+• Used SetTodoList
+  • Read existing skill patterns for reference
+  • Create itinerary-builder skill structure (package.json, tsconfig.json, etc.)
+  • Implement core library (src/index.ts) with SQLite storage
+  • Implement CLI interface (src/cli.ts)
+  • Write SKILL.md documentation
+  • Run typecheck and verify build
+  • Update prd.json and progress.txt
+  • Commit changes
+• Now let me check if there are more stories with passes: false in the PRD.
+• Let me check if there are remaining stories to complete:
+• Used Grep ("passes": false)
+• There are still 19 stories remaining with passes: false. The next one is US-04
+  2 (Create property-alerts skill for real estate). Since there are still incomp
+  lete stories, I should end my response normally without the COMPLETE tag.
+
+  Let me summarize what was completed in this iteration.
+• I have successfully completed US-041: Create itinerary-builder skill for trip
+  planning.
+
+  Summary
+
+  What was implemented:
+
+  • Trip Management: Create, read, update, delete trips with destination, dates,
+    nd descriptions
+  • Activity Scheduling: Add activities to specific days with start/end times, d
+    ation, location, cost, and booking references
+  • 8 Activity Categories: transport, sightseeing, food, shopping, entertainment
+    relaxation, accommodation, other
+  • Drag-Drop Reordering: CLI-based reordering of activities within days
+  • Travel Time Estimation: Automatic estimation of travel time between activiti
+    based on location and category
+  • Export to HTML/PDF: Professional HTML itineraries with CSS styling, ready fo
+    PDF conversion
+  • Full CLI: Complete command-line interface for all operations
+
+  Files created:
+
+  • skills/itinerary-builder/package.json
+  • skills/itinerary-builder/tsconfig.json
+  • skills/itinerary-builder/.gitignore
+  • skills/itinerary-builder/SKILL.md
+  • skills/itinerary-builder/src/index.ts (main library)
+  • skills/itinerary-builder/src/cli.ts (CLI interface)
+
+  Verification:
+
+  • ✅ Typecheck passes
+  • ✅ Build successful
+  • ✅ Functional tests pass (trip creation, activity management, schedule view,
+    TML export)
+
+  Commit:
+
+  feat: US-041 - Create itinerary-builder skill for trip planning
+
+  There are still 19 remaining stories to complete (US-042 through US-060). The
+  next highest priority story is US-042: Create property-alerts skill for real e
+  state.

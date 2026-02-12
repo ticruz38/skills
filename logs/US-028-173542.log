@@ -1,0 +1,393 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• The user wants me to work as an autonomous coding agent following the Ralph fr
+  amework. Let me start by:
+
+  1. Reading the PRD at prd.json
+  2. Reading the progress log at progress.txt
+  3. Checking the branch and picking the highest priority user story with passes
+     alse
+  4. Implementing it, running quality checks, and committing
+
+  Let me start by reading the necessary files.
+• I'll start by reading the PRD and progress log to understand what needs to be
+  implemented.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt to get the complete picture.
+• Used ReadFile (progress.txt)
+• I've analyzed the PRD and the current progress log. It's clear that while many
+  foundational skills and management tools are complete, the expense management
+  workflow is still missing its core logic. Specifically, US-028 (Create expense
+  -categorizer skill) is a blocker for US-029.
+
+  Hmm, looking at the requirements for US-028, it involves ML/rule-based categor
+  ization and learning from corrections. To implement this correctly, I need to
+  understand the underlying data structures used by the receipts-ocr skill. If I
+  don't know the specific fields the OCR extracts, I can't build an effective ca
+  tegorization logic or database schema.
+
+  Actually, I should also verify if there are any existing utility functions for
+  SQLite that I should be leveraging, as the logs show a pattern of using a cust
+  om runWithResult function. Instead of jumping straight into coding, I'll first
+  explore the skills directory to get a clear picture of the existing structure
+  and dependencies. This will ensure the new skill integrates seamlessly with th
+  e OCR and storage systems. I'll start by listing the contents of the skills di
+  rectory and checking the receipts-ocr implementation.
+• Now I understand the project. Looking at the PRD, I need to find the highest p
+  riority story with passes: false. Let me check the current status of stories:
+• Used Shell (cd /root/code/skills && g...es"' prd.json | head -100)
+• Used Glob (skills/*)
+• The highest priority story with passes: false is US-028: Create expense-catego
+  rizer skill.
+
+  Let me check the current git branch and then read the receipts-ocr skill to un
+  derstand what interface it provides.
+• The highest priority story with passes: false is US-028: Create expense-catego
+  rizer skill (priority 28). Let me check the current branch and examine the rec
+  eipts-ocr skill it depends on:
+• Used Shell (cd /root/code/skills && g...ho "No .last-branch file")
+• Used ReadFile (skills/receipts-ocr/SKILL.md)
+• Used ReadFile (skills/receipts-ocr/src/index.ts)
+• I've examined the requirements for US-028: creating an expense-categorizer ski
+  ll. This involves ML/rule-based categorization, custom category support, and t
+  he ability to learn from corrections. It's a direct dependency for US-029, so
+  the design must be robust.
+
+  Hmm, looking at the existing receipts-ocr skill, it already performs some basi
+  c categorization. However, the new skill needs to be more sophisticated with a
+  learning feedback loop and bulk processing. This means it needs its own databa
+  se schema to store category mappings and confidence scores.
+
+  Wait, I need to decide on the architecture. I'll create a standalone TypeScrip
+  t skill. It should use a local SQLite database to store custom categories and
+  track which merchants belong to which categories. The categorization logic sho
+  uld be a mix: first, check for keyword matches; second, apply rule-based logic
+  for specific merchants; and third, allow for manual overrides that the system
+  learns from.
+
+  Looking at the codebase patterns, I see that skills like 'auth-provider' and '
+  portfolio' use a standard structure with a src/ directory for the TypeScript s
+  ource files. I should follow this convention to maintain consistency.
+
+  Before I can implement the core logic in index.ts, I need to set up the projec
+  t environment. This means creating the package.json to manage dependencies lik
+  e typescript and sqlite3, and a tsconfig.json for the build process. I'll also
+  need a comprehensive SKILL.md to document the API and usage.
+
+  Actually, I'll start by defining the project metadata and build configuration.
+  By setting up package.json and tsconfig.json now, I'm establishing the foundat
+  ion for the skill. I'll also include the .gitignore to ensure the node_modules
+  and build artifacts don't clutter the repository. Finally, I'll draft the SKIL
+  L.md to solidify the planned interface for the categorizer. This structured se
+  tup allows me to then focus on the categorization algorithms.
+• Now I understand the project structure and requirements. Let me implement US-0
+  28: Create expense-categorizer skill. This skill will:
+
+  1. Auto-categorize expenses from receipts using ML/rule-based categorization
+  2. Support custom categories
+  3. Learn from user corrections
+  4. Provide bulk categorization
+
+  Let me create the skill:
+• Used Shell (mkdir -p skills/expense-categorizer/src)
+• Used WriteFile (skills/expense-categorizer/package.json)
+• Used WriteFile (skills/expense-categorizer/tsconfig.json)
+• Used WriteFile (skills/expense-categorizer/.gitignore)
+• Used WriteFile (skills/expense-categorizer/SKILL.md)
+• Now let me write the main index.ts file with the complete implementation of th
+  e expense-categorizer skill.
+• Now let me create the main library file with the complete implementation:
+• Used WriteFile (skills/expense-categorizer/src/index.ts)
+• Now I need to create the CLI file for the expense-categorizer skill. Let me cr
+  eate that now.
+• Now let me create the CLI file:
+• Used WriteFile (skills/expense-categorizer/src/cli.ts)
+• Now let me build the skill and run the typecheck to ensure everything compiles
+  correctly.
+• Now let's build the skill and run typecheck:
+• Used Shell (cd /root/code/skills/skil...rizer && npm install 2>&1)
+• Good, npm install succeeded. Now let me run the typecheck to make sure the Typ
+  eScript code compiles.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• There are TypeScript errors. The issue is that I'm using snake_case property n
+  ames when querying from the database but the interface has camelCase. Let me f
+  ix the getLearningHistory method.
+• I need to fix a type error in the getLearningHistory method:
+• Used StrReplaceFile (skills/expense-categorizer/src/index.ts)
+• Now let me also check the getAccuracyMetrics method which references those fie
+  lds.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+  Failed with exit code: 2
+• Hmm, it seems my previous assumptions about the LearningRecord interface in in
+  dex.ts were a bit off. The TypeScript compiler is flagging a mismatch in prope
+  rty names and types. Specifically, the database layer is returning snake_case
+  keys like suggested_category, while the frontend or logic layer likely expects
+  camelCase.
+
+  Wait, let me look at the error logs again. If getAccuracyMetrics is failing, i
+  t's because it's trying to access properties that don't exist on the object as
+  it's currently typed. I need to align the interface definition with the actual
+  data structure returned by the database query.
+
+  Actually, the LearningRecord interface is central to how corrections are track
+  ed. If I don't fix the type definition first, any attempt to access the fields
+  will continue to fail. I should update the interface to match the database sch
+  ema—specifically using suggested_category and corrected_category—and ensure th
+  e types (like merchant) are marked as potentially null or undefined to reflect
+  the database reality. This will resolve the TypeScript error by ensuring the i
+  nterface accurately describes the objects being processed.
+• I need to fix the LearningRecord interface to match what we get from the datab
+  ase:
+• Used StrReplaceFile (skills/expense-categorizer/src/index.ts)
+• Now I need to fix the getAccuracyMetrics method which still uses snake_case. L
+  et me check and fix it.
+• Used ReadFile (skills/expense-categorizer/src/index.ts)
+• I see the issue. The getAccuracyMetrics method uses LearningRecord as the type
+  but the database returns snake_case fields. I need to create a separate databa
+  se record type for that method too.
+• Used StrReplaceFile (skills/expense-categorizer/src/index.ts)
+• Now let me run the typecheck again.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• Typecheck passes! Now let me build the project.
+• Typecheck passes. Now let's build the project:
+• Used Shell (cd /root/code/skills/skil...zer && npm run build 2>&1)
+• Build succeeded. Now let me update the progress.txt file to record this implem
+  entation and update the PRD to mark US-028 as passes: true.
+• Build successful! Now let me update the PRD and progress log, then commit the
+  changes:
+• Used StrReplaceFile (prd.json)
+• Now let me append to progress.txt with the implementation details.
+• Used Shell (cat >> /root/code/skills/...words) in SQLite --- EOF )
+• Now let me commit the changes.
+• Now let's commit all changes:
+• Used Shell (cd /root/code/skills && g... skill for receipts" 2>&1)
+• The commit was successful. Now let me verify that not all stories are complete
+  yet by checking the PRD for any remaining stories with passes: false.
+• Commit successful. Let me verify there are still more stories to complete:
+• Used Shell (cd /root/code/skills && g...'"id"|"title"' | head -20)
+• There are still 32 stories with passes: false. The task is not complete yet. L
+  et me list a few of them to confirm.
+• Used Shell (cd /root/code/skills && g...'"id"|"title"' | head -30)
+• Let me try a different approach to list the remaining incomplete stories.
+• Used Shell (cd /root/code/skills && p...ority']})\") " | head -10)
+• I've successfully completed US-028. Now, I must verify if there are remaining
+  tasks. The PRD outlines a total of 60 user stories. A quick mental check confi
+  rms that while US-028 is done, 32 stories are still pending. The next item, US
+  -029, involves creating a tax-export skill for expense export. It's clear the
+  workflow is far from finished.
+
+  Wait, let me re-evaluate the stop condition. The instructions specify: "If ALL
+  stories are complete and passing, reply with: <promise>COMPLETE</promise>." If
+  they aren't, I should end the response normally. Since 32 stories remain, I cl
+  early haven't reached the finish line. I should simply conclude this iteration
+  now and await the next instruction to tackle US-029.
+
+  Actually, let me double-check the count one last time to be absolutely certain
+  . 60 total stories minus the 28 already finished leaves 32. The math is correc
+  t. There is no need to update the todo list or perform any other actions. The
+  most logical next step is to terminate the session successfully, signaling tha
+  t the current story is closed and the system is ready for the next one.
+• I have successfully completed US-028: Create expense-categorizer skill for rec
+  eipts.
+
+  Summary
+
+  Created a comprehensive expense categorization skill that:
+
+  1. Smart Categorization: Rule-based categorization using merchant names, keywo
+     , and receipt content analysis
+  2. 12 Default Categories: Groceries, Dining, Gas, Pharmacy, Office, Electronic
+     Transportation, Entertainment, Retail, Utilities, Travel, Healthcare
+  3. Custom Categories: Users can add their own categories with custom keywords
+  4. Learning System: Tracks user corrections and learns from them to improve fu
+     e categorizations
+  5. Merchant Mapping: Automatically maps merchants to categories based on histo
+     and user corrections
+  6. Bulk Processing: Can categorize multiple uncategorized receipts at once
+  7. Confidence Scoring: Each categorization includes a confidence score (High/M
+     um/Low)
+  8. Full CLI: Complete command-line interface for all operations
+
+  The skill is built on top of the receipts-ocr skill and stores data in SQLite
+  with three tables:
+
+  • categories - Stores category definitions with keywords
+  • merchant_mappings - Maps merchants to categories with confidence scores
+  • learning_records - Tracks corrections to improve accuracy
+
+  Files created:
+
+  • skills/expense-categorizer/package.json
+  • skills/expense-categorizer/tsconfig.json
+  • skills/expense-categorizer/.gitignore
+  • skills/expense-categorizer/SKILL.md
+  • skills/expense-categorizer/src/index.ts
+  • skills/expense-categorizer/src/cli.ts
+
+  Commit: feat: US-028 - Create expense-categorizer skill for receipts
+
+  There are still 32 stories remaining with passes: false. The next story is US-
+  029: Create tax-export skill for expense export.

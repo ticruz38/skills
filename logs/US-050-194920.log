@@ -1,0 +1,397 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ # Ralph Agent Instructions                                                   │
+│                                                                              │
+│ You are an autonomous coding agent working on a software project.            │
+│                                                                              │
+│ ## 🛡️ CRITICAL SAFETY RULES - NEVER VIOLATE                                   │
+│                                                                              │
+│ ### System Resource Protection                                               │
+│ The following actions are **STRICTLY PROHIBITED** and will cause harm to the │
+│ host system:                                                                 │
+│                                                                              │
+│ **Docker/Container Management:**                                             │
+│ - **NEVER** run `docker stop` without an explicit container name or ID       │
+│ - **NEVER** use `docker stop $(docker ps -q)` or any pattern that stops mult │
+│ iple/all containers                                                          │
+│ - **NEVER** run `docker rm -f $(docker ps -aq)` or similar mass-removal comm │
+│ ands                                                                         │
+│ - **ALWAYS** verify container names with `docker ps --filter name=<pattern>` │
+│ before stopping                                                              │
+│ - **ONLY** stop containers that were explicitly created by this session      │
+│ - **ONLY** stop containers using their explicit name: `docker stop <exact-co │
+│ ntainer-name>`                                                               │
+│                                                                              │
+│ **Process Management:**                                                      │
+│ - **NEVER** run `killall`, `pkill`, or similar commands without specific pro │
+│ cess names                                                                   │
+│ - **NEVER** use `kill -9` on system processes or processes you didn't start  │
+│ - **ONLY** terminate processes you explicitly started in this session        │
+│                                                                              │
+│ **Port/Network Conflicts:**                                                  │
+│ - If a port is in use, **USE A DIFFERENT PORT** instead of killing the proce │
+│ ss using it                                                                  │
+│ - Check what's running on a port with `lsof -i :<port>` or `ss -tlnp | grep  │
+│ <port>`                                                                      │
+│ - Prefer random/high ports (e.g., `docker run -p 0:8080`) to avoid conflicts │
+│                                                                              │
+│ **General Safety:**                                                          │
+│ - **NEVER** run commands that affect system-wide state unless explicitly req │
+│ uired by the PRD                                                             │
+│ - **NEVER** use wildcards or glob patterns with destructive commands (`rm`,  │
+│ `kill`, `stop`)                                                              │
+│ - When in doubt, be explicit and specific with resource names                │
+│                                                                              │
+│ ---                                                                          │
+│                                                                              │
+│ ## Your Task                                                                 │
+│                                                                              │
+│ 1. Read the PRD at `prd.json` (in the same directory as this file)           │
+│ 2. Read the progress log at `progress.txt` (check Codebase Patterns section  │
+│ first)                                                                       │
+│ 3. Check you're on the correct branch from PRD `branchName`. If not, check i │
+│ t out or create from main.                                                   │
+│ 4. Pick the **highest priority** user story where `passes: false`            │
+│ 5. Implement that single user story                                          │
+│ 6. Run quality checks (e.g., typecheck, lint, test - use whatever your proje │
+│ ct requires)                                                                 │
+│ 7. Update AGENTS.md files if you discover reusable patterns (see below)      │
+│ 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Sto │
+│ ry Title]`                                                                   │
+│ 9. Update the PRD to set `passes: true` for the completed story              │
+│ 10. Append your progress to `progress.txt`                                   │
+│                                                                              │
+│ ## Progress Report Format                                                    │
+│                                                                              │
+│ APPEND to progress.txt (never replace, always append):                       │
+│ ```                                                                          │
+│ ## [Date/Time] - [Story ID]                                                  │
+│ - What was implemented                                                       │
+│ - Files changed                                                              │
+│ - **Learnings for future iterations:**                                       │
+│   - Patterns discovered (e.g., "this codebase uses X for Y")                 │
+│   - Gotchas encountered (e.g., "don't forget to update Z when changing W")   │
+│   - Useful context (e.g., "the evaluation panel is in component X")          │
+│ ---                                                                          │
+│ ```                                                                          │
+│                                                                              │
+│ The learnings section is critical - it helps future iterations avoid repeati │
+│ ng mistakes and understand the codebase better.                              │
+│                                                                              │
+│ ## Consolidate Patterns                                                      │
+│                                                                              │
+│ If you discover a **reusable pattern** that future iterations should know, a │
+│ dd it to the `## Codebase Patterns` section at the TOP of progress.txt (crea │
+│ te it if it doesn't exist). This section should consolidate the most importa │
+│ nt learnings:                                                                │
+│                                                                              │
+│ ```                                                                          │
+│ ## Codebase Patterns                                                         │
+│ - Example: Use `sql<number>` template for aggregations                       │
+│ - Example: Always use `IF NOT EXISTS` for migrations                         │
+│ - Example: Export types from actions.ts for UI components                    │
+│ ```                                                                          │
+│                                                                              │
+│ Only add patterns that are **general and reusable**, not story-specific deta │
+│ ils.                                                                         │
+│                                                                              │
+│ ## Update AGENTS.md Files                                                    │
+│                                                                              │
+│ Before committing, check if any edited files have learnings worth preserving │
+│ in nearby AGENTS.md files:                                                   │
+│                                                                              │
+│ 1. **Identify directories with edited files** - Look at which directories yo │
+│ u modified                                                                   │
+│ 2. **Check for existing AGENTS.md** - Look for AGENTS.md in those directorie │
+│ s or parent directories                                                      │
+│ 3. **Add valuable learnings** - If you discovered something future developer │
+│ s/agents should know:                                                        │
+│    - API patterns or conventions specific to that module                     │
+│    - Gotchas or non-obvious requirements                                     │
+│    - Dependencies between files                                              │
+│    - Testing approaches for that area                                        │
+│    - Configuration or environment requirements                               │
+│                                                                              │
+│ **Examples of good AGENTS.md additions:**                                    │
+│ - "When modifying X, also update Y to keep them in sync"                     │
+│ - "This module uses pattern Z for all API calls"                             │
+│ - "Tests require the dev server running on PORT 3000"                        │
+│ - "Field names must match the template exactly"                              │
+│                                                                              │
+│ **Do NOT add:**                                                              │
+│ - Story-specific implementation details                                      │
+│ - Temporary debugging notes                                                  │
+│ - Information already in progress.txt                                        │
+│                                                                              │
+│ Only update AGENTS.md if you have **genuinely reusable knowledge** that woul │
+│ d help future work in that directory.                                        │
+│                                                                              │
+│ ## Quality Requirements                                                      │
+│                                                                              │
+│ - ALL commits must pass your project's quality checks (typecheck, lint, test │
+│ )                                                                            │
+│ - Do NOT commit broken code                                                  │
+│ - Keep changes focused and minimal                                           │
+│ - Follow existing code patterns                                              │
+│                                                                              │
+│ ## Browser Testing (Required for Frontend Stories)                           │
+│                                                                              │
+│ For any story that changes UI, you MUST verify it works in the browser:      │
+│                                                                              │
+│ 1. Load the `dev-browser` skill                                              │
+│ 2. Navigate to the relevant page                                             │
+│ 3. Verify the UI changes work as expected                                    │
+│ 4. Take a screenshot if helpful for the progress log                         │
+│                                                                              │
+│ A frontend story is NOT complete until browser verification passes.          │
+│                                                                              │
+│ ## Stop Condition                                                            │
+│                                                                              │
+│ After completing a user story, check if ALL stories have `passes: true`.     │
+│                                                                              │
+│ If ALL stories are complete and passing, reply with:                         │
+│ <promise>COMPLETE</promise>                                                  │
+│                                                                              │
+│ If there are still stories with `passes: false`, end your response normally  │
+│ (another iteration will pick up the next story).                             │
+│                                                                              │
+│ ## Important                                                                 │
+│                                                                              │
+│ - Work on ONE story per iteration                                            │
+│ - Commit frequently                                                          │
+│ - Keep CI green                                                              │
+│ - Read the Codebase Patterns section in progress.txt before starting         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+• Let me start by reading the PRD file and the progress log to understand what n
+  eeds to be done.
+• Used ReadFile (prd.json)
+• Used ReadFile (progress.txt)
+• Let me continue reading the progress.txt file to understand what has been comp
+  leted and what patterns have been established.
+• Used ReadFile (progress.txt)
+• Used Shell (cd /root/code/skills && git branch --show-current)
+• Let me continue reading the progress.txt to understand what's been completed.
+• Used ReadFile (progress.txt)
+• Used Shell (cd /root/code/skills && git status)
+• I've reviewed the PRD. Stories US-001 through US-049 are already marked as pas
+  sed. This leaves US-050 through US-060 as the remaining tasks. Logically, I sh
+  ould focus on US-050, the 'buffer-time' skill.
+
+  Hmm, looking at the details for US-050, it requires implementing a system to a
+  utomatically add buffers between meetings. To do this correctly, I need to und
+  erstand how the system currently interacts with the calendar.
+
+  Wait, I shouldn't just assume how the events are structured or how the reminde
+  r system is configured. I need to see the actual implementation of the existin
+  g skills to ensure the new buffer-time logic integrates seamlessly.
+
+  Specifically, the calendar skill is the primary dependency—it likely contains
+  the logic for event creation and retrieval that I'll need to intercept or wrap
+  . Additionally, the reminders skill might offer patterns for scheduling these
+  buffers or handling timing-related tasks, which could be very relevant here.
+
+  I'll start by exploring the skills/calendar and skills/reminders directories t
+  o get a clear picture of the existing codebase before I begin the implementati
+  on of US-050.
+• Now I need to check which stories are incomplete. Based on the PRD, stories US
+  -001 through US-049 are complete (passes: true). The remaining stories are US-
+  050 through US-060. Let me work on the highest priority incomplete story: US-0
+  50 - Create buffer-time skill.
+
+  Let me first check existing skill patterns:
+• Used Glob (skills/calendar/**/*)
+• Used Glob (skills/reminders/**/*)
+• Let me read a simpler skill to understand the pattern, particularly the calend
+  ar skill which the buffer-time skill depends on.
+• Let me read the calendar skill source files to understand the pattern for impl
+  ementing the buffer-time skill:
+• Used ReadFile (skills/calendar/src/index.ts)
+• Used ReadFile (skills/calendar/package.json)
+• I've analyzed the requirements for US-050. The 'buffer-time' skill is designed
+  to enhance the existing calendar functionality by automatically inserting buff
+  er periods between meetings.
+
+  Hmm, looking at the acceptance criteria, I'll need to implement configurable b
+  uffers, travel time calculation, and prep time blocks. This means the skill wi
+  ll need to interact closely with the 'calendar' skill to read the user's sched
+  ule and potentially modify or suggest events. SQLite will be perfect for stori
+  ng these buffer preferences persistently.
+
+  Wait, before I jump into coding the TypeScript logic in index.ts or the CLI in
+  terface in cli.ts, I need to establish the skill's foundation. Every skill in
+  this ecosystem requires a SKILL.md file to define its metadata, dependencies,
+  and usage instructions for other agents. This file is the entry point for unde
+  rstanding what the skill does and how to invoke it.
+
+  Actually, looking at the established project structure, it's best to start wit
+  h the documentation and configuration. I'll define the skill's metadata, speci
+  fy the dependency on the 'calendar' skill as noted in the story, and outline t
+  he basic setup. This ensures that the skill is properly registered before I st
+  art writing the implementation logic.
+
+  Therefore, I'll start by creating the skills/buffer-time/SKILL.md file. This w
+  ill formalize the skill's identity and provide the necessary context for the i
+  mplementation phase.
+• Now I'll create the buffer-time skill. This skill will auto-add buffers betwee
+  n meetings using the calendar skill. Let me implement it:
+• Used WriteFile (skills/buffer-time/SKILL.md)
+  Parent directory not found
+• I need to create the directory first.
+• Used Shell (mkdir -p /root/code/skills/skills/buffer-time/src)
+• Now let me create all the files for the buffer-time skill.
+• Used WriteFile (skills/buffer-time/SKILL.md)
+• Used WriteFile (skills/buffer-time/package.json)
+• Used WriteFile (skills/buffer-time/tsconfig.json)
+• Used WriteFile (skills/buffer-time/.gitignore)
+• I've finished scaffolding the project structure and now I'm ready to tackle th
+  e core implementation in index.ts. The primary goal here is to build a system
+  that automatically manages 'buffer time'—those small gaps we need between meet
+  ings to stay sane and prepared.
+
+  Hmm, let me look at the requirements again. I need to support 'Configurable bu
+  ffers,' 'Travel time calculation,' and 'Prep time blocks.' This suggests a mul
+  ti-layered approach to how I store and apply these rules. If I just apply a fl
+  at 15-minute buffer to everything, I'll end up with unnecessary gaps in my day
+  . But if I'm too conservative, back-to-back meetings in different buildings wi
+  ll wreck my schedule.
+
+  Wait, I should probably think about the database schema first. I'll need a way
+  to persist these settings. If I use SQLite, I can track the default buffer, sp
+  ecific rules for different meeting types, and even a history of when buffers w
+  ere added. Actually, a simple JSON file might be faster for the default settin
+  gs, but a database is much better for tracking location-based travel times and
+  per-event overrides. Let's go with SQLite for scalability.
+
+  Now, how do I actually 'add' these buffers? If I modify the existing events di
+  rectly, I'm going to shift the start times of meetings, which might conflict w
+  ith other attendees' calendars. That's a terrible idea. Instead, I should crea
+  te 'Buffer Events'—separate calendar entries that act as placeholders. But wai
+  t, what if the user deletes the main meeting? The buffer becomes an orphaned e
+  vent. I should probably store the relationship between the buffer event ID and
+  the original meeting ID so I can manage them as a pair.
+
+  Let's refine the logic for the BufferTimeSkill class. It needs to be smart. Fo
+  r 'Travel time calculation,' I can't just use a fixed duration. I'll need a wa
+  y to estimate travel time between two locations. I could use a mapping API, bu
+  t that's complex and requires API keys. For this implementation, a simple heur
+  istic based on string similarity would be a good start—if the locations are id
+  entical, zero travel time; if they differ, use a configurable default like 15
+  minutes. It's not perfect, but it's robust.
+
+  Then there's the 'Auto-adjustment' requirement. If a meeting is rescheduled, t
+  he buffer needs to move with it. This means I'll need to listen for calendar u
+  pdates or, more simply for this version, provide a manual 're-sync' function t
+  hat cleans up orphaned buffers and recalculates gaps.
+
+  I also need to make sure I handle 'Prep time.' This is different from travel t
+  ime—it's about mental preparation. I should allow the user to set a 'prepMinut
+  es' buffer that occurs before a specific event type, rather than just between
+  events.
+
+  Before I start typing the code, I should structure the file with clear imports
+  and a logical flow. I'll define the interfaces first so the data structures ar
+  e solid. Then I'll implement the class methods for initialization, rule config
+  uration, and the core processing loop that scans the calendar and applies the
+  buffers. I'm ready to write the implementation to /root/code/skills/skills/buf
+  fer-time/src/index.ts.
+• Now let me create the main implementation file:
+• Used WriteFile (skills/buffer-time/src/index.ts)
+• Now let me create the CLI file.
+• Now let me create the CLI:
+• Used WriteFile (skills/buffer-time/src/cli.ts)
+• Now I need to install dependencies and run the typecheck. Let me do that.
+• Now let me install dependencies and run typecheck:
+• Used Shell (cd /root/code/skills/skil...-time && npm install 2>&1)
+• Now let me run the typecheck.
+• Used Shell (cd /root/code/skills/skil...&& npm run typecheck 2>&1)
+• Typecheck passes. Now let me build and run a quick test.
+• Typecheck passes. Let me build the skill and test it:
+• Used Shell (cd /root/code/skills/skil...ime && npm run build 2>&1)
+• Now let me test the CLI to make sure it works.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js health 2>&1)
+• The skill works. The unhealthy status is expected because we haven't connected
+  the calendar. Let me test the config and stats commands.
+• Used Shell (cd /root/code/skills/skil...e dist/cli.js config 2>&1)
+• The skill works. Let me also test the rules command.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js rules 2>&1)
+• I see the rules are being duplicated. This is because the INSERT OR IGNORE is
+  not matching correctly. The issue is that the seed function runs every time th
+  e skill initializes, and it's inserting duplicate rules. Let me fix the seedin
+  g logic to check if rules already exist before inserting.
+
+  Actually, the issue is the INSERT OR IGNORE relies on a UNIQUE constraint, but
+  we don't have one. Let me add a UNIQUE constraint on the keyword column, or ch
+  eck if rules exist before seeding.
+• I notice there's a duplicate rules issue. Let me fix the seeding logic:
+• Used StrReplaceFile (skills/buffer-time/src/index.ts)
+• Now let me delete the old database file and rebuild.
+• Used Shell (rm -f ~/.openclaw/skills/...ime && npm run build 2>&1)
+• Let me verify the rules are no longer duplicated.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js rules 2>&1)
+• Now the rules are unique. Let me test setting the default buffer and getting s
+  tats.
+• Used Shell (cd /root/code/skills/skil...li.js set-default 20 2>&1)
+• Let me also test stats.
+• Used Shell (cd /root/code/skills/skil...de dist/cli.js stats 2>&1)
+• The skill is working correctly. Now let me:
+
+  1. Update the PRD to mark US-050 as passing
+  2. Add progress to progress.txt
+  3. Commit the changes
+
+  Let me do these steps.
+• The skill is working. Now let me update the PRD and progress log, then commit:
+• Used StrReplaceFile (prd.json)
+• Now let me add progress to progress.txt.
+• Used WriteFile (progress.txt)
+• Now let me commit the changes.
+• Used Shell (cd /root/code/skills && g...l for calendar gaps" 2>&1)
+• The commit was successful. Let me verify by checking the remaining incomplete
+  stories.
+• I've completed US-050 - Create buffer-time skill. Let me verify what stories r
+  emain:
+• Used Shell (cd /root/code/skills && c...asses": false' | head -60)
+• Let me get a count of remaining stories.
+• Used Shell (cd /root/code/skills && c...'"passes": false' | wc -l)
+• There are still 10 stories remaining. The next one is US-051 - Create focus-ti
+  me-blocks skill. Since there are still incomplete stories, I should end my res
+  ponse normally, not with COMPLETE.
+
+  Let me summarize what was accomplished in this iteration.
+• I've successfully completed US-050 - Create buffer-time skill for calendar gap
+  s.
+
+  Summary
+
+  Created the buffer-time skill that automatically adds buffers between calendar
+  meetings for:
+
+  • Travel time - Calculates time needed between different locations
+  • Prep time - Blocks time before important meetings
+  • Configurable buffers - Default 15min, customizable per meeting type
+
+  Key Features:
+
+  • 6 default buffer rules (External Meetings, Interviews, Presentations, etc.)
+  • Smart location detection (skips buffers for same-location back-to-backs)
+  • Gap analysis tool to find missing buffers
+  • Full CLI for configuration and analysis
+  • SQLite storage for rules and buffer history
+
+  Files Created:
+
+  • skills/buffer-time/package.json
+  • skills/buffer-time/tsconfig.json
+  • skills/buffer-time/.gitignore
+  • skills/buffer-time/SKILL.md
+  • skills/buffer-time/src/index.ts (main library)
+  • skills/buffer-time/src/cli.ts (CLI interface)
+
+  Quality Checks:
+
+  • ✅ Typecheck passes
+  • ✅ Build successful
+  • ✅ CLI commands tested
+
+  Remaining Stories:
+
+  10 stories still incomplete (US-051 through US-060).
